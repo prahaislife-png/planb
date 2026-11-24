@@ -93,6 +93,32 @@ class TestRowLevelSecurity:
         conn.rollback()
 
 
+class TestSourceRegistryGate:
+    def test_only_an_admin_can_change_reuse_terms_or_enable_ingestion(self, conn, factory, settings):
+        source = factory.source(reuse_status="permitted_with_attribution")
+        for user in (RESEARCHER, REVIEWER):
+            with as_user(settings, user) as c:
+                for sql in ("update intel.sources set ingestion_enabled = true where id = %s",
+                            "update intel.sources set reuse_status = 'permitted' where id = %s",
+                            "update intel.sources set permission_granted_on = current_date, permission_evidence = 'x' where id = %s"):
+                    with pytest.raises(psycopg.errors.InsufficientPrivilege, match="only an administrator"):
+                        c.execute(sql, (source["id"],))
+                    c.rollback()
+                c.execute("update intel.sources set accessibility_notes = 'checked today' where id = %s", (source["id"],))  # ordinary fields stay editable
+                c.commit()
+        with as_worker(settings) as c, pytest.raises(psycopg.errors.InsufficientPrivilege, match="research worker cannot"):
+            c.execute("update intel.sources set ingestion_enabled = true where id = %s", (source["id"],))
+        with as_user(settings, ADMIN) as c:
+            c.execute("update intel.sources set ingestion_enabled = true where id = %s", (source["id"],))
+            c.commit()
+        assert one(conn, "select ingestion_enabled from intel.sources where id = %s", source["id"])["ingestion_enabled"] is True
+
+    def test_do_not_ingest_source_can_never_be_enabled(self, conn, factory, settings):
+        source = factory.source(reuse_status="permitted", recommended_ingestion="do_not_ingest")
+        with as_user(settings, ADMIN) as c, pytest.raises(psycopg.errors.CheckViolation):
+            c.execute("update intel.sources set ingestion_enabled = true where id = %s", (source["id"],))
+
+
 class TestWorkerRole:
     def test_worker_can_run_research_but_not_reach_personal_data(self, conn, settings):
         with as_worker(settings) as c:

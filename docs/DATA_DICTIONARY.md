@@ -1741,7 +1741,7 @@ _RLS: enabled (7 policies) · audited: yes_
 
 Unique: `(slug)`
 
-<details><summary>Check constraints (14)</summary>
+<details><summary>Check constraints (15)</summary>
 
 - `sources_access_method_check`: `CHECK ((access_method = ANY (ARRAY['http_download'::text, 'api'::text, 'manual_download'::text, 'portal_login'::text, 'email_request'::text, 'paid_subscription'::text, 'primary_collection'::text])))`
 - `sources_accessibility_check`: `CHECK ((accessibility = ANY (ARRAY['yes'::text, 'partial'::text, 'no'::text, 'untested'::text])))`
@@ -1750,6 +1750,7 @@ Unique: `(slug)`
 - `sources_default_revalidation_days_check`: `CHECK ((default_revalidation_days > 0))`
 - `sources_ingestion_requires_reuse_right`: `CHECK (((NOT ingestion_enabled) OR (reuse_status = ANY (ARRAY['permitted'::text, 'permitted_with_attribution'::text])) OR ((reuse_status = 'permission_required'::text) AND (permission_granted_on IS NOT NULL) AND (permission_evidence IS NOT NULL))))`
 - `sources_ingestion_requires_terms_check`: `CHECK (((NOT ingestion_enabled) OR (terms_checked_on IS NOT NULL)))`
+- `sources_no_ingestion_when_do_not_ingest`: `CHECK (((NOT ingestion_enabled) OR (recommended_ingestion <> 'do_not_ingest'::text)))`
 - `sources_rate_limit_per_minute_check`: `CHECK (((rate_limit_per_minute >= 1) AND (rate_limit_per_minute <= 600)))`
 - `sources_recommended_ingestion_check`: `CHECK ((recommended_ingestion = ANY (ARRAY['automated'::text, 'manual_only'::text, 'do_not_ingest'::text])))`
 - `sources_registry_confidence_check`: `CHECK ((registry_confidence = ANY (ARRAY['verified'::text, 'partially_verified'::text, 'unverified'::text])))`
@@ -1760,7 +1761,7 @@ Unique: `(slug)`
 
 </details>
 
-Triggers: `sources_updated` → `set_updated_at()`
+Triggers: `sources_legal_guard` → `guard_source_legal_fields()`, `sources_updated` → `set_updated_at()`
 
 <a id="intelsupplier_quotes"></a>
 ### intel.supplier_quotes  ·  table
