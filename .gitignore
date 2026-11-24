@@ -1,0 +1,19 @@
+node_modules/
+.next/
+dist/
+out/
+coverage/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+# Local evidence store (dev only). Source documents are never committed; they are
+# re-fetchable from their recorded URL + sha256 and live in Supabase Storage in production.
+/var/
+.DS_Store

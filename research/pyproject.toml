@@ -1,0 +1,38 @@
+[project]
+name = "planb-research"
+version = "0.1.0"
+description = "PlanB Intelligence research worker: source adapters, document ingestion, evidence extraction, normalisation, cross-verification, gap analysis and the durable pipeline runner."
+requires-python = ">=3.11"
+dependencies = [
+  "psycopg[binary]>=3.2",
+  "pydantic>=2.7",
+  "pyyaml>=6.0",
+  "httpx>=0.27",
+  "pdfplumber>=0.11",
+]
+
+[project.optional-dependencies]
+llm = ["anthropic>=0.40"]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+planb = "planb_research.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["planb_research"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+ignore = ["S101", "S603", "S607", "E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

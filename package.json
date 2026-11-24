@@ -1,0 +1,11 @@
+{
+  "name": "planb",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "dev": "pnpm --filter @planb/web dev"
+  }
+}
