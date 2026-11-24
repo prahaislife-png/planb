@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { act, backTo, optionalText, text, uuid, withMessage } from '@/lib/action';
+import { act, backTo, mustAffect, optionalText, text, uuid, withMessage } from '@/lib/action';
 import { requireStaff } from '@/lib/auth';
 import { asUser, dbErrorMessage } from '@/lib/db';
 import { contentPath, isPdf, MAX_UPLOAD_BYTES, putEvidence, sha256 } from '@/lib/storage';
@@ -89,8 +89,8 @@ export async function setAssumption(form: FormData) {
 export async function updateBusinessIdentity(form: FormData) {
   return act(form, z.object({ model_id: uuid, name: text(200).min(3), description: optionalText(4000), operating_model: optionalText(4000),
     target_customers: optionalText(2000) }), 'Record updated.',
-  (sql, i) => sql`update intel.business_models set name = ${i.name}, description = ${i.description}, operating_model = ${i.operating_model},
-                         target_customers = ${i.target_customers} where id = ${i.model_id}`);
+  (sql, i) => mustAffect(sql`update intel.business_models set name = ${i.name}, description = ${i.description}, operating_model = ${i.operating_model},
+                         target_customers = ${i.target_customers} where id = ${i.model_id}`, 'this business record'));
 }
 
 export async function enqueueRefresh(form: FormData) {
@@ -182,24 +182,24 @@ export async function updatePolicy(form: FormData) {
     min_completeness_pct: z.coerce.number().min(0).max(100), max_critical_missing: z.coerce.number().int().min(0),
     max_open_conflicts: z.coerce.number().int().min(0), max_pending_claims: z.coerce.number().int().min(0),
     max_stale_observations: z.coerce.number().int().min(0), min_parameters_c_or_better_pct: z.coerce.number().min(0).max(100),
-  }), 'Publication policy updated.', (sql, i, userId) => sql`
+  }), 'Publication policy updated.', (sql, i, userId) => mustAffect(sql`
     update ops.publication_policy set min_completeness_pct = ${i.min_completeness_pct}, max_critical_missing = ${i.max_critical_missing},
       max_open_conflicts = ${i.max_open_conflicts}, max_pending_claims = ${i.max_pending_claims},
       max_stale_observations = ${i.max_stale_observations}, min_parameters_c_or_better_pct = ${i.min_parameters_c_or_better_pct},
-      updated_at = now(), updated_by = ${userId}`);
+      updated_at = now(), updated_by = ${userId}`, 'the publication policy (administrators only)'));
 }
 
 // ── Tasks ────────────────────────────────────────────────────────────────────
 export async function updateTask(form: FormData) {
   return act(form, z.object({ task_id: uuid, status: z.enum(['open', 'in_progress', 'blocked', 'done', 'cancelled']), note: optionalText() }),
-    'Task updated.', (sql, i, userId) => sql`
+    'Task updated.', (sql, i, userId) => mustAffect(sql`
       update intel.research_tasks
          set status = ${i.status},
              assignee = case when ${i.status} = 'in_progress' then ${userId}::uuid else assignee end,
              resolution_note = coalesce(${i.note}, resolution_note),
              completed_at = case when ${i.status} in ('done', 'cancelled') then now() else null end,
              completed_by = case when ${i.status} in ('done', 'cancelled') then ${userId}::uuid else null end
-       where id = ${i.task_id}`);
+       where id = ${i.task_id}`, 'this task'));
 }
 
 export async function createTask(form: FormData) {

@@ -70,7 +70,8 @@ Each was run end to end as the restricted `planb_worker` role with the rule-base
 - every extracted claim's quote was found on its cited page;
 - machinery line items sum to the document's stated plant-and-machinery total (₹7.20 L, ₹13.60 L, ₹8.36 L);
 - the engine, pinned to each source's year-1 assumptions, reproduces the source's stated sales within 1.0–3.5 %
-  (the gap is the source's closing-stock adjustment);
+  (the gap is the source's closing-stock adjustment); year-1 net profit is ₹1.0–1.8 lakh above the source's because the
+  engine sells all production, charges no working-capital interest and depreciates straight-line;
 - completeness is 54 %, with two critical sections missing (description, regulatory mapping); all observations are
   grade C, unverified and — being dated 2021–22 — already past their revalidation date;
 - 21–26 research tasks were raised per record.

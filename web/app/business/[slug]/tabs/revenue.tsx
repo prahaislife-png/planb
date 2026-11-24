@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { can, type StaffUser } from '@/lib/auth';
 import { asUser, type Row } from '@/lib/db';
-import { date, humanize, valueWithUnit } from '@/lib/format';
+import { date, humanize, num, pct, valueWithUnit } from '@/lib/format';
 import { Badge, Empty, Grade, Panel } from '@/components/ui';
-import { setAssumption, setObservationStatus } from '@/app/actions/research';
+import { resolveConflict, setAssumption, setObservationStatus } from '@/app/actions/research';
 
 export async function RevenueTab({ user, model, back }: { user: StaffUser; model: Row; back: string }) {
   const d = await asUser(user.id, async (sql) => ({
@@ -29,6 +29,11 @@ export async function RevenueTab({ user, model, back }: { user: StaffUser; model
       join intel.sources s on s.id = o.source_id
       left join intel.revenue_streams rs on rs.id = o.revenue_stream_id
       where bv.business_model_id = ${model.id} order by pd.sort_order, o.projection_year nulls first`,
+    conflicts: await sql`
+      select c.*, pd.name as parameter_name from intel.observation_conflicts c
+      join intel.business_variants bv on bv.id = c.business_variant_id
+      join intel.financial_parameter_definitions pd on pd.key = c.parameter_key
+      where bv.business_model_id = ${model.id} order by (c.status = 'open') desc, c.detected_at desc`,
     requirements: await sql`
       select r.* from intel.operating_requirements r join intel.business_variants bv on bv.id = r.business_variant_id
       where bv.business_model_id = ${model.id} order by r.requirement_type`,
@@ -38,6 +43,26 @@ export async function RevenueTab({ user, model, back }: { user: StaffUser; model
 
   return (
     <div className="grid">
+      {d.conflicts.length ? (
+        <Panel title="Conflicting parameter observations" flush>
+          <table>
+            <thead><tr><th>Parameter</th><th className="num">Observations</th><th className="num">Lowest</th><th className="num">Highest</th><th className="num">Spread</th><th>Status</th><th>Resolution</th></tr></thead>
+            <tbody>
+              {d.conflicts.map((c) => (
+                <tr key={c.id}>
+                  <td>{c.parameter_name}</td><td className="num">{c.observation_count}</td><td className="num">{num(c.min_value, 2)}</td>
+                  <td className="num">{num(c.max_value, 2)}</td><td className="num">{pct(c.spread_pct, 0)}</td><td><Badge value={c.status} /></td>
+                  <td>{c.status === 'open' ? (
+                    <form action={resolveConflict} className="inline">
+                      <input type="hidden" name="conflict_id" value={c.id} /><input type="hidden" name="back" value={back} />
+                      <input name="note" placeholder="Why — e.g. different scale or year" required minLength={5} style={{ width: 280 }} />
+                      <select name="status" style={{ width: 150 }}><option value="resolved">Resolved</option><option value="accepted_as_range">Accept as range</option></select>
+                      <button type="submit" disabled={!editor && !reviewer}>Close</button>
+                    </form>) : <span className="muted small">{c.resolution_note}</span>}</td>
+                </tr>))}
+            </tbody>
+          </table>
+        </Panel>) : null}
       <Panel title="Revenue streams" flush>
         <table>
           <thead><tr><th>Stream</th><th>Variant</th><th>Volume driver</th><th>Pricing unit</th><th>Customer segment</th><th>Payment terms</th><th>Seasonality</th></tr></thead>

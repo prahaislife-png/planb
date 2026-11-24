@@ -51,3 +51,16 @@ export async function act<T>(form: FormData, schema: z.ZodType<T, z.ZodTypeDef, 
   revalidatePath('/', 'layout');
   redirect(target);
 }
+
+/**
+ * Row-level security filters rows silently: an UPDATE the user may not perform affects zero rows and raises
+ * nothing. Wrap such statements so "nothing changed" is reported as a refusal, never as success.
+ */
+export async function mustAffect(query: PromiseLike<{ count: number }>, what = 'this record'): Promise<void> {
+  const result = await query;
+  if (result.count === 0) {
+    const error = new Error(`your role does not allow changing ${what}, or it no longer exists`) as Error & { code: string };
+    error.code = '42501';
+    throw error;
+  }
+}

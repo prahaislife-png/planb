@@ -289,6 +289,34 @@ class TestReproducibility:
         assert rec["statedRevenue"] == 6000000 and rec["modelledRevenue"] == 6000000 and rec["revenueDeltaPct"] == 0
 
 
+class TestDerivations:
+    def test_variable_cost_ratio_uses_production_value_not_net_sales(self, conn, factory):
+        """Regression: sources state sales net of finished-goods stock build-up. Dividing a production cost by net
+        sales overstated raw-material cost enough to turn a thin-margin business into a loss."""
+        from .fixtures import SYNTHETIC_DPR_PAGES
+
+        pages = [(no, text.replace("Total                            60.00      72.00", "Total                            54.00      72.00")
+                              .replace("Synthetic Test Powder            60.00", "Synthetic Test Powder            54.00"))
+                 for no, text in SYNTHETIC_DPR_PAGES]
+        source, model = factory.source(), factory.model()
+        doc = factory.document(source, pages=pages)
+        run = enqueue(conn, "document_research", business_model_id=model["id"], source_document_id=doc["id"], idempotency_key=f"t:{uuid.uuid4()}")
+        worker = Worker(conn, factory.settings, store=LocalEvidenceStore(factory.settings.evidence_dir))
+        assert worker.execute(factory._claim(worker, run["id"]))["status"] == "succeeded"
+        p = one(conn, """select fp.value, fp.basis, fp.rationale,
+                                (select count(*) from intel.financial_parameter_sources s where s.financial_parameter_id = fp.id) as sources
+                         from intel.financial_parameters fp join intel.cost_items ci on ci.id = fp.cost_item_id
+                         join intel.business_variants v on v.id = ci.business_variant_id
+                         where v.business_model_id = %s and ci.key = 'raw_material_consumed' and fp.is_current""", model["id"])
+        # 30.00 lakh of raw material on production worth 120,000 × 50 % × ₹100 = 60 lakh → 50 %, not 30 / 54 = 55.6 %
+        assert float(p["value"]) == 50.0 and p["basis"] == "derived" and "production value" in p["rationale"]
+        assert p["sources"] == 4  # the cost line plus capacity, utilisation and price
+        sc = one(conn, """select summary from intel.financial_scenarios fs join intel.business_variants v on v.id = fs.business_variant_id
+                          where v.business_model_id = %s and fs.kind = 'base' and fs.is_current""", model["id"])
+        rec = sc["summary"]["sourceReconciliation"]
+        assert rec["statedRevenue"] == 5400000 and rec["modelledRevenue"] == 6000000  # the gap is the stock build-up, visible
+
+
 # ── AC: missing data is visible / research tasks can be generated ────────────
 class TestGaps:
     def test_missing_required_input_blocks_the_scenario_and_raises_a_task(self, conn, factory):

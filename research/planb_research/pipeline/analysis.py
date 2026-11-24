@@ -216,6 +216,27 @@ def _set_parameter(ctx: RunContext, variant_id, *, parameter_key=None, cost_item
     return True
 
 
+def _production_value(param_obs: list[dict], stream_id, year: int | None) -> tuple[float, str, list[dict]] | None:
+    """Value of what the source says is PRODUCED in a projection year: capacity × that year's utilisation × price.
+    Returns (rupees, description, the observations used), or None when the source does not give all three."""
+    if year != 1:
+        return None
+
+    def first(key: str) -> dict | None:
+        candidates = [o for o in param_obs if o["parameter_key"] == key and (stream_id is None or o["revenue_stream_id"] == stream_id)]
+        return candidates[0] if len(candidates) == 1 else None  # ambiguous or absent → do not guess
+
+    capacity, utilisation, price = first("capacity_units_per_month"), first("utilization_year1_pct"), first("unit_price")
+    if not (capacity and utilisation and price):
+        return None
+    value = float(capacity["value"]) * 12.0 * float(utilisation["value"]) / 100.0 * float(price["value"])
+    if value <= 0:
+        return None
+    text = (f"production value of ₹{value:,.0f} ({float(capacity['value']) * 12:,.0f} units a year × "
+            f"{float(utilisation['value']):g}% utilisation × ₹{float(price['value']):,.2f})")
+    return value, text, [capacity, utilisation, price]
+
+
 def _resolve(values: list[tuple[float, dict]], *, has_open_conflict: bool) -> tuple[float, str, str | None, str]:
     grades = [o["evidence_grade"] for _, o in values]
     if len(values) == 1:
@@ -252,15 +273,26 @@ def resolve_parameters(ctx: RunContext, variant: dict) -> dict[str, Any]:
         sources = [("cost_observation", o["id"]) for _, o in values]
         first = values[0][1]
         if basis_label.startswith("annual_total_y"):
-            rev = stated_revenue.get(first["projection_year"])
-            if rev is None or float(rev["value"]) <= 0:
-                continue  # cannot be expressed per unit of revenue without the source's stated sales: stays unresolved
-            pct = float(values[0][0]) / float(rev["value"]) * 100.0
-            rationale = (f"Derived: source states ₹{float(values[0][0]):,.0f} for projection year {first['projection_year']} against stated "
-                         f"sales of ₹{float(rev['value']):,.0f} → {pct:.2f}% of revenue.")
+            year = first["projection_year"]
+            amount = float(values[0][0])
+            # A cost incurred on PRODUCTION must be expressed against the value of that production. The source's
+            # stated sales are net of finished-goods stock build-up, so dividing by them overstates the ratio
+            # (enough to turn a thin-margin business into a loss). Stated sales are only the fallback.
+            production = _production_value(param_obs, first["revenue_stream_id"], year)
+            if production:
+                denominator, basis_text, denom_sources = production
+            else:
+                rev = stated_revenue.get(year)
+                if rev is None or float(rev["value"]) <= 0:
+                    continue  # cannot be expressed per unit of revenue: stays unresolved
+                denominator, denom_sources = float(rev["value"]), [rev]
+                basis_text = f"stated sales of ₹{denominator:,.0f} (production value could not be computed from the source)"
+            pct = amount / denominator * 100.0
+            rationale = f"Derived: source states ₹{amount:,.0f} for projection year {year} against {basis_text} → {pct:.2f}% of revenue."
             changed += _set_parameter(ctx, variant["id"], cost_item_id=item_id, value=round(pct, 4), unit="percent", basis="derived",
-                                      method="formula", rationale=rationale, grade=_weakest([first["evidence_grade"], rev["evidence_grade"]]),
-                                      sources=[*sources[:1], ("parameter_observation", rev["id"])])
+                                      method="formula", rationale=rationale,
+                                      grade=_weakest([first["evidence_grade"], *[o["evidence_grade"] for o in denom_sources]]),
+                                      sources=[*sources[:1], *[("parameter_observation", o["id"]) for o in denom_sources]])
             continue
         value, method, why, grade = _resolve(values, has_open_conflict=(item_id, None) in open_conflicts)
         unit = "percent" if basis_label == "pct_of_revenue" else "inr"
@@ -540,8 +572,9 @@ def _source_reconciliation(ctx: RunContext, variant: dict, model: dict) -> dict[
            "revenueDeltaPct": round((year1["revenue"] - stated["stated_annual_revenue"]) / stated["stated_annual_revenue"] * 100, 2)}
     if "stated_annual_net_profit" in stated:
         out |= {"statedNetProfit": stated["stated_annual_net_profit"], "modelledNetProfit": year1["netProfit"],
-                "note": "Profit differs by construction: the source uses written-down-value depreciation, working-capital interest and "
-                        "stock adjustments that the engine models differently."}
+                "note": "Profit differs by construction: the engine sells all production in the year, charges no interest on "
+                        "working-capital borrowing and depreciates straight-line, while the source holds back closing stock, pays "
+                        "working-capital interest and uses written-down-value depreciation."}
     return out
 
 
