@@ -188,15 +188,56 @@ class TestGroundTruthPrivacy:
             c.execute("insert into gt.business_actuals (interview_id, metric_key, value, evidence_level, data_origin) values (%s, 'owner_monthly_income', 50000, 'self_reported', 'test')", (iv["id"],))
             c.commit()
 
+    def test_human_only_decisions_and_privacy_rules_hold_in_the_database(self, conn, factory, settings):
+        sid = self._subject(settings)
+        model = factory.model()
+        district = one(conn, "select id from intel.locations where slug = 'pune-district'")["id"]
+        city = one(conn, "select id from intel.locations where slug = 'pune-city'")["id"]
+        question = one(conn, "select id from gt.questionnaire_questions where key = 'owner_monthly_income' limit 1")["id"]
+        with as_user(settings, RESEARCHER) as c:
+            # no answers before consent
+            bare = c.execute("insert into gt.owner_interviews (subject_id, business_model_id, business_status, status, data_origin) values (%s, %s, 'operating', 'planned', 'test') returning id", (sid, model["id"])).fetchone()["id"]
+            c.commit()
+            with pytest.raises(psycopg.errors.CheckViolation, match="active consent"):
+                c.execute("insert into gt.interview_responses (interview_id, question_id, answer_numeric) values (%s, %s, 1)", (bare, question))
+            c.rollback()
+            consent = c.execute("insert into gt.consents (subject_id, consent_form_version, allows_aggregate_use, given_on, collection_method) values (%s, 'v1', true, current_date, 'signed_form') returning id", (sid,)).fetchone()["id"]
+            c.commit()
+            # city-level location would identify the owner
+            with pytest.raises(psycopg.errors.CheckViolation, match="district level or coarser"):
+                c.execute("insert into gt.owner_interviews (subject_id, consent_id, business_model_id, location_id, business_status, status, data_origin) values (%s, %s, %s, %s, 'operating', 'conducted', 'test')", (sid, consent, model["id"], city))
+            c.rollback()
+            iv = c.execute("insert into gt.owner_interviews (subject_id, consent_id, business_model_id, location_id, business_status, status, anonymisation_status, data_origin) values (%s, %s, %s, %s, 'operating', 'coded', 'anonymised', 'test') returning id", (sid, consent, model["id"], district)).fetchone()["id"]
+            c.execute("insert into gt.business_actuals (interview_id, question_id, metric_key, value, evidence_level, data_origin) values (%s, %s, 'owner_monthly_income', 40000, 'self_reported', 'test')", (iv, question))
+            c.commit()
+            with pytest.raises(psycopg.errors.UniqueViolation):  # one actual per questionnaire answer
+                c.execute("insert into gt.business_actuals (interview_id, question_id, metric_key, value, evidence_level, data_origin) values (%s, %s, 'owner_monthly_income', 50000, 'self_reported', 'test')", (iv, question))
+            c.rollback()
+            # a researcher cannot sign off their own interview, nor verify a regulation
+            with pytest.raises(psycopg.errors.InsufficientPrivilege, match="only a reviewer or admin"):
+                c.execute("update gt.owner_interviews set status = 'reviewed', reviewed_at = now() where id = %s", (iv,))
+            c.rollback()
+            reg = c.execute("insert into intel.regulations (slug, name, regulation_type, issuing_authority, jurisdiction_level, data_origin) values (%s, 'Synthetic licence', 'licence', 'Synthetic authority', 'state', 'test') returning id", (f"synthetic-{uuid.uuid4().hex[:8]}",)).fetchone()["id"]
+            c.commit()
+            with pytest.raises(psycopg.errors.InsufficientPrivilege, match="only a reviewer or admin"):
+                c.execute("update intel.regulations set verification_status = 'verified', last_verified_on = current_date, source_id = (select id from intel.sources limit 1) where id = %s", (reg,))
+        with as_user(settings, REVIEWER) as c:
+            c.execute("update gt.owner_interviews set status = 'reviewed', reviewed_by = %s, reviewed_at = now() where id = %s", (REVIEWER, iv))
+            c.commit()
+
     def test_aggregates_are_suppressed_below_five_interviews(self, conn, factory, settings):
         model = factory.model(origin="research")
         with as_user(settings, RESEARCHER) as c:
             for _i in range(4):
                 sid = c.execute("insert into gt.interview_subjects (full_name, created_by) values ('Synthetic Person', %s) returning id", (RESEARCHER,)).fetchone()["id"]
                 consent = c.execute("insert into gt.consents (subject_id, consent_form_version, allows_aggregate_use, given_on, collection_method) values (%s, 'v1', true, current_date, 'signed_form') returning id", (sid,)).fetchone()["id"]
-                iv = c.execute("insert into gt.owner_interviews (subject_id, consent_id, business_model_id, business_status, status, anonymisation_status) values (%s, %s, %s, 'operating', 'reviewed', 'anonymised') returning id", (sid, consent, model["id"])).fetchone()["id"]
+                iv = c.execute("insert into gt.owner_interviews (subject_id, consent_id, business_model_id, business_status, status, anonymisation_status) values (%s, %s, %s, 'operating', 'coded', 'anonymised') returning id", (sid, consent, model["id"])).fetchone()["id"]
                 c.execute("insert into gt.business_actuals (interview_id, metric_key, value, evidence_level) values (%s, 'owner_monthly_income', 40000, 'self_reported')", (iv,))
             c.commit()
+        with as_user(settings, REVIEWER) as c:
+            c.execute("update gt.owner_interviews set status = 'reviewed', reviewed_at = now() where business_model_id = %s", (model["id"],))
+            c.commit()
+        with as_user(settings, RESEARCHER) as c:
             assert c.execute("select count(*) as n from gt.v_actuals_aggregate where business_model_id = %s", (model["id"],)).fetchone()["n"] == 0
 
     def test_erasure_removes_identity(self, conn, settings):

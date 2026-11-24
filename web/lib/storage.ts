@@ -25,7 +25,8 @@ export function isPdf(data: Buffer): boolean {
 }
 
 function localRoot(): string {
-  return path.resolve(process.cwd(), process.env.PLANB_EVIDENCE_DIR ?? '../var/evidence');
+  // The evidence directory is runtime configuration, not part of the build: keep it out of file tracing.
+  return path.resolve(/*turbopackIgnore: true*/ process.cwd(), process.env.PLANB_EVIDENCE_DIR ?? '../var/evidence');
 }
 
 function supabaseConfig(): { url: string; key: string } | null {

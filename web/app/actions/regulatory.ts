@@ -64,7 +64,7 @@ export async function addRegulation(form: FormData) {
 
 export async function verifyRegulation(form: FormData) {
   return act(form, z.object({
-    regulation_id: uuid, source_id: uuid,
+    regulation_id: uuid, source_id: z.string().uuid('select the registry source the regulation was checked against'),
     evidence_grade: z.union([z.literal(''), z.enum(['A', 'B', 'C', 'D'])]).optional().transform((v) => (v ? v : null)),
   }), 'Regulation verified today; revalidation is due in 180 days.', (sql, i, userId) => readable(async () => {
     // intel.regulations has no database-level role guard for verification, so the reviewer rule is checked here, as the acting user.

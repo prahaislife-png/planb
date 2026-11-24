@@ -133,46 +133,49 @@ export default async function Suppliers({ searchParams }: { searchParams: Promis
         <Panel title="Quotations" right={<span className="muted">{d.quotes.length} collected</span>} flush>
           <table>
             <thead><tr>
-              <th>Supplier</th><th>Item</th><th>Model / spec</th><th>Capacity</th><th className="num">Price</th><th>GST</th><th>Install.</th><th>Freight</th>
-              <th className="num">Warranty</th><th className="num">Lead time</th><th>Quoted on</th><th>Valid until</th><th>Collected</th><th>Consent to use</th><th>Status</th><th>Review</th>
+              <th>Supplier</th><th style={{ minWidth: 180 }}>Item</th><th>Spec · capacity</th><th className="num">Price</th>
+              <th>GST · install. · freight</th><th>Warranty · lead time</th><th>Quoted · valid until</th><th title="Collection method and consent to use">Collected · consent</th><th>Status · review</th>
             </tr></thead>
             <tbody>
-              {d.quotes.length === 0 ? <Empty cols={16}>No supplier quotation has been collected yet. Machinery and material prices on file come from project reports only; see the open quotation tasks below.</Empty> : null}
+              {d.quotes.length === 0 ? <Empty cols={9}>No supplier quotation has been collected yet. Machinery and material prices on file come from project reports only; see the open quotation tasks below.</Empty> : null}
               {d.quotes.map((q) => {
                 const past = Boolean(q.valid_until && q.valid_until < today);
                 return (
                   <tr key={q.id}>
-                    <td>{q.supplier_name} <OriginBadge origin={q.data_origin} /></td>
+                    <td style={{ minWidth: 120 }}>{q.supplier_name} <OriginBadge origin={q.data_origin} /></td>
                     <td>{q.item_description}
                       {q.cost_item_id
                         ? <div className="faint small">cost item: <Link href={`/business/${q.model_slug}?tab=costs`}>{q.cost_item_name}</Link> · {q.model_name}</div>
                         : <div className="faint small">not linked to a cost item</div>}
                       {q.analyst_notes ? <div className="faint small">{q.analyst_notes}</div> : null}</td>
-                    <td className="small">{q.model_or_spec ?? MISSING}</td>
-                    <td className="small">{q.capacity_value === null ? (q.capacity_unit ?? MISSING) : `${num(q.capacity_value, 2)} ${q.capacity_unit ?? ''}`}</td>
+                    <td className="small">{q.model_or_spec ?? <span className="faint">spec not stated</span>}
+                      <div className="faint">{q.capacity_value === null && !q.capacity_unit ? 'capacity not stated' : `capacity ${q.capacity_value === null ? '' : num(q.capacity_value, 2)} ${q.capacity_unit ?? ''}`}</div></td>
                     <td className="num">{q.currency === 'INR' ? inr(q.quoted_price) : `${q.currency} ${num(q.quoted_price, 2)}`}
-                      <div className="faint small">for {num(q.quantity, 2)}{q.unit_code ? ` ${q.unit_code}` : ''}{q.quantity !== 1 && q.currency === 'INR' ? ` · ${inr(q.quoted_price / q.quantity)} each` : ''}</div></td>
-                    <td className="small">{humanize(q.tax_treatment)}{q.tax_rate_pct === null ? <div className="faint">rate not stated</div> : <div className="faint">{num(q.tax_rate_pct, 2)}%</div>}</td>
-                    <td className="small">{humanize(q.installation)}</td>
-                    <td className="small">{q.freight_terms ?? MISSING}{q.delivery_location ? <div className="faint">to {q.delivery_location}</div> : null}</td>
-                    <td className="num small">{q.warranty_months === null ? MISSING : `${q.warranty_months} mo`}</td>
-                    <td className="num small">{q.lead_time_days === null ? MISSING : `${q.lead_time_days} d`}</td>
-                    <td className="mono small">{date(q.quoted_on)}</td>
-                    <td className="mono small">{q.valid_until ? date(q.valid_until) : <span className="faint">not stated</span>} {past ? <Badge value="EXPIRED" tone="bad" title="The validity date of this quotation has passed" /> : null}</td>
-                    <td className="small">{humanize(q.collection_method)}</td>
-                    <td>{q.consent_to_use ? <Badge value="yes" /> : <Badge value="no" tone="bad" title="Cannot be verified or used without consent" />}{q.consent_notes ? <div className="faint small">{q.consent_notes}</div> : null}</td>
-                    <td><Badge value={q.status} tone={QUOTE_STATUS_TONE[q.status]} />{q.observation_count ? <div className="faint small">cost observation recorded</div> : null}</td>
-                    <td>{q.status === 'received' ? (
-                      <form action={verifyQuote} className="inline">
+                      <div className="faint small">for {num(q.quantity, 2)}{q.unit_code ? ` ${q.unit_code}` : ''}</div>
+                      {q.quantity !== 1 && q.currency === 'INR' ? <div className="faint small">{inr(q.quoted_price / q.quantity)} each</div> : null}</td>
+                    <td className="small">GST {humanize(q.tax_treatment).toLowerCase()}{q.tax_rate_pct === null ? <span className="faint"> · rate not stated</span> : ` · ${num(q.tax_rate_pct, 2)}%`}
+                      <div>installation {humanize(q.installation).toLowerCase()}</div>
+                      <div className={q.freight_terms ? undefined : 'faint'}>{q.freight_terms ? `freight: ${q.freight_terms}` : 'freight not stated'}{q.delivery_location ? ` · to ${q.delivery_location}` : ''}</div></td>
+                    <td className="small">{q.warranty_months === null ? <span className="faint">warranty not stated</span> : `warranty ${q.warranty_months} mo`}
+                      <div className={q.lead_time_days === null ? 'faint' : undefined}>{q.lead_time_days === null ? 'lead time not stated' : `lead time ${q.lead_time_days} d`}</div></td>
+                    <td className="mono small nowrap">{date(q.quoted_on)}
+                      <div>{q.valid_until ? <span className="muted">until {date(q.valid_until)}</span> : <span className="faint">validity not stated</span>}</div>
+                      {past ? <div><Badge value="EXPIRED" tone="bad" title="The validity date of this quotation has passed" /></div> : null}</td>
+                    <td className="small">{humanize(q.collection_method)}
+                      <div>{q.consent_to_use ? <Badge value="consent: yes" tone="good" /> : <Badge value="consent: no" tone="bad" title="Cannot be verified or used without consent" />}</div>
+                      {q.consent_notes ? <div className="faint">{q.consent_notes}</div> : null}</td>
+                    <td><Badge value={q.status} tone={QUOTE_STATUS_TONE[q.status]} />{q.observation_count ? <div className="faint small">→ cost observation</div> : null}
+                      {q.status === 'received' ? (
+                      <form action={verifyQuote} className="inline" style={{ display: 'flex', marginTop: 4 }}>
                         <input type="hidden" name="quote_id" value={q.id} /><input type="hidden" name="back" value="/suppliers" />
                         <button type="submit" className="good" disabled={!reviewer} title={reviewer ? 'Mark verified; creates a cost observation when linked to a cost item' : 'Reviewer or admin only'}>Verify</button>
-                      </form>) : <span className="faint small">{q.verified_at ? `verified ${date(q.verified_at)}` : MISSING}</span>}</td>
+                      </form>) : q.verified_at ? <div className="faint small">verified {date(q.verified_at)}</div> : null}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-          <div className="body muted small">
+          <div className="muted small" style={{ padding: '8px 10px' }}>
             Verify is a reviewer act. A verified quotation linked to a cost item is stored as a cost observation (evidence type “supplier quote”, value = price ÷ quantity)
             at <b>grade C, unverified</b>, sourced to {d.source[0] ? <>“{d.source[0].name}”</> : <span className="badge bad">no primary-research source registered</span>}.
             Grade A needs a source document (the scanned quotation), which this form does not capture yet.
@@ -241,7 +244,7 @@ export default async function Suppliers({ searchParams }: { searchParams: Promis
               ))}
             </tbody>
           </table>
-          <div className="body muted small">
+          <div className="muted small" style={{ padding: '8px 10px' }}>
             Use the enquiry template at <span className="mono">research/templates/supplier_enquiry.md</span> when approaching a supplier: it asks for the
             specification, price basis, GST, installation, freight, warranty, validity and — explicitly — consent to use the quotation.
           </div>

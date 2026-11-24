@@ -5,7 +5,7 @@ foundation that is not real. Status as of 2026-11-24 — details in [`STATUS.md`
 
 | Phase | Scope | Status |
 |---|---|---|
-| 1 | Architecture, ontology, database schema, evidence framework | **Done** — 17 migrations, 77 tables, RLS, audit, evidence grades, publication gate, generated dictionary + ERD |
+| 1 | Architecture, ontology, database schema, evidence framework | **Done** — 18 migrations, 77 tables, RLS, audit, evidence grades, publication gate, generated dictionary + ERD |
 | 2 | Internal dashboard and source registry | **Core done** — business record, catalogue, overview; 71-source registry with reuse terms. Remaining screens in progress |
 | 3 | Document ingestion and structured research pipeline | **Done for the first slice** — durable 8-stage pipeline; rule-based extractor; LLM extractor written, untested live |
 | 4 | Financial modelling engine | **Done** — 7 archetypes, scenarios, stress tests, sensitivity, closure; 865 tests |

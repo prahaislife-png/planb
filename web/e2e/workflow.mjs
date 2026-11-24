@@ -5,7 +5,10 @@
 //
 //   BASE_URL=http://localhost:3100 SLUG=<test model slug> WORKER_CMD="…planb worker --until-empty" node web/e2e/workflow.mjs
 import { execSync } from 'node:child_process';
-import { chromium } from 'playwright';
+import { createRequire } from 'node:module';
+
+// Playwright is resolved with require() so that a globally installed copy (NODE_PATH) works as well as a local one.
+const { chromium } = createRequire(import.meta.url)('playwright');
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3100';
 const SLUG = process.env.SLUG;
@@ -21,12 +24,14 @@ function check(name, condition, detail = '') {
 }
 
 const browser = await chromium.launch();
+const TIMEOUT = 8000;
 const errors = [];
 
 async function as(role) {
   const context = await browser.newContext({ viewport: { width: 1600, height: 1000 } });
   await context.addCookies([{ name: 'planb_dev_user', value: USERS[role], url: BASE }]);
   const page = await context.newPage();
+  page.setDefaultTimeout(TIMEOUT);
   page.on('pageerror', (e) => errors.push(`${role}: ${String(e).slice(0, 200)}`));
   page.on('response', (r) => { if (r.status() >= 500) errors.push(`${role}: HTTP ${r.status()} ${r.url()}`); });
   return page;
@@ -36,6 +41,7 @@ const flash = async (page) => (await page.locator('.notice.good, .notice.bad').f
 const rowWith = (page, text) => page.locator('tr', { hasText: text }).first();
 const runWorker = () => execSync(WORKER, { stdio: 'pipe' }).toString();
 
+try {
 // ── 1. Every core screen renders for a researcher ───────────────────────────
 const researcher = await as('researcher');
 for (const path of ['/', '/catalogue', '/tasks', '/runs', '/sources', '/evidence', '/review', '/publication', '/quality', '/costs', '/audit',
@@ -175,6 +181,9 @@ check('no publish button is offered while blockers exist', (await v2a.locator('b
 await admin.goto(BASE + '/audit');
 check('audit history records the actions with their actors', (await admin.locator('body').textContent()).includes('Dev Reviewer'));
 
+} catch (error) {
+  check('workflow ran to completion', false, String(error).split('\n')[0]);
+}
 check('no server errors or page exceptions', errors.length === 0, errors.slice(0, 3).join(' | '));
 await browser.close();
 console.log(results.join('\n'));

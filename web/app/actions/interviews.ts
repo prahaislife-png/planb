@@ -193,23 +193,21 @@ export async function saveResponses(form: FormData) {
       saved += 1;
       if (q.metric_key && (numeric !== null || low !== null)) {
         // What an owner says in an interview is self-reported: grade C at best (D for demo data). One such row per question.
-        const marker = `Questionnaire answer "${q.key}" (self-reported in interview)`;
-        const [existing] = await sql`
-          select id from gt.business_actuals
-          where interview_id = ${interview.id} and metric_key = ${q.metric_key} and evidence_level = 'self_reported' and analyst_notes = ${marker}
-          order by created_at limit 1`;
-        if (existing) {
-          await sql`
-            update gt.business_actuals
-               set value = ${numeric}, value_low = ${low}, value_high = ${high}, verification_status = 'unverified', verified_by = null
-             where id = ${existing.id} and (value, value_low, value_high) is distinct from (${numeric}::numeric, ${low}::numeric, ${high}::numeric)`;
-        } else {
-          await sql`
-            insert into gt.business_actuals (interview_id, metric_key, value, value_low, value_high, unit_code, period, evidence_level, evidence_grade,
-                                             analyst_notes, data_origin)
-            values (${interview.id}, ${q.metric_key}, ${numeric}, ${low}, ${high}, ${q.metric_unit}, ${ACTUAL_PERIODS.includes(q.metric_period) ? q.metric_period : null},
-                    'self_reported', ${interview.data_origin === 'demo' ? 'D' : 'C'}, ${marker}, ${interview.data_origin})`;
-        }
+        await sql`
+          insert into gt.business_actuals (interview_id, question_id, metric_key, value, value_low, value_high, unit_code, period, evidence_level,
+                                           evidence_grade, analyst_notes, data_origin)
+          values (${interview.id}, ${q.id}, ${q.metric_key}, ${numeric}, ${low}, ${high}, ${q.metric_unit},
+                  ${ACTUAL_PERIODS.includes(q.metric_period) ? q.metric_period : null}, 'self_reported',
+                  ${interview.data_origin === 'demo' ? 'D' : 'C'}, ${`Questionnaire answer "${q.key}" (self-reported in interview)`}, ${interview.data_origin})
+          on conflict (interview_id, question_id) where question_id is not null do update
+            set value = excluded.value, value_low = excluded.value_low, value_high = excluded.value_high,
+                -- a changed answer is a new, unverified figure
+                verification_status = case when (gt.business_actuals.value, gt.business_actuals.value_low, gt.business_actuals.value_high)
+                                                is distinct from (excluded.value, excluded.value_low, excluded.value_high)
+                                           then 'unverified' else gt.business_actuals.verification_status end,
+                verified_by = case when (gt.business_actuals.value, gt.business_actuals.value_low, gt.business_actuals.value_high)
+                                        is distinct from (excluded.value, excluded.value_low, excluded.value_high)
+                                   then null else gt.business_actuals.verified_by end`;
         actuals += 1;
       }
     }

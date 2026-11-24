@@ -112,7 +112,7 @@ export default async function Geography({ searchParams }: { searchParams: Promis
               ))}
             </tbody>
           </table>
-          <div className="body muted small">Official codes are left empty on purpose until each has been checked against the Local Government Directory and Census tables; “not verified” is not an error.</div>
+          <div className="muted small" style={{ padding: '8px 10px' }}>Official codes are left empty on purpose until each has been checked against the Local Government Directory and Census tables; “not verified” is not an error.</div>
         </Panel>
 
         <Panel title="Add a location">
@@ -150,11 +150,11 @@ export default async function Geography({ searchParams }: { searchParams: Promis
                         <>
                           <td className="num"><b>{valueWithUnit(r.value, r.unit_code, r.period)}</b></td>
                           <td>{r.is_fallback
-                            ? <Badge value={`inherited · ${LEVEL_LABEL[r.resolved_level] ?? r.resolved_level} level`} tone="warn" title={`Not specific to ${d.selected!.name}: taken from an ancestor ${r.fallback_depth} level(s) up`} />
-                            : <Badge value={`${d.selected!.location_type}-specific`} tone="good" title="Recorded for this exact location" />}</td>
+                            ? <span className="badge warn" title={`Not specific to ${d.selected!.name}: taken from an ancestor ${r.fallback_depth} level(s) up`}>inherited · {LEVEL_LABEL[r.resolved_level] ?? r.resolved_level} level</span>
+                            : <span className="badge good" title="Recorded for this exact location">{d.selected!.location_type}-specific</span>}</td>
                           <td className="small">{r.resolved_location_name}</td>
                           <td className="small">{r.segment ?? <span className="faint">{MISSING}</span>}</td>
-                          <td className="mono small">{date(r.observed_on)}</td>
+                          <td className="mono small nowrap">{date(r.observed_on)}</td>
                           <td className="small">{r.source_name}</td>
                           <td><Badge value={r.verification_status} /></td>
                           <td><Grade grade={r.evidence_grade} /></td>
@@ -170,7 +170,7 @@ export default async function Geography({ searchParams }: { searchParams: Promis
                   ))}
                 </tbody>
               </table>
-              <div className="body muted small">
+              <div className="muted small" style={{ padding: '8px 10px' }}>
                 Resolution order: this location, then each ancestor up to the country; rejected and superseded values are skipped; within a level the best grade, then the
                 most recent, wins. The resolver is shown here without a segment filter — where a metric has several segments, check the full list below.
               </div>
@@ -237,7 +237,8 @@ export default async function Geography({ searchParams }: { searchParams: Promis
                   <td className="small">{o.subject ?? <span className="faint">{MISSING}</span>}</td>
                   <td className="small">{o.model_slug ? <Link href={`/business/${o.model_slug}`}>{o.model_name}</Link> : <span className="faint">{MISSING}</span>}</td>
                   <td className="small">{o.location_name ?? <span className="faint">{MISSING}</span>}<div className="faint">{humanize(o.geographic_scope)}</div></td>
-                  <td className="num">{o.value === null ? <span className="faint">{MISSING}</span> : valueWithUnit(o.value, o.unit_code, o.period)}{o.value_text ? <div className="small muted" style={{ whiteSpace: 'normal', textAlign: 'left' }}>{o.value_text}</div> : null}</td>
+                  <td className={o.value === null ? 'small' : 'num'}>{o.value === null ? null : valueWithUnit(o.value, o.unit_code, o.period)}
+                    {o.value_text ? <div className="small muted" style={{ whiteSpace: 'normal' }}>{o.value_text}</div> : o.value === null ? <span className="faint">{MISSING}</span> : null}</td>
                   <td className="mono small">{date(o.observed_on)}</td>
                   <td className="small">{o.source_name}</td>
                   <td className="small">{humanize(o.evidence_type)}</td>
@@ -247,7 +248,7 @@ export default async function Geography({ searchParams }: { searchParams: Promis
               ))}
             </tbody>
           </table>
-          <div className="body muted small"><b>Standing note:</b> a competitor count or a population figure is an indicator, never a demand estimate. Record what was counted and where; do not convert it into customers or revenue.</div>
+          <div className="muted small" style={{ padding: '8px 10px' }}><b>Standing note:</b> a competitor count or a population figure is an indicator, never a demand estimate. Record what was counted and where; do not convert it into customers or revenue.</div>
         </Panel>
 
         <Panel title="Record a market observation">

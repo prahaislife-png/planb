@@ -25,12 +25,12 @@ run" is three NIFTEM project reports processed end to end as the restricted `pla
 | Approved records maintain version history | ✅ | `TestPublication`: three versions, two publications, supersession, immutability, diff in the dashboard |
 | Research jobs can resume after failure | ✅ | `TestDurability`: failed stage retried with backoff, completed stages not re-run, dead worker's lease reclaimed, bounded attempts, budget stop. Also observed for real during development |
 | Demonstration data cannot be mistaken for verified research | ✅ | `TestDemoData`: demo rows forced to grade D and unverified; estimates always D; demo/test records unpublishable; loud badges in the UI |
-| The entire workflow functions end to end | ✅ | `TestEndToEnd`; the real run; the browser-driven workflow test (`web/e2e/`) |
+| The entire workflow functions end to end | ✅ | `TestEndToEnd`; the real run; the browser-driven workflow test (`web/e2e/run.sh`, 48 checks: production build, real browser, real worker, isolated database) |
 
 ## 2. Component status
 
 ### Database — ✅
-17 migrations; RLS on every table; audit trail; evidence-grade, review, versioning and publication rules in
+18 migrations; RLS on every table; audit trail; evidence-grade, review, versioning and publication rules in
 triggers and constraints; generated data dictionary and ERD. Applied and tested on PostgreSQL 16 with a local shim
 for Supabase's roles and `auth` schema. 🟡 **Never applied to an actual Supabase project.**
 
@@ -108,6 +108,16 @@ show honest empty states — no demonstration rows are seeded.
 Authentication: ✅ development identity switcher (refused in production builds). 🟡 Supabase Auth path written,
 never exercised against a live project.
 
+### Test suites
+| Suite | Count | Where it runs |
+|---|---|---|
+| Python unit + PostgreSQL integration (`research/tests`) | 111 | Locally and in CI (`.github/workflows/ci.yml`) |
+| Finance engine (`packages/finance/test`) | 865 | Locally and in CI |
+| Dashboard end-to-end (`web/e2e/run.sh`) | 48 checks | Locally only — not yet wired into CI |
+| Dashboard typecheck and production build | — | Locally and in CI |
+
+The CI workflow itself has not run yet (no pull request has been opened); treat it as unverified until its first run.
+
 ## 4. What the real run found
 
 Three NIFTEM PMFME detailed project reports (red chilli powder, bread, honey processing), rule-based extraction, zero
@@ -129,6 +139,21 @@ LLM cost:
   date from 2021–22), five model inputs are PlanB default assumptions, and the source's assumed subsidy is excluded.
 
 A government report yields a costed skeleton and a list of 21–26 things to find out. It does not yield a finding.
+
+### Defects found by testing against real behaviour
+
+Recorded because each one would have produced a wrong number or a silent failure, and because they show which
+checks are doing real work:
+
+| Found by | Defect | Fix |
+|---|---|---|
+| Source reconciliation on the honey report | Variable-cost ratios derived against net sales overstated raw-material cost; a profitable unit showed a loss | Ratios derived against production value; regression test |
+| Browser end-to-end test | After a reviewer rejected a claim, the model **kept using the rejected figure** (a cost item with no remaining usable observation was skipped, not retired) | Model inputs whose evidence is gone are retired on every refresh; regression test |
+| Browser end-to-end test | Refresh failed when extracted machinery lines stopped adding up to the stated total — the very case the check exists for | Run logs moved to a dedicated connection; regression test |
+| Unit test on the extractor | "Excluding GST" note was read before the machinery rows on the same page, leaving tax treatment "unknown" | Ordering fixed |
+| Integration test | Completeness was NULL instead of 0 % for an empty record | Fixed in the view |
+| Dashboard build-out | An update blocked by row-level security was reported as success | Zero-row updates are now refusals |
+| Dashboard build-out | The legal gate on sources, and reviewer-only verification of quotations, regulations and interviews, were enforced only in the UI | Database triggers (migrations 0017, 0018) with tests |
 
 ## 5. Blockers — things only a person can resolve
 
@@ -157,4 +182,8 @@ A government report yields a costed skeleton and a list of 21–26 things to fin
 - NIC-2008 codes were verified by an automated research agent, not a person; treat as sample-audited.
 - Completeness weights and publication thresholds are first judgements; revisit after the first records are completed.
 - The 15 % conflict tolerance and 3-year corroboration window are single global values; they should become per-category.
+- The dashboard's data-entry workspaces (suppliers, Ground Truth, geography, regulatory) were exercised end to end
+  in a browser with artificial entries that were then deleted; they have never held real research data.
+- Grade A for a supplier quotation needs an attached document; the quotation form does not capture one yet.
+- There is no action to verify a government scheme, and scheme status is not yet connected to the modelled subsidy.
 - No load, security or accessibility testing has been done.

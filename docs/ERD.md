@@ -558,6 +558,7 @@ erDiagram
     text metric_key FK
     text unit_code FK
     uuid verified_by FK
+    uuid question_id FK
   }
   gt_questionnaires {
     uuid id PK
@@ -573,6 +574,7 @@ erDiagram
     uuid created_by FK
   }
   gt_owner_interviews ||--o{ gt_business_actuals : "interview_id"
+  gt_questionnaire_questions ||--o{ gt_business_actuals : "question_id"
   gt_interview_subjects ||--o{ gt_consents : "subject_id"
   gt_owner_interviews ||--o{ gt_interview_responses : "interview_id"
   gt_questionnaire_questions ||--o{ gt_interview_responses : "question_id"

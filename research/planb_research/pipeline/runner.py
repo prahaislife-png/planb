@@ -24,6 +24,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import psycopg
+import psycopg.sql
 from psycopg.types.json import Jsonb
 
 from ..config import Settings
@@ -47,6 +48,7 @@ class RunContext:
     worker_id: str
     stage: str = ""
     carried: dict[str, Any] = field(default_factory=dict)  # outputs of earlier stages, by stage name
+    log_conn: psycopg.Connection | None = None
 
     @property
     def run_id(self) -> str:
@@ -61,11 +63,15 @@ class RunContext:
         return self.run["data_origin"]
 
     def log(self, message: str, level: str = "info", **data: Any) -> None:
-        self.conn.execute(
+        """Write a run-log line. Logs go through a dedicated autocommit connection, so they can be written from
+        inside a stage's transaction and survive that transaction being rolled back."""
+        target = self.log_conn or self.conn
+        target.execute(
             "insert into ops.research_run_logs (run_id, level, stage, message, data) values (%s, %s, %s, %s, %s)",
-            (self.run_id, level, self.stage, message, Jsonb(data) if data else None),
+            (self.run_id, level, self.stage, message, Jsonb(json.loads(json.dumps(data, default=str))) if data else None),
         )
-        self.conn.commit()
+        if self.log_conn is None:
+            self.conn.commit()
 
     def tag_audit(self) -> None:
         """Make audit rows written in the current transaction reference this run."""
@@ -158,6 +164,17 @@ class Worker:
         self.store = store or default_store(self.settings.evidence_dir)
         self.worker_id = worker_id or f"{socket.gethostname()}:{os.getpid()}"
         self.lease_seconds = lease_seconds
+        self._log_conn: psycopg.Connection | None = None
+
+    def _logging_connection(self) -> psycopg.Connection:
+        """A second, autocommit session with the same role as the work connection, used only for run logs."""
+        if self._log_conn is None or self._log_conn.closed:
+            role = self.conn.execute("select current_user as r").fetchone()["r"]
+            self.conn.commit()
+            log_conn = psycopg.connect(self.settings.database_url, autocommit=True)
+            log_conn.execute(psycopg.sql.SQL("set role {}").format(psycopg.sql.Identifier(role)))
+            self._log_conn = log_conn
+        return self._log_conn
 
     # ── queue ────────────────────────────────────────────────────────────────
     def claim(self) -> dict[str, Any] | None:
@@ -197,7 +214,7 @@ class Worker:
 
     def execute(self, run: dict[str, Any]) -> dict[str, Any]:
         stages = PIPELINES[run["pipeline"]]
-        ctx = RunContext(self.conn, self.settings, self.store, run, self.worker_id)
+        ctx = RunContext(self.conn, self.settings, self.store, run, self.worker_id, log_conn=self._logging_connection())
         ctx.log(f"run claimed by {self.worker_id} (attempt {run['attempt']}/{run['max_attempts']})")
 
         for seq, (name, fn) in enumerate(stages, start=1):

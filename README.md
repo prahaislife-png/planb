@@ -14,7 +14,7 @@ the customer product that will sit on top of it.
 
 ## What works today
 
-- **Database** — 17 PostgreSQL migrations: 77 tables in five schemas, row-level security on every table, an
+- **Database** — 18 PostgreSQL migrations: 77 tables in five schemas, row-level security on every table, an
   append-only audit trail, evidence-grade rules, four-eyes review and a publication gate, all enforced in the database.
 - **Research pipeline** (`research/`, Python) — a durable, resumable eight-stage pipeline: ingest a document → extract
   claims → verify each quote against the page → normalise → structure into a business record → cross-verify →
@@ -25,7 +25,7 @@ the customer product that will sit on top of it.
   its observations, the model with its assumptions counted, evidence review, gaps, versions and publication.
 - **Research catalogue** (`research/catalog/`) — 71 sources with their reuse terms, a 137-model research backlog with
   NIC-2008 codes, 27 verified pilot documents.
-- **Tests** — 109 Python tests against a real PostgreSQL database (mapped to the milestone acceptance criteria, RLS
+- **Tests** — 111 Python tests against a real PostgreSQL database (mapped to the milestone acceptance criteria, RLS
   and privacy), 865 finance-engine tests.
 
 What does **not** exist yet, what is unverified, and what blocks the first publication: [`docs/STATUS.md`](docs/STATUS.md).

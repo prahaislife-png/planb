@@ -132,7 +132,7 @@ YAML and the source registry; stage 10 (publication) is a human action behind th
 ## 5. Repository layout
 
 ```
-supabase/migrations/     17 SQL migrations — the schema, RLS, triggers, workflow functions, reference vocabularies
+supabase/migrations/     18 SQL migrations — the schema, RLS, triggers, workflow functions, reference vocabularies
 supabase/dev/            local-only Supabase shim
 research/planb_research/ Python worker: adapters/, extract/, pipeline/, ingest, storage, catalog, cli
 research/catalog/        version-controlled source registry, 137-model backlog, pilot document list (YAML)

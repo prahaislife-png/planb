@@ -323,11 +323,11 @@ class TestGaps:
         r = factory.run_document()
         price = one(conn, "select id from intel.parameter_observations where business_variant_id = %s and parameter_key = 'unit_price'", r["variant"]["id"])
         conn.execute("update intel.parameter_observations set verification_status = 'rejected' where id = %s", (price["id"],))
-        conn.execute("update intel.financial_parameters set is_current = false, superseded_at = now() where business_variant_id = %s and parameter_key = 'unit_price' and is_current", (r["variant"]["id"],))
         conn.commit()
         final = factory.refresh(r["model"]["id"])
         assert final["status"] == "succeeded"
         assert final["result"]["build_model"]["variants"][0]["missing_required"] == ["unit_price (Synthetic Test Powder)"]
+        assert final["result"]["build_model"]["variants"][0]["parameters_retired"] >= 1  # the input lost its evidence and was retired
         # nothing was invented to fill the hole
         assert one(conn, "select count(*) as n from intel.financial_parameters where business_variant_id = %s and parameter_key = 'unit_price' and is_current", r["variant"]["id"])["n"] == 0
         assert one(conn, "select count(*) as n from intel.financial_scenarios where business_variant_id = %s and is_current", r["variant"]["id"])["n"] == 0
@@ -474,6 +474,22 @@ class TestReview:
         assert review["decision"] == "reject" and review["reviewer"] == REVIEWER
         audit = one(conn, "select actor_user_id, actor_db_role, changed_fields from ops.audit_log where table_name = 'evidence_claims' and row_id = %s and action = 'UPDATE' order by id desc limit 1", str(claim["id"]))
         assert audit["actor_user_id"] == REVIEWER and audit["actor_db_role"] == "authenticated" and "status" in audit["changed_fields"]
+
+    def test_refresh_after_rejecting_a_machinery_line_reports_the_broken_total(self, conn, factory, settings):
+        """Regression: with a machinery line rejected, the lines no longer add up to the stated total. The
+        cross-verification stage must report that and carry on, not fail."""
+        r = factory.run_document()
+        claim = one(conn, "select id from intel.evidence_claims where source_document_id = %s and subject = 'Synthetic packer'", r["doc"]["id"])
+        with as_user(settings, REVIEWER) as c:
+            c.execute("select intel.review_claim(%s, 'reject', 'Not part of this configuration')", (claim["id"],))
+            c.commit()
+        final = factory.refresh(r["model"]["id"])
+        assert final["status"] == "succeeded", final["error"]
+        assert final["result"]["cross_verify"]["consistency_mismatches"] == 1
+        warning = one(conn, "select message, data from ops.research_run_logs where run_id = %s and level = 'warning' and stage = 'cross_verify'", final["id"])
+        assert "do not add up" in warning["message"] and warning["data"] == {"lines_total": 400000.0, "stated_total": 500000.0}
+        capex = one(conn, "select summary->'initialInvestment'->>'capex' as capex from intel.financial_scenarios where business_variant_id = %s and kind = 'base' and is_current", r["variant"]["id"])
+        assert float(capex["capex"]) == 500000  # 600000 less the rejected 100000 packer
 
     def test_rejection_requires_a_reason(self, conn, factory, settings):
         r = factory.run_document()

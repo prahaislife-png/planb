@@ -86,6 +86,7 @@ def cross_verify(ctx: RunContext) -> dict[str, Any]:
     conn = ctx.conn
     opened = corroborated = auto_resolved = 0
     notes: list[str] = []
+    mismatches: list[dict[str, float]] = []
     today = dt.date.today()
 
     with conn.transaction():
@@ -175,10 +176,13 @@ def cross_verify(ctx: RunContext) -> dict[str, Any]:
                     diff = (float(total) - float(s["value_normalized"])) / float(s["value_normalized"]) * 100
                     notes.append(f"machinery lines sum to ₹{float(total):,.0f} vs stated total ₹{float(s['value_normalized']):,.0f} ({diff:+.1f}%)")
                     if abs(diff) > 1.0:
-                        ctx.log("extracted machinery lines do not add up to the document's stated total — a line may be missing", level="warning",
-                                lines_total=float(total), stated_total=float(s["value_normalized"]))
+                        mismatches.append({"lines_total": float(total), "stated_total": float(s["value_normalized"])})
+    # logged after the transaction: run logs are committed independently of stage work
+    for m in mismatches:
+        ctx.log("usable machinery lines do not add up to the document's stated total — a line is missing, rejected or misread",
+                level="warning", **m)
     return {"conflicts_opened": opened, "conflicts_auto_resolved": auto_resolved, "observations_corroborated": corroborated,
-            "consistency_checks": notes}
+            "consistency_checks": notes, "consistency_mismatches": len(mismatches)}
 
 
 # ── Stage 7: financial modelling ─────────────────────────────────────────────
@@ -250,6 +254,12 @@ def _resolve(values: list[tuple[float, dict]], *, has_open_conflict: bool) -> tu
 def resolve_parameters(ctx: RunContext, variant: dict) -> dict[str, Any]:
     conn = ctx.conn
     changed = 0
+    touched: set[tuple] = set()
+
+    def setp(*, parameter_key=None, cost_item_id=None, stream_id=None, **kw) -> bool:
+        touched.add((parameter_key, cost_item_id, stream_id))
+        return _set_parameter(ctx, variant["id"], parameter_key=parameter_key, cost_item_id=cost_item_id, stream_id=stream_id, **kw)
+
     cost_obs = _usable_cost_obs(ctx, variant["id"])
     param_obs = _usable_param_obs(ctx, variant["id"])
     open_conflicts = {(c["cost_item_id"], c["parameter_key"]) for c in conn.execute(
@@ -289,14 +299,14 @@ def resolve_parameters(ctx: RunContext, variant: dict) -> dict[str, Any]:
                 basis_text = f"stated sales of ₹{denominator:,.0f} (production value could not be computed from the source)"
             pct = amount / denominator * 100.0
             rationale = f"Derived: source states ₹{amount:,.0f} for projection year {year} against {basis_text} → {pct:.2f}% of revenue."
-            changed += _set_parameter(ctx, variant["id"], cost_item_id=item_id, value=round(pct, 4), unit="percent", basis="derived",
+            changed += setp(cost_item_id=item_id, value=round(pct, 4), unit="percent", basis="derived",
                                       method="formula", rationale=rationale,
                                       grade=_weakest([first["evidence_grade"], *[o["evidence_grade"] for o in denom_sources]]),
                                       sources=[*sources[:1], *[("parameter_observation", o["id"]) for o in denom_sources]])
             continue
         value, method, why, grade = _resolve(values, has_open_conflict=(item_id, None) in open_conflicts)
         unit = "percent" if basis_label == "pct_of_revenue" else "inr"
-        changed += _set_parameter(ctx, variant["id"], cost_item_id=item_id, value=round(value, 4), unit=unit, basis="observation",
+        changed += setp(cost_item_id=item_id, value=round(value, 4), unit=unit, basis="observation",
                                   method=method, rationale=why, grade=grade, sources=sources)
 
     # named parameters
@@ -313,11 +323,11 @@ def resolve_parameters(ctx: RunContext, variant: dict) -> dict[str, Any]:
             # when a source gives several projection years, the latest is the value the parameter is defined on
             values = [(float(o["value"]), o) for o in obs]
             value, method, why, grade = _resolve(values, has_open_conflict=(None, d["key"]) in open_conflicts)
-            changed += _set_parameter(ctx, variant["id"], parameter_key=d["key"], stream_id=stream_id, value=value, unit=d["unit_code"],
+            changed += setp(parameter_key=d["key"], stream_id=stream_id, value=value, unit=d["unit_code"],
                                       basis="observation", method=method, rationale=why, grade=grade,
                                       sources=[("parameter_observation", o["id"]) for _, o in values])
         elif d["default_value"] is not None and d["key"] not in derived_keys:
-            changed += _set_parameter(ctx, variant["id"], parameter_key=d["key"], stream_id=stream_id, value=float(d["default_value"]),
+            changed += setp(parameter_key=d["key"], stream_id=stream_id, value=float(d["default_value"]),
                                       unit=d["unit_code"], basis="assumption", method="manual", rationale=d["default_rationale"], grade="D")
 
     # ramp-up derived from the source's own multi-year utilisation projection, when it gives one
@@ -334,9 +344,9 @@ def resolve_parameters(ctx: RunContext, variant: dict) -> dict[str, Any]:
             src = [("parameter_observation", y1["id"]), ("parameter_observation", steady["id"])]
             why = (f"Derived from the source's projection: utilisation {float(y1['value']):g}% in year 1 rising to "
                    f"{float(steady['value']):g}% in year {steady['projection_year']}, linearised month by month.")
-            changed += _set_parameter(ctx, variant["id"], parameter_key="ramp_start_pct", value=round(start, 4), unit="percent",
+            changed += setp(parameter_key="ramp_start_pct", value=round(start, 4), unit="percent",
                                       basis="derived", method="formula", rationale=why, grade=grade, sources=src)
-            changed += _set_parameter(ctx, variant["id"], parameter_key="ramp_months_to_steady_state", value=float(months), unit="month",
+            changed += setp(parameter_key="ramp_months_to_steady_state", value=float(months), unit="month",
                                       basis="derived", method="formula", rationale=why, grade=grade, sources=src)
             derived_keys |= {"ramp_start_pct", "ramp_months_to_steady_state"}
 
@@ -347,7 +357,18 @@ def resolve_parameters(ctx: RunContext, variant: dict) -> dict[str, Any]:
             for s in streams:
                 if d["template_key"] == s["driver_kind"]:
                     resolve_named(d, s["id"])
-    return {"parameters_changed": changed}
+    # A model input whose evidence is gone (every observation rejected or superseded) must stop feeding the model.
+    # Pipeline-resolved inputs that were not re-resolved in this pass are retired; analyst-set values are left alone.
+    retired = 0
+    for p in conn.execute(
+        """select id, parameter_key, cost_item_id, revenue_stream_id from intel.financial_parameters
+           where business_variant_id = %s and is_current and scenario = 'base' and location_id is null and set_by is null""",
+        (variant["id"],),
+    ).fetchall():
+        if (p["parameter_key"], p["cost_item_id"], p["revenue_stream_id"]) not in touched:
+            conn.execute("update intel.financial_parameters set is_current = false, superseded_at = now() where id = %s", (p["id"],))
+            retired += 1
+    return {"parameters_changed": changed, "parameters_retired": retired}
 
 
 def build_engine_input(ctx: RunContext, variant: dict) -> tuple[dict | None, dict[str, Any]]:

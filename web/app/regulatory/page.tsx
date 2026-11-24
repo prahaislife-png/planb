@@ -125,7 +125,7 @@ export default async function Regulatory({ searchParams }: { searchParams: Promi
               ))}
             </tbody>
           </table>
-          <div className="body muted small">
+          <div className="muted small" style={{ padding: '8px 10px' }}>
             Verifying requires the registry source that was checked; it stamps today as the verification date and sets revalidation 180 days out.
             The grade is not changed unless the reviewer picks one — the database allows grade A only on a verified regulation.
           </div>
@@ -175,7 +175,7 @@ export default async function Regulatory({ searchParams }: { searchParams: Promi
               ))}
             </tbody>
           </table>
-          <div className="body muted small">“To be determined” means <b>research lead, not a requirement</b>: it must never be presented to a customer as something they need.</div>
+          <div className="muted small" style={{ padding: '8px 10px' }}>“To be determined” means <b>research lead, not a requirement</b>: it must never be presented to a customer as something they need.</div>
         </Panel>
 
         <Panel title="Map a regulation to a business model">
@@ -264,7 +264,7 @@ export default async function Regulatory({ searchParams }: { searchParams: Promi
                 ))}
               </tbody>
             </table>
-            <div className="body">
+            <div style={{ padding: 10 }}>
               <form action={mapScheme}>
                 <input type="hidden" name="back" value="/regulatory" />
                 <div className="form-grid">
@@ -299,7 +299,7 @@ export default async function Regulatory({ searchParams }: { searchParams: Promi
               ))}
             </tbody>
           </table>
-          <div className="body muted small">
+          <div className="muted small" style={{ padding: '8px 10px' }}>
             These are names of licences and rules an analyst thought might apply. None has been confirmed with its authority, and none says whether it is mandatory,
             conditional or irrelevant for the business. Turn a lead into a regulation above, verify it, then map it.
           </div>
@@ -321,7 +321,7 @@ export default async function Regulatory({ searchParams }: { searchParams: Promi
               ))}
             </tbody>
           </table>
-          <div className="body muted small">Checklist for these tasks: <span className="mono">research/templates/regulatory_checklist.md</span>.</div>
+          <div className="muted small" style={{ padding: '8px 10px' }}>Checklist for these tasks: <span className="mono">research/templates/regulatory_checklist.md</span>.</div>
         </Panel>
       </div>
     </>

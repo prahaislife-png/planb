@@ -184,7 +184,7 @@ Unique: `(business_model_id, regulation_id)`
 
 </details>
 
-Triggers: `business_regulations_updated` → `set_updated_at()`
+Triggers: `business_regulations_reviewer_only` → `guard_reviewer_only()`, `business_regulations_updated` → `set_updated_at()`
 
 <a id="intelbusiness_relationships"></a>
 ### intel.business_relationships  ·  table
@@ -267,6 +267,8 @@ _RLS: enabled (7 policies) · audited: yes_
 - `business_scheme_eligibility_verification_status_check`: `CHECK ((verification_status = ANY (ARRAY['unverified'::text, 'verified'::text, 'disputed'::text])))`
 
 </details>
+
+Triggers: `business_scheme_eligibility_reviewer_only` → `guard_reviewer_only()`
 
 <a id="intelbusiness_skill_mapping"></a>
 ### intel.business_skill_mapping  ·  table
@@ -997,7 +999,7 @@ Unique: `(slug)`
 
 </details>
 
-Triggers: `government_schemes_updated` → `set_updated_at()`
+Triggers: `government_schemes_reviewer_only` → `guard_reviewer_only()`, `government_schemes_updated` → `set_updated_at()`
 
 <a id="intelindustries"></a>
 ### intel.industries  ·  table
@@ -1490,7 +1492,7 @@ Unique: `(slug)`
 
 </details>
 
-Triggers: `regulations_updated` → `set_updated_at()`
+Triggers: `regulations_reviewer_only` → `guard_reviewer_only()`, `regulations_updated` → `set_updated_at()`
 
 <a id="intelresearch_reviews"></a>
 ### intel.research_reviews  ·  table
@@ -1824,7 +1826,7 @@ _RLS: enabled (7 policies) · audited: yes_
 
 </details>
 
-Triggers: `supplier_quotes_updated` → `set_updated_at()`
+Triggers: `supplier_quotes_reviewer_only` → `guard_reviewer_only()`, `supplier_quotes_updated` → `set_updated_at()`
 
 <a id="intelsuppliers"></a>
 ### intel.suppliers  ·  table
@@ -2127,6 +2129,7 @@ _RLS: enabled (4 policies) · audited: yes_
 | `data_origin` | ops.data_origin | yes |  |  |  |
 | `created_at` | timestamp with time zone | no | `now()` |  |  |
 | `updated_at` | timestamp with time zone | no | `now()` |  |  |
+| `question_id` | uuid | yes |  | FK → gt.questionnaire_questions | The questionnaire question this figure was captured from, when it came from a structured answer. NULL for separately recorded actuals. |
 
 <details><summary>Check constraints (10)</summary>
 
@@ -2143,7 +2146,7 @@ _RLS: enabled (4 policies) · audited: yes_
 
 </details>
 
-Triggers: `business_actuals_updated` → `set_updated_at()`
+Triggers: `business_actuals_consent` → `guard_consented_interview()`, `business_actuals_reviewer_only` → `guard_reviewer_only()`, `business_actuals_updated` → `set_updated_at()`
 
 <a id="gtconsents"></a>
 ### gt.consents  ·  table
@@ -2194,6 +2197,8 @@ _RLS: enabled (4 policies) · audited: yes_
 | `created_at` | timestamp with time zone | no | `now()` |  |  |
 
 Unique: `(interview_id, question_id)`
+
+Triggers: `interview_responses_consent` → `guard_consented_interview()`
 
 <a id="gtinterview_subjects"></a>
 ### gt.interview_subjects  ·  table
@@ -2269,7 +2274,7 @@ _RLS: enabled (4 policies) · audited: yes_
 
 </details>
 
-Triggers: `owner_interviews_updated` → `set_updated_at()`
+Triggers: `owner_interviews_location` → `guard_interview_location()`, `owner_interviews_reviewer_only` → `guard_reviewer_only()`, `owner_interviews_updated` → `set_updated_at()`
 
 <a id="gtquestionnaire_questions"></a>
 ### gt.questionnaire_questions  ·  table

@@ -200,35 +200,35 @@ export default async function Interviews({ searchParams }: { searchParams: Promi
         <Panel title="Interviews — de-identified" right={<span className="muted">{d.interviews.length} interviews</span>} flush>
           <table>
             <thead><tr>
-              <th>Business model</th><th>Location</th><th>Business status</th><th>Years</th><th>Interviewer</th><th>Instrument</th><th>Consent</th>
-              <th className="num">Answers</th><th>Status</th><th>Anonymisation</th><th>Move on</th>
+              <th>Business model · instrument</th><th>Location</th><th>Business status</th><th>Years</th><th>Interviewer</th>
+              <th>Status · consent</th><th>Anonymisation</th><th>Move on</th>
             </tr></thead>
             <tbody>
-              {d.interviews.length === 0 ? <Empty cols={11}>No owner interview has been planned or conducted yet. Ground Truth is empty until the first consented interview is recorded.</Empty> : null}
+              {d.interviews.length === 0 ? <Empty cols={8}>No owner interview has been planned or conducted yet. Ground Truth is empty until the first consented interview is recorded.</Empty> : null}
               {d.interviews.map((i) => {
                 const consents = (i.subject_id ? consentsBySubject.get(i.subject_id) : undefined) ?? [];
                 return (
                   <tr key={i.id} style={selectedId === i.id ? { background: 'var(--panel-2)' } : i.status === 'withdrawn' ? { opacity: 0.55 } : undefined}>
                     <td><Link href={`/business/${i.model_slug}`}>{i.model_name}</Link> <OriginBadge origin={i.data_origin} />
-                      <div className="small"><Link href={`/interviews?interview=${i.id}`}>{selectedId === i.id ? 'answers shown below' : 'capture answers'}</Link></div></td>
+                      <div className="faint small">{i.questionnaire_title ?? 'no questionnaire'}</div>
+                      <div className="small"><Link href={`/interviews?interview=${i.id}`}>{selectedId === i.id ? 'answers shown below' : 'capture answers'}</Link>
+                        <span className="faint"> · {i.response_count} answers · {i.actual_count} actuals</span></div></td>
                     <td className="small">{i.location_name ?? <span className="faint">not recorded</span>}{i.location_type ? <div className="faint">{i.location_type} level</div> : null}</td>
                     <td><Badge value={i.business_status} tone={i.business_status === 'operating' ? 'good' : i.business_status === 'paused' ? 'warn' : 'info'} /></td>
-                    <td className="small">{i.years_operated !== null ? `${num(i.years_operated, 1)} yrs` : <span className="faint">{MISSING}</span>}
+                    <td className="small nowrap">{i.years_operated !== null ? `${num(i.years_operated, 1)} yrs` : <span className="faint">{MISSING}</span>}
                       {i.started_year ? <div className="faint mono">{i.started_year}–{i.ended_year ?? ''}</div> : null}</td>
                     <td className="small">{i.interviewer_name ?? <span className="faint">{MISSING}</span>}{i.interview_date ? <div className="faint mono">{date(i.interview_date)}{i.interview_mode ? ` · ${humanize(i.interview_mode).toLowerCase()}` : ''}</div> : <div className="faint">no date set</div>}</td>
-                    <td className="small">{i.questionnaire_title ?? <span className="faint">{MISSING}</span>}</td>
-                    <td>{i.consent_id ? <Badge value="on file" tone="good" /> : <Badge value="none attached" tone="bad" title="Cannot be recorded as conducted" />}</td>
-                    <td className="num small">{i.response_count}<div className="faint">{i.actual_count} actuals</div></td>
-                    <td><Badge value={i.status} tone={i.status === 'reviewed' ? 'good' : i.status === 'withdrawn' ? 'bad' : i.status === 'planned' || i.status === 'scheduled' ? 'warn' : 'info'} /></td>
+                    <td><Badge value={i.status} tone={i.status === 'reviewed' ? 'good' : i.status === 'withdrawn' ? 'bad' : i.status === 'planned' || i.status === 'scheduled' ? 'warn' : 'info'} />
+                      <div style={{ marginTop: 3 }}>{i.consent_id ? <Badge value="consent on file" tone="good" /> : <Badge value="no consent attached" tone="bad" title="Cannot be recorded as conducted" />}</div></td>
                     <td><Badge value={i.anonymisation_status} tone={i.anonymisation_status === 'pending' ? 'warn' : 'good'} /></td>
                     <td>
-                      <form action={updateInterviewStatus} className="inline">
+                      <form action={updateInterviewStatus} className="inline" style={{ flexWrap: 'nowrap' }}>
                         <input type="hidden" name="interview_id" value={i.id} /><input type="hidden" name="back" value={back} />
-                        <select name="status" defaultValue={i.status} style={{ width: 112 }} aria-label="Status">
+                        <select name="status" defaultValue={i.status} style={{ width: 108 }} aria-label="Status">
                           {STATUSES.map((s) => <option key={s} value={s} disabled={s === 'reviewed' && !reviewer}>{humanize(s)}</option>)}</select>
                         <select name="anonymisation_status" defaultValue={i.anonymisation_status} style={{ width: 118 }} aria-label="Anonymisation">
                           <option value="pending">Anon. pending</option><option value="anonymised">Anonymised</option><option value="not_required">Not required</option></select>
-                        <select name="consent_id" defaultValue="" style={{ width: 150 }} aria-label="Consent">
+                        <select name="consent_id" defaultValue="" style={{ width: 124 }} aria-label="Consent">
                           <option value="">{i.consent_id ? 'keep consent' : 'no consent'}</option>
                           {consents.filter((c) => !c.withdrawn_on).map((c) => <option key={c.id} value={c.id}>attach {date(c.given_on)} · form {c.consent_form_version}</option>)}</select>
                         <button type="submit" disabled={!anyRole}>Set</button>
@@ -239,7 +239,7 @@ export default async function Interviews({ searchParams }: { searchParams: Promi
               })}
             </tbody>
           </table>
-          <div className="body muted small">
+          <div className="muted small" style={{ padding: '8px 10px' }}>
             The database rejects “conducted” (or any later stage) without a consent attached, and “reviewed” until anonymisation is done or recorded as not required;
             the refusal is shown at the top of the page. Marking “reviewed” is a reviewer act. Consents can be attached only by someone who may see the subject.
           </div>
@@ -283,8 +283,8 @@ export default async function Interviews({ searchParams }: { searchParams: Promi
           <>
             <Panel title={`Answers — ${selected.model_name} · ${selected.location_name ?? 'location not recorded'} · ${humanize(selected.business_status).toLowerCase()}`}
               right={<><Badge value={selected.status} /> <Link href="/interviews">close</Link></>} flush>
-              {!selected.consent_id ? <div className="body"><div className="notice bad" style={{ margin: 0 }}>No consent is attached to this interview, so no answer can be saved. Record the consent and attach it in the interviews table first.</div></div> : null}
-              {selectedQuestions.length === 0 ? <div className="body muted">This interview has no questionnaire.</div> : (
+              {!selected.consent_id ? <div style={{ padding: 10 }}><div className="notice bad" style={{ margin: 0 }}>No consent is attached to this interview, so no answer can be saved. Record the consent and attach it in the interviews table first.</div></div> : null}
+              {selectedQuestions.length === 0 ? <div className="muted" style={{ padding: 10 }}>This interview has no questionnaire.</div> : (
                 <form action={saveResponses}>
                   <input type="hidden" name="interview_id" value={selected.id} /><input type="hidden" name="back" value={back} />
                   <table>
@@ -329,7 +329,7 @@ export default async function Interviews({ searchParams }: { searchParams: Promi
                       ])}
                     </tbody>
                   </table>
-                  <div className="body row">
+                  <div className="row" style={{ padding: 10 }}>
                     <button type="submit" className="primary" disabled={!writer || !selected.consent_id}>Save answers</button>
                     <span className="faint small">Unanswered questions stay unanswered — a blank is never stored as zero. Money in rupees (never lakh). Do not type names or addresses into answers.
                       A numeric answer to an “actual” question is also stored as a self-reported actual, grade C.</span>
@@ -357,7 +357,7 @@ export default async function Interviews({ searchParams }: { searchParams: Promi
                   ))}
                 </tbody>
               </table>
-              <div className="body">
+              <div style={{ padding: 10 }}>
                 <form action={addActual}>
                   <input type="hidden" name="interview_id" value={selected.id} /><input type="hidden" name="back" value={back} />
                   <div className="form-grid">
@@ -407,7 +407,7 @@ export default async function Interviews({ searchParams }: { searchParams: Promi
               ))}
             </tbody>
           </table>
-          <div className="body muted small">
+          <div className="muted small" style={{ padding: '8px 10px' }}>
             Why the threshold: with fewer than 5 owners in a cell, a quartile could be traced back to one person. Minimum and maximum are never shown for the same reason.
             Demo data, rejected figures and interviews whose consent was withdrawn are excluded by the database view itself.
           </div>
