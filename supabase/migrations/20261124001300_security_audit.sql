@@ -222,6 +222,9 @@ begin
     execute format('create policy worker_insert on ops.%I for insert to planb_worker with check (true)', t);
   end loop;
 end $$;
+-- Staff upload documents through the dashboard; that action is logged like any adapter action.
+grant insert on ops.ingestion_log to authenticated;
+create policy staff_insert on ops.ingestion_log for insert to authenticated with check (ops.has_role('admin', 'researcher'));
 create policy worker_update on ops.research_runs for update to planb_worker using (true) with check (true);
 create policy worker_update on ops.research_run_steps for update to planb_worker using (true) with check (true);
 -- Staff may enqueue and cancel runs; they do not execute them.

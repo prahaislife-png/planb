@@ -101,92 +101,124 @@ with checks (check_key, section, label, weight, is_critical) as (
     ('geography.overlay',           'geography',      'Location overlay exists for a pilot location', 4, false),
     ('ground_truth.interviews',     'ground_truth',   'At least one reviewed owner interview', 5, false),
     ('ground_truth.failures',       'ground_truth',   'At least one interview with a closed or sold business', 3, false)
-)
+),
+-- Each fact about a record is computed once for all models (set-based), then the checks read those facts.
+obs as (
+  select business_model_id,
+         bool_or(section = 'fixed_opex') as has_fixed_opex,
+         bool_or(section = 'staff') as has_staff,
+         bool_or(section = 'variable') as has_variable,
+         bool_or(observation_kind = 'parameter') as has_parameter,
+         bool_or(observation_kind = 'market') as has_market,
+         bool_or(section = 'capex' and evidence_type = 'supplier_quote') as has_capex_quote
+  from intel.v_usable_observations group by business_model_id),
+capex as (
+  select bv.business_model_id, count(*) as items,
+         count(*) filter (where not ci.is_optional and not exists (
+           select 1 from intel.cost_observations o
+           where o.cost_item_id = ci.id and o.verification_status <> 'rejected'
+             and not exists (select 1 from intel.cost_observations n where n.supersedes_id = o.id))) as unobserved
+  from intel.cost_items ci
+  join intel.business_variants bv on bv.id = ci.business_variant_id
+  join intel.cost_categories cc on cc.id = ci.cost_category_id
+  where cc.cost_class = 'capex' group by bv.business_model_id),
+variants as (select business_model_id, count(*) as n from intel.business_variants group by business_model_id),
+streams as (
+  select bv.business_model_id, count(*) as n
+  from intel.revenue_streams rs join intel.business_variants bv on bv.id = rs.business_variant_id group by bv.business_model_id),
+params as (
+  select business_model_id, count(*) as n, count(*) filter (where is_required and not is_resolved) as unresolved
+  from intel.v_variant_parameter_status group by business_model_id),
+scenarios as (
+  select bv.business_model_id, count(*) as n
+  from intel.financial_scenarios fs join intel.business_variants bv on bv.id = fs.business_variant_id
+  where fs.is_current and fs.kind = 'base' group by bv.business_model_id),
+reqs as (
+  select bv.business_model_id, bool_or(r.requirement_type in ('built_up_space', 'land')) as has_space,
+         bool_or(r.requirement_type = 'power_load') as has_power
+  from intel.operating_requirements r join intel.business_variants bv on bv.id = r.business_variant_id
+  where r.verification_status <> 'rejected' group by bv.business_model_id),
+skills as (select business_model_id, count(*) as n from intel.business_skill_mapping group by business_model_id),
+lifestyle as (
+  select bv.business_model_id, count(*) as n
+  from intel.lifestyle_profiles lp join intel.business_variants bv on bv.id = lp.business_variant_id group by bv.business_model_id),
+regs as (
+  select br.business_model_id,
+         count(*) filter (where br.applicability <> 'to_be_determined') as mapped,
+         count(*) filter (where br.applicability = 'mandatory') as mandatory,
+         count(*) filter (where br.applicability = 'mandatory'
+                            and (br.verification_status <> 'verified' or r.verification_status <> 'verified')) as mandatory_unverified
+  from intel.business_regulations br join intel.regulations r on r.id = br.regulation_id group by br.business_model_id),
+launch as (select business_model_id, count(*) as n from intel.launch_tasks group by business_model_id),
+risks as (
+  select business_model_id, count(*) as n, bool_or(risk_type = 'capital_loss') as has_capital_loss
+  from intel.business_risks group by business_model_id),
+geo as (
+  select business_model_id, count(*) as n from (
+    select bv.business_model_id
+    from intel.financial_parameters fp join intel.business_variants bv on bv.id = fp.business_variant_id
+    join intel.locations l on l.id = fp.location_id where fp.is_current and l.is_pilot
+    union all
+    select mo.business_model_id
+    from intel.market_observations mo join intel.locations l on l.id = mo.location_id
+    where l.is_pilot and mo.verification_status <> 'rejected' and mo.business_model_id is not null) x
+  group by business_model_id),
+interviews as (
+  select business_model_id, count(*) filter (where status = 'reviewed') as reviewed,
+         count(*) filter (where status = 'reviewed' and business_status in ('closed', 'sold')) as failures
+  from gt.owner_interviews group by business_model_id),
+classified as (
+  select business_model_id, count(*) as n from intel.business_model_classifications where is_primary group by business_model_id)
 select
   m.id as business_model_id,
   c.check_key, c.section, c.label, c.weight, c.is_critical,
-  case c.check_key
+  coalesce(case c.check_key
     when 'identity.description' then
       coalesce(length(btrim(m.description)), 0) > 0 and coalesce(length(btrim(m.operating_model)), 0) > 0
       and coalesce(length(btrim(m.target_customers)), 0) > 0
-    when 'identity.classification' then
-      exists (select 1 from intel.business_model_classifications x where x.business_model_id = m.id and x.is_primary)
-    when 'identity.variant' then
-      exists (select 1 from intel.business_variants v where v.business_model_id = m.id)
-    when 'capital.items' then
-      exists (select 1 from intel.cost_items ci join intel.business_variants v on v.id = ci.business_variant_id
-              join intel.cost_categories cc on cc.id = ci.cost_category_id
-              where v.business_model_id = m.id and cc.cost_class = 'capex')
-    when 'capital.observed' then
-      exists (select 1 from intel.cost_items ci join intel.business_variants v on v.id = ci.business_variant_id
-              join intel.cost_categories cc on cc.id = ci.cost_category_id
-              where v.business_model_id = m.id and cc.cost_class = 'capex')
-      and not exists (
-        select 1 from intel.cost_items ci join intel.business_variants v on v.id = ci.business_variant_id
-        join intel.cost_categories cc on cc.id = ci.cost_category_id
-        where v.business_model_id = m.id and cc.cost_class = 'capex' and not ci.is_optional
-          and not exists (select 1 from intel.v_usable_observations o where o.cost_item_id = ci.id))
-    when 'capital.quotes' then
-      exists (select 1 from intel.v_usable_observations o
-              where o.business_model_id = m.id and o.section = 'capex' and o.evidence_type = 'supplier_quote')
-    when 'operations.fixed_costs' then
-      exists (select 1 from intel.v_usable_observations o where o.business_model_id = m.id and o.section = 'fixed_opex')
-    when 'operations.staffing' then
-      exists (select 1 from intel.v_usable_observations o where o.business_model_id = m.id and o.section = 'staff')
-    when 'operations.variable_costs' then
-      exists (select 1 from intel.v_usable_observations o where o.business_model_id = m.id and o.section = 'variable')
-    when 'revenue.streams' then
-      exists (select 1 from intel.revenue_streams rs join intel.business_variants v on v.id = rs.business_variant_id
-              where v.business_model_id = m.id)
-    when 'revenue.drivers' then
-      exists (select 1 from intel.v_usable_observations o where o.business_model_id = m.id and o.observation_kind = 'parameter')
-    when 'financial.parameters' then
-      exists (select 1 from intel.v_variant_parameter_status s where s.business_model_id = m.id)
-      and not exists (select 1 from intel.v_variant_parameter_status s
-                      where s.business_model_id = m.id and s.is_required and not s.is_resolved)
-    when 'financial.scenario' then
-      exists (select 1 from intel.financial_scenarios fs join intel.business_variants v on v.id = fs.business_variant_id
-              where v.business_model_id = m.id and fs.is_current and fs.kind = 'base')
-    when 'infrastructure.requirements' then
-      exists (select 1 from intel.operating_requirements r join intel.business_variants v on v.id = r.business_variant_id
-              where v.business_model_id = m.id and r.requirement_type in ('built_up_space', 'land'))
-      and exists (select 1 from intel.operating_requirements r join intel.business_variants v on v.id = r.business_variant_id
-                  where v.business_model_id = m.id and r.requirement_type = 'power_load')
-    when 'founder.skills' then
-      exists (select 1 from intel.business_skill_mapping s where s.business_model_id = m.id)
-    when 'founder.requirements' then
-      exists (select 1 from intel.founder_requirements f where f.business_model_id = m.id)
-    when 'lifestyle.profile' then
-      exists (select 1 from intel.lifestyle_profiles lp join intel.business_variants v on v.id = lp.business_variant_id
-              where v.business_model_id = m.id)
-    when 'market.observations' then
-      exists (select 1 from intel.v_usable_observations o where o.business_model_id = m.id and o.observation_kind = 'market')
-    when 'regulatory.mapping' then
-      exists (select 1 from intel.business_regulations br where br.business_model_id = m.id and br.applicability <> 'to_be_determined')
-    when 'regulatory.verified' then
-      exists (select 1 from intel.business_regulations br where br.business_model_id = m.id and br.applicability = 'mandatory')
-      and not exists (select 1 from intel.business_regulations br join intel.regulations r on r.id = br.regulation_id
-                      where br.business_model_id = m.id and br.applicability = 'mandatory'
-                        and (br.verification_status <> 'verified' or r.verification_status <> 'verified'))
-    when 'execution.launch_tasks' then
-      (select count(*) from intel.launch_tasks lt where lt.business_model_id = m.id) >= 5
-    when 'risk.register' then
-      (select count(*) from intel.business_risks r where r.business_model_id = m.id) >= 3
-      and exists (select 1 from intel.business_risks r where r.business_model_id = m.id and r.risk_type = 'capital_loss')
-    when 'geography.overlay' then
-      exists (select 1 from intel.financial_parameters fp join intel.business_variants v on v.id = fp.business_variant_id
-              join intel.locations l on l.id = fp.location_id
-              where v.business_model_id = m.id and fp.is_current and l.is_pilot)
-      or exists (select 1 from intel.market_observations mo join intel.locations l on l.id = mo.location_id
-                 where mo.business_model_id = m.id and l.is_pilot and mo.verification_status <> 'rejected')
-    when 'ground_truth.interviews' then
-      exists (select 1 from gt.owner_interviews i where i.business_model_id = m.id and i.status = 'reviewed')
-    when 'ground_truth.failures' then
-      exists (select 1 from gt.owner_interviews i where i.business_model_id = m.id and i.status = 'reviewed'
-              and i.business_status in ('closed', 'sold'))
-  end as is_satisfied
+    when 'identity.classification' then classified.n > 0
+    when 'identity.variant' then variants.n > 0
+    when 'capital.items' then capex.items > 0
+    when 'capital.observed' then capex.items > 0 and capex.unobserved = 0
+    when 'capital.quotes' then obs.has_capex_quote
+    when 'operations.fixed_costs' then obs.has_fixed_opex
+    when 'operations.staffing' then obs.has_staff
+    when 'operations.variable_costs' then obs.has_variable
+    when 'revenue.streams' then streams.n > 0
+    when 'revenue.drivers' then obs.has_parameter
+    when 'financial.parameters' then params.n > 0 and params.unresolved = 0
+    when 'financial.scenario' then scenarios.n > 0
+    when 'infrastructure.requirements' then reqs.has_space and reqs.has_power
+    when 'founder.skills' then skills.n > 0
+    when 'founder.requirements' then fr.business_model_id is not null
+    when 'lifestyle.profile' then lifestyle.n > 0
+    when 'market.observations' then obs.has_market
+    when 'regulatory.mapping' then regs.mapped > 0
+    when 'regulatory.verified' then regs.mandatory > 0 and regs.mandatory_unverified = 0
+    when 'execution.launch_tasks' then launch.n >= 5
+    when 'risk.register' then risks.n >= 3 and risks.has_capital_loss
+    when 'geography.overlay' then geo.n > 0
+    when 'ground_truth.interviews' then interviews.reviewed > 0
+    when 'ground_truth.failures' then interviews.failures > 0
+  end, false) as is_satisfied
 from intel.business_models m
-cross join checks c;
+cross join checks c
+left join obs on obs.business_model_id = m.id
+left join capex on capex.business_model_id = m.id
+left join variants on variants.business_model_id = m.id
+left join streams on streams.business_model_id = m.id
+left join params on params.business_model_id = m.id
+left join scenarios on scenarios.business_model_id = m.id
+left join reqs on reqs.business_model_id = m.id
+left join skills on skills.business_model_id = m.id
+left join intel.founder_requirements fr on fr.business_model_id = m.id
+left join lifestyle on lifestyle.business_model_id = m.id
+left join regs on regs.business_model_id = m.id
+left join launch on launch.business_model_id = m.id
+left join risks on risks.business_model_id = m.id
+left join geo on geo.business_model_id = m.id
+left join interviews on interviews.business_model_id = m.id
+left join classified on classified.business_model_id = m.id;
 comment on view intel.v_completeness_items is 'One row per (business model, completeness check): is that part of the record present? Says nothing about how good the evidence is.';
 
 create view intel.v_business_completeness as
