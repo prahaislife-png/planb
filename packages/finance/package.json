@@ -1,0 +1,40 @@
+{
+  "name": "@planb/finance",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Deterministic financial modelling engine for PlanB (pure functions, no I/O, no randomness).",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "bin": {
+    "planb-finance": "./dist/cli.mjs"
+  },
+  "files": [
+    "src",
+    "dist",
+    "docs",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo \"@planb/finance: no lint configured\""
+  },
+  "dependencies": {
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

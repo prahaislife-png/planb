@@ -192,7 +192,7 @@ comment on view intel.v_completeness_items is 'One row per (business model, comp
 create view intel.v_business_completeness as
 select
   business_model_id,
-  round(100.0 * sum(weight) filter (where is_satisfied) / sum(weight), 1) as completeness_pct,
+  round(100.0 * coalesce(sum(weight) filter (where is_satisfied), 0) / sum(weight), 1) as completeness_pct,
   count(*) filter (where is_satisfied) as checks_passed,
   count(*) as checks_total,
   count(*) filter (where is_critical and not is_satisfied) as critical_missing,

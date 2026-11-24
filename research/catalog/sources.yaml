@@ -1,0 +1,2478 @@
+# PlanB research source registry
+# Compiled 2026-11-24 from a cloud container (non-Indian egress). 'accessible' and robots results are as observed from that container;
+# several .gov.in hosts reset connections, failed TLS chain validation or returned 403/503 to it and must be re-checked from an India-based network.
+# confidence: verified = policy/terms page read today; partially_verified = some evidence read (see notes); unverified = nothing could be read.
+# Entries marked 'NOT VERIFIED TODAY' describe the source from prior knowledge only. Nothing here is legal advice.
+# recommended_ingestion is 'automated' only where a reuse grant was read AND robots.txt does not disallow the relevant paths.
+
+- slug: dcmsme-project-profiles
+  name: DC-MSME Project Profiles
+  publisher: "Office of the Development Commissioner (MSME), Ministry of MSME, Government of India"
+  source_type: government_project_report
+  authority_level: primary_government
+  base_url: "https://dcmsme.gov.in/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): product-wise project profiles (process, machinery list, capacity, cost of project, profitability) prepared by MSME-DIs; also the MSME-DI state network links."
+  geographic_coverage: national
+  access_method: manual_download
+  accessible: "no"
+  accessibility_notes: "curl from container: exit 60 'SSL certificate problem: unable to get local issuer certificate' for dcmsme.gov.in and www.dcmsme.gov.in (homepage and /robots.txt); TLS verification was not disabled. WebFetch of https://www.dcmsme.gov.in/ returned HTTP 503. Not retried by other routes."
+  api_available: unknown
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://dcmsme.gov.in/robots.txt"
+    status: unreachable
+    summary: Could not be fetched (TLS chain error).
+  licence:
+    name: Not verified (site copyright policy not reachable)
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "No policy page could be read today. A web search only surfaced https://dcmsme.gov.in/disclaimer.htm (liability disclaimer, no reuse grant) as a search-result snippet; that page itself was not fetched. Do not assume the Ministry's msme.gov.in copyright policy (separate host, separate entry) extends to dcmsme.gov.in. Treat as permission-needed until the policy is read from an India-based network."
+  permission_contact: ""
+  update_frequency: ad hoc; many profiles are legacy documents (not verified today)
+  quality_limitations:
+    - Could not be inspected today; from prior knowledge many profiles carry prices that are several years old and state no GST treatment - verify per document
+    - Licence status unverified - a foundational source that currently cannot gate an adapter
+  candidate_adapter: dcmsme_profiles
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: dcmsme-district-industrial-profiles
+  name: DC-MSME Brief Industrial Profiles of Districts (DIPs) - incl. Pune and Nanded
+  publisher: "MSME-Development Institutes (e.g. MSME-DI Mumbai) / DC-MSME, Ministry of MSME"
+  source_type: government_project_report
+  authority_level: primary_government
+  base_url: "https://dcmsme.gov.in/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): 'Brief Industrial Profile of ___ District' PDFs (district resources, industrial areas, existing clusters, MSME counts, potential industries). Pune and Nanded profiles are believed to exist but were not opened today."
+  geographic_coverage: district-level
+  access_method: manual_download
+  accessible: "no"
+  accessibility_notes: "dcmsme.gov.in: curl exit 60 (unable to get local issuer certificate); WebFetch HTTP 503. MSME-DI Mumbai host www.msmedimumbai.gov.in and msmedimumbai.gov.in: curl exit 35 'Recv failure: Connection reset by peer' on 3 attempts each."
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://dcmsme.gov.in/robots.txt"
+    status: unreachable
+    summary: Could not be fetched.
+  licence:
+    name: Not verified
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "Neither the hosting site nor any DIP PDF could be opened, so no licence text was read. Same caution as dcmsme-project-profiles."
+  permission_contact: ""
+  update_frequency: "irregular; most DIPs were compiled once (from prior knowledge, around 2012-2017) and not refreshed - unverified"
+  quality_limitations:
+    - Not inspected today
+    - From prior knowledge the DIPs are old (many rely on Census 2011 and 2010-2016 DIC data); treat as historical context only until a current edition is confirmed
+  candidate_adapter: dcmsme_dip
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: msme-ministry-portal
+  name: "Ministry of MSME portal (schemes, reports, notifications)"
+  publisher: "Ministry of Micro, Small and Medium Enterprises, Government of India"
+  source_type: scheme_portal
+  authority_level: primary_government
+  base_url: "https://www.msme.gov.in/"
+  information_available: "Scheme and service descriptions, annual reports, acts/policies, orders and gazette notifications (e.g. MSME definition/classification), press releases. Not itself a repository of project profiles."
+  geographic_coverage: national
+  access_method: http_download
+  accessible: "yes"
+  accessibility_notes: "HTTP 200. Site is a client-rendered Next.js app: page HTML is an empty shell and content is loaded from a WordPress JSON backend under /cms/wp-json/ (e.g. /cms/wp-json/wp/v2/pages?slug=copyright-policy returned 200 JSON)."
+  api_available: unknown
+  api_notes: "No documented public API. The site's own front end reads public WordPress REST JSON under https://www.msme.gov.in/cms/wp-json/ ; this is an implementation detail, not a published/supported API, and carries no stability guarantee."
+  requires_auth: false
+  robots_txt:
+    url: "https://www.msme.gov.in/robots.txt"
+    status: fetched
+    summary: "User-agent: * / Allow: / (no Disallow rules, no crawl-delay)."
+  licence:
+    name: Site copyright policy (Ministry of MSME)
+    url: "https://www.msme.gov.in/cms/wp-json/wp/v2/pages?slug=copyright-policy"
+    quoted_terms: "Material featured on this Website may be reproduced free of charge. However, the material has to be reproduced accurately and not to be used in a derogatory manner or in a misleading context. Wherever the material is being published or issued to others, the source must be prominently acknowledged."
+  reuse_status: permitted_with_attribution
+  reuse_notes: "Reproduction is free of charge with accurate reproduction and prominent source acknowledgement. The grant expressly does not extend to material identified as third-party copyright. Policy text was read from the CMS JSON that backs the site's copyright-policy page (the rendered page needs JavaScript). Applies to msme.gov.in only - not verified for dcmsme.gov.in, udyamregistration.gov.in or kviconline.gov.in."
+  permission_contact: ""
+  update_frequency: continuous
+  quality_limitations:
+    - "JavaScript-rendered site: an adapter must use the backing JSON or a headless browser"
+    - Linked PDFs may contain third-party material excluded from the grant
+  candidate_adapter: msme_gov_portal
+  recommended_ingestion: automated
+  evidence_urls:
+    - "https://www.msme.gov.in/"
+    - "https://www.msme.gov.in/robots.txt"
+    - "https://www.msme.gov.in/cms/wp-json/wp/v2/pages?slug=copyright-policy"
+    - "https://www.msme.gov.in/cms/wp-json/post-page/footer-links"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: udyam-registration
+  name: Udyam Registration portal
+  publisher: "Ministry of MSME, Government of India"
+  source_type: regulatory_portal
+  authority_level: primary_government
+  base_url: "https://udyamregistration.gov.in/"
+  information_available: MSME registration process and classification criteria; enterprise-level data is behind registration/verification flows. Any aggregate statistics pages were not examined today.
+  geographic_coverage: national
+  access_method: portal_login
+  accessible: partial
+  accessibility_notes: Homepage HTTP 200. /robots.txt redirects to an error page (ErrorPages/FileNotFound.htm). No copyright/terms link found in homepage HTML.
+  api_available: unknown
+  api_notes: No public API seen on the homepage; not investigated further.
+  requires_auth: true
+  robots_txt:
+    url: "https://udyamregistration.gov.in/robots.txt"
+    status: not_found
+    summary: Request resolved to ErrorPages/FileNotFound.htm - no robots.txt served.
+  licence:
+    name: No policy page found
+    url: "https://udyamregistration.gov.in/"
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "Homepage footer only states that content is managed by the Ministry of MSME; no reuse terms located. Enterprise-level records contain personal/business data of registrants and sit behind OTP/captcha flows - do not collect. Use only published aggregates, and source those from data.gov.in/MSME annual reports where a licence is stated."
+  permission_contact: ""
+  update_frequency: continuous
+  quality_limitations:
+    - No bulk or aggregate download verified today
+    - Registrant-level data is personal data under the DPDP Act 2023 context - out of scope
+  candidate_adapter: ""
+  recommended_ingestion: do_not_ingest
+  evidence_urls:
+    - "https://udyamregistration.gov.in/"
+  checked_on: '2026-11-24'
+  confidence: partially_verified
+
+- slug: kvic-pmegp-model-projects
+  name: KVIC PMEGP model project reports / profiles
+  publisher: "Khadi and Village Industries Commission (KVIC), Ministry of MSME"
+  source_type: government_project_report
+  authority_level: primary_government
+  base_url: "https://www.kviconline.gov.in/pmegpeportal/pmegphome/index.jsp"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): PMEGP e-portal with model project profiles (project cost, machinery, working capital, means of finance) by industry group. Verified today only that kvic.gov.in links to this portal and hosts PMEGP guidelines/circular PDFs."
+  geographic_coverage: national
+  access_method: manual_download
+  accessible: partial
+  accessibility_notes: "kviconline.gov.in and www.kviconline.gov.in: curl 'CONNECT tunnel failed, response 502' on every attempt; WebFetch failed with DNS error (getaddrinfo EAI_AGAIN). Corporate site www.kvic.gov.in: HTTP 200 (redirects to /kvicres/index.php)."
+  api_available: unknown
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.kvic.gov.in/robots.txt"
+    status: fetched
+    summary: "kvic.gov.in: 'User-agent: * / Disallow: /' - all crawling disallowed. kviconline.gov.in/robots.txt unreachable (502)."
+  licence:
+    name: Not found (no copyright/terms link on kvic.gov.in homepage; kviconline.gov.in unreachable)
+    url: "https://www.kvic.gov.in/"
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "No reuse terms could be read. kvic.gov.in's robots.txt disallows all automated access, which by itself rules out an automated adapter on that host; the PMEGP e-portal's own robots.txt and terms are unverified. Treat as permission-needed."
+  permission_contact: ""
+  update_frequency: ad hoc (unverified)
+  quality_limitations:
+    - PMEGP portal not inspected today
+    - "From prior knowledge, model profiles are indicative templates with undated or old prices - verify per profile"
+  candidate_adapter: kvic_pmegp
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://www.kvic.gov.in/"
+    - "https://www.kvic.gov.in/robots.txt"
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: nabard-model-bankable-projects
+  name: NABARD model bankable projects and state unit-cost publications
+  publisher: National Bank for Agriculture and Rural Development (NABARD)
+  source_type: government_project_report
+  authority_level: quasi_government
+  base_url: "https://www.nabard.org/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): model bankable project reports for farm/off-farm activities (dairy, poultry, food processing etc.) with techno-economic parameters, plus state-wise unit cost booklets and Potential Linked Credit Plans (district level)."
+  geographic_coverage: national; state and district-level publications
+  access_method: manual_download
+  accessible: "no"
+  accessibility_notes: "www.nabard.org and nabard.org: curl exit 35 'Recv failure: Connection reset by peer' on 3 attempts (homepage and /robots.txt). WebFetch of a nabard.org content page returned HTTP 503."
+  api_available: unknown
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.nabard.org/robots.txt"
+    status: unreachable
+    summary: Connection reset; could not be fetched.
+  licence:
+    name: Not verified
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "No NABARD policy page could be read. A web search did not surface NABARD's copyright policy; one search snippet (not fetched) indicates at least one NABARD PDF carries a 'no part may be reproduced without written authorization from NABARD' notice. Assume permission is needed until the policy and per-document notices are read."
+  permission_contact: ""
+  update_frequency: model projects ad hoc; unit costs typically annual per state (unverified)
+  quality_limitations:
+    - Not inspected today
+    - Per-document copyright notices may be stricter than any site-level policy
+    - Unit costs vary by state and year - record both
+  candidate_adapter: nabard_model_projects
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: niftem-pmfme-dpr
+  name: NIFTEM (Kundli) PMFME Detailed Project Reports and training material
+  publisher: "National Institute of Food Technology Entrepreneurship and Management (NIFTEM-K), Ministry of Food Processing Industries"
+  source_type: government_project_report
+  authority_level: academic
+  base_url: "https://niftem.ac.in/newsite/pmfme/"
+  information_available: "Per-product PMFME packs by ODOP domain (bakery, fruits & vegetables, grain, dairy, oilseeds, spices, marine, minor forest produce): for each product a DPR PDF plus Processing, Packaging, FSSAI and Handbook PDFs. Sample DPR opened (cumin biscuits, 26 pages) contains project summary, process flow, capacity/utilisation, premises, machinery & equipment, total project cost, means of finance, term-loan schedule, working capital."
+  geographic_coverage: national
+  access_method: http_download
+  accessible: "yes"
+  accessibility_notes: "HTTP 200 for the PMFME index, a category page and a DPR PDF (direct /wp-content/uploads/ link, no login)."
+  api_available: "no"
+  api_notes: WordPress site; no documented API.
+  requires_auth: false
+  robots_txt:
+    url: "https://www.niftem.ac.in/robots.txt"
+    status: fetched
+    summary: "'User-agent: * / Disallow:' (empty Disallow = nothing disallowed); no crawl-delay."
+  licence:
+    name: All rights reserved (footer notice; no reuse policy found)
+    url: "https://niftem.ac.in/newsite/pmfme/"
+    quoted_terms: Copyright © 2026 NIFTEM PMFME. All rights reserved.
+  reuse_status: permission_required
+  reuse_notes: "The PMFME microsite footer reserves all rights and no copyright policy, terms of use or open licence was found on niftem.ac.in (the homepage links only a Privacy Policy, which returned 404). The sample DPR itself carries no copyright or licence statement. With rights reserved and no grant, storing/redistributing the PDFs or reproducing their tables commercially needs written permission. Extracting individual facts (e.g. a machine name and capacity) with citation is lower risk than copying documents, but that is a legal judgement for counsel, not something the site authorises."
+  permission_contact: "pmfmecell@niftem.ac.in (PMFME cell address printed on the DPR cover; not stated to be a permissions contact)"
+  update_frequency: "ad hoc; uploads dated 2022, sample DPR created March 2021"
+  quality_limitations:
+    - Sample DPR PDF metadata shows creation date March 2021 - costs are 2020-21 price level
+    - "DPRs are model templates for PMFME credit-linked subsidy applications, not observed businesses"
+    - "GST treatment and location-specific costs (rent, wages, power tariff) not localised"
+  candidate_adapter: niftem_pmfme
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://www.niftem.ac.in/"
+    - "https://www.niftem.ac.in/robots.txt"
+    - "https://niftem.ac.in/newsite/pmfme/"
+    - "https://niftem.ac.in/newsite/pmfme/?taining_category=bakery-and-confectionery"
+    - "https://niftem.ac.in/newsite/pmfme/wp-content/uploads/2022/07/cuminbiscuitdpr.pdf"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: niftem-thanjavur-pmfme
+  name: "NIFTEM-T (Thanjavur, formerly IIFPT) PMFME material"
+  publisher: "National Institute of Food Technology, Entrepreneurship and Management - Thanjavur (NIFTEM-T)"
+  source_type: government_project_report
+  authority_level: academic
+  base_url: "https://niftem-t.ac.in/olapp/pmfme/web/index.php"
+  information_available: "PMFME microsite with menu items Capacity Building, Incubation, Training Material - ODOP, Beneficiary Modules, ODOP Webinar Materials, Scheme Guidelines, Reports. Individual DPR documents were not opened today."
+  geographic_coverage: national
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200 for homepage and PMFME microsite. /robots.txt returns HTTP 404.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://niftem-t.ac.in/robots.txt"
+    status: not_found
+    summary: HTTP 404 - no robots.txt.
+  licence:
+    name: All rights reserved (footer notice; no reuse policy found)
+    url: "https://niftem-t.ac.in/"
+    quoted_terms: © Copyright NIFTEM-T. All Rights Reserved
+  reuse_status: permission_required
+  reuse_notes: "Homepage footer reserves all rights; no copyright policy/terms page was found. Same reasoning as niftem-pmfme-dpr: permission needed for document storage or reproduction."
+  permission_contact: ""
+  update_frequency: ad hoc
+  quality_limitations:
+    - Document-level content not inspected today
+    - Likely overlaps with NIFTEM-K packs; de-duplicate by product
+  candidate_adapter: niftem_t_pmfme
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://niftem-t.ac.in/"
+    - "https://niftem-t.ac.in/olapp/pmfme/web/index.php"
+  checked_on: '2026-11-24'
+  confidence: partially_verified
+
+- slug: pmfme-mofpi-portal
+  name: PMFME scheme portal (MoFPI)
+  publisher: "Ministry of Food Processing Industries, Government of India"
+  source_type: scheme_portal
+  authority_level: primary_government
+  base_url: "https://pmfme.mofpi.gov.in/"
+  information_available: "PM Formalisation of Micro Food Processing Enterprises scheme portal (applications, scheme information; ODOP list and dashboards believed available). Page content is rendered client-side and was not read today beyond the shell and script bundle."
+  geographic_coverage: national
+  access_method: portal_login
+  accessible: partial
+  accessibility_notes: "HTTP 200, but the page is an Angular single-page app (empty HTML shell). www.pmfme.mofpi.gov.in: connection reset. /robots.txt returns HTTP 404."
+  api_available: unknown
+  api_notes: ""
+  requires_auth: true
+  robots_txt:
+    url: "https://pmfme.mofpi.gov.in/robots.txt"
+    status: not_found
+    summary: HTTP 404 - no robots.txt.
+  licence:
+    name: No policy found
+    url: "https://pmfme.mofpi.gov.in/"
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "Only a footer string in the script bundle was seen ('Content Managed by Ministry of Food Processing Industries, Government of India'); no copyright or terms text located. Applicant/beneficiary data is behind login and out of scope."
+  permission_contact: ""
+  update_frequency: continuous
+  quality_limitations:
+    - Client-rendered; content not inspected
+    - Beneficiary data is personal data - never collect
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://pmfme.mofpi.gov.in/"
+    - "https://pmfme.mofpi.gov.in/pmfme/main.js"
+  checked_on: '2026-11-24'
+  confidence: partially_verified
+
+- slug: mofpi-ministry
+  name: Ministry of Food Processing Industries website
+  publisher: "Ministry of Food Processing Industries, Government of India"
+  source_type: scheme_portal
+  authority_level: primary_government
+  base_url: "https://www.mofpi.gov.in/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): scheme guidelines (PMKSY, PLI, PMFME), annual reports, state food-processing profiles, approved project lists."
+  geographic_coverage: national
+  access_method: manual_download
+  accessible: "no"
+  accessibility_notes: "mofpi.gov.in and www.mofpi.gov.in: curl exit 60 'unable to get local issuer certificate' (one attempt returned connection reset). WebFetch of https://www.mofpi.gov.in/copyright-policy returned HTTP 503."
+  api_available: unknown
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.mofpi.gov.in/robots.txt"
+    status: unreachable
+    summary: Could not be fetched (TLS chain error / connection reset).
+  licence:
+    name: Not verified
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: Policy page not reachable today; no terms read.
+  permission_contact: ""
+  update_frequency: continuous (unverified)
+  quality_limitations:
+    - Not inspected today
+  candidate_adapter: mofpi
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: data-gov-in-ogd
+  name: Open Government Data (OGD) Platform India
+  publisher: "National Informatics Centre (NIC), Ministry of Electronics and IT, Government of India"
+  source_type: government_dataset
+  authority_level: primary_government
+  base_url: "https://www.data.gov.in/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): catalogue of datasets contributed by ministries/states (e.g. mandi prices, MSME, census-derived tables, PIN/LGD codes) with per-dataset licence metadata and dataset APIs."
+  geographic_coverage: national; varies by dataset
+  access_method: api
+  accessible: "no"
+  accessibility_notes: "www.data.gov.in: HTTP 503 from Akamai edge ('An error occurred while processing your request') on 4 attempts incl. /robots.txt; data.gov.in and api.data.gov.in: connection reset; WebFetch of https://www.data.gov.in/Godl: HTTP 403. community.data.gov.in and smartcities.data.gov.in also reset. Looks like datacentre/geo blocking, not an outage - re-test from an India-based network."
+  api_available: "yes"
+  api_notes: "From prior knowledge (NOT verified today): dataset-level REST APIs at api.data.gov.in require a free API key issued on registration, with rate limits. Key issuance and terms could not be checked."
+  requires_auth: true
+  robots_txt:
+    url: "https://www.data.gov.in/robots.txt"
+    status: unreachable
+    summary: HTTP 503 from edge; content not obtained.
+  licence:
+    name: "GODL-India (Government Open Data License - India), read from a secondary copy only"
+    url: "https://commons.wikimedia.org/wiki/Template:GODL-India"
+    quoted_terms: "all users are provided a worldwide, royalty-free, non-exclusive license to use, adapt, publish (either in original, or in adapted and/or derivative forms), translate, display, add value, and create derivative works (including products and services), for all lawful commercial and non-commercial purposes"
+  reuse_status: permitted_with_attribution
+  reuse_notes: "GODL-India, as transcribed on Wikimedia Commons (secondary copy; the official data.gov.in/Gazette text could not be fetched today), grants commercial reuse subject to an attribution statement acknowledging provider, source and licence with the dataset URL/DOI, no implied endorsement, and exemptions (personal information, non-shareable/sensitive data, official symbols, data subject to other IP rights, RTI s.8 material). IMPORTANT: GODL applies per dataset - check each catalogue record's licence field; not every resource on the portal is under GODL. Recommended ingestion is held at manual_only solely because robots.txt, API terms and the official licence page could not be verified from this container; upgrade to automated (API with key) once verified."
+  permission_contact: ""
+  update_frequency: continuous; per-dataset frequency varies
+  quality_limitations:
+    - Official licence page not read today - quote is from a secondary transcription
+    - Dataset freshness varies widely; many catalogues are stale
+    - "Per-dataset licence must be recorded, not assumed"
+  candidate_adapter: data_gov_in
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://commons.wikimedia.org/wiki/Template:GODL-India"
+  checked_on: '2026-11-24'
+  confidence: partially_verified
+
+- slug: nsws-know-your-approvals
+  name: National Single Window System - Know Your Approvals (KYA)
+  publisher: "DPIIT, Ministry of Commerce and Industry (portal operated by Invest India)"
+  source_type: regulatory_portal
+  authority_level: primary_government
+  base_url: "https://www.nsws.gov.in/"
+  information_available: "Central and state approval catalogues ('All Approvals', per-state lists incl. Maharashtra), approval detail pages per ministry/department, scheme pages. The Know Your Approvals questionnaire itself was not exercised today."
+  geographic_coverage: national; state-wise approvals
+  access_method: manual_download
+  accessible: partial
+  accessibility_notes: "Homepage and /website-policies HTTP 200. /robots.txt returns HTTP 403 'Access Denied: You do not have the necessary permissions to view this file.'"
+  api_available: unknown
+  api_notes: No public data API found on the pages read.
+  requires_auth: false
+  robots_txt:
+    url: "https://www.nsws.gov.in/robots.txt"
+    status: unreachable
+    summary: HTTP 403 Access Denied - rules could not be read.
+  licence:
+    name: NSWS website policies (Copyright Policy + Terms of Use)
+    url: "https://www.nsws.gov.in/website-policies"
+    quoted_terms: "You shall not use any deep-link, robot, spider or other automatic device, program, algorithm or methodology, or any similar or equivalent manual process, to access, acquire, copy or monitor any portion of the Platform or Content"
+  reuse_status: permitted_with_attribution
+  reuse_notes: "Two layers. (1) Copyright Policy (last updated 24.11.2021) permits reuse: 'Material featured on NSWS website may be reproduced free of charge in any format or media without specific permission ... the source must be prominently acknowledged' (third-party material excluded). (2) The Terms of Use on the same page prohibit robots/spiders/automatic devices and 'any similar or equivalent manual process' to access or copy the platform, and the hyperlinking policy restricts direct links without prior DPIIT permission. Net: content may be reproduced with attribution, but it must be gathered by a person using the normal interface - no adapter. Seek written DPIIT/Invest India clearance before any systematic compilation."
+  permission_contact: DPIIT (named in the hyperlinking policy as the body whose prior permission is required); no email given on the page read
+  update_frequency: continuous
+  quality_limitations:
+    - KYA output depends on questionnaire answers - record the inputs used
+    - State coverage depends on which states have onboarded
+    - Fees/timelines should be cross-checked with the issuing department
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://www.nsws.gov.in/"
+    - "https://www.nsws.gov.in/website-policies"
+    - "https://www.nsws.gov.in/robots.txt"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: fssai-website
+  name: "FSSAI website (regulations, licensing categories, fee structure, advisories)"
+  publisher: "Food Safety and Standards Authority of India (FSSAI), Ministry of Health and Family Welfare"
+  source_type: regulatory_portal
+  authority_level: primary_government
+  base_url: "https://www.fssai.gov.in/"
+  information_available: "Food Safety and Standards regulations, licensing/registration framework and kind-of-business categories, fee notifications, advisories/orders, standards. Specific fee pages were not opened today."
+  geographic_coverage: national
+  access_method: http_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200. Client-rendered React/Vite app (HTML shell only); policy text was read from the lazily loaded script chunk that backs the /website-policies route.
+  api_available: unknown
+  api_notes: No documented public API identified.
+  requires_auth: false
+  robots_txt:
+    url: "https://www.fssai.gov.in/robots.txt"
+    status: fetched
+    summary: "User-agent: * ; Disallow: /search.php ; Disallow: /*?cx= ; sitemap declared. No other restrictions, no crawl-delay."
+  licence:
+    name: FSSAI website policies - Copyright Policy (text served by the script chunk behind the /website-policies route)
+    url: "https://www.fssai.gov.in/assets/WebsitePolicies-wJJXDQ9E.js"
+    quoted_terms: "may be reproduced free of charge in any format or media without requiring specific permission. This is subject to the material being reproduced accurately and not being used in a derogatory manner or in a misleading context. Where the material is being published or issued to others, the source must be prominently acknowledged."
+  reuse_status: permitted_with_attribution
+  reuse_notes: "Reproduction permitted in any format without specific permission, with accuracy and prominent acknowledgement; grant does not extend to material identified as third-party copyright. robots.txt only excludes search URLs. Covers www.fssai.gov.in - FoSCoS (separate host) is a separate entry."
+  permission_contact: ""
+  update_frequency: continuous
+  quality_limitations:
+    - "JavaScript-rendered site: adapter needs headless rendering or the route chunks"
+    - Regulations are amended by gazette notification - capture notification number/date with every fact
+    - Fees must be read with the latest amendment; verify against FoSCoS
+  candidate_adapter: fssai_site
+  recommended_ingestion: automated
+  evidence_urls:
+    - "https://www.fssai.gov.in/"
+    - "https://www.fssai.gov.in/robots.txt"
+    - "https://www.fssai.gov.in/assets/WebsitePolicies-wJJXDQ9E.js"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: fssai-foscos
+  name: FoSCoS - Food Safety Compliance System (licensing portal)
+  publisher: Food Safety and Standards Authority of India (FSSAI)
+  source_type: regulatory_portal
+  authority_level: primary_government
+  base_url: "https://foscos.fssai.gov.in/"
+  information_available: Online licence/registration applications; eligibility and fee information by kind of business; licensee search. Content is rendered client-side and was not read today.
+  geographic_coverage: national
+  access_method: portal_login
+  accessible: partial
+  accessibility_notes: HTTP 200 but single-page app shell only. A request for /robots.txt returns the same SPA HTML (no robots file).
+  api_available: unknown
+  api_notes: ""
+  requires_auth: true
+  robots_txt:
+    url: "https://foscos.fssai.gov.in/robots.txt"
+    status: not_found
+    summary: "Returns the application's HTML shell (HTTP 200, text/html) - no robots rules published."
+  licence:
+    name: No policy read on this host
+    url: "https://foscos.fssai.gov.in/"
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: No terms were readable without running the application. Do not assume the fssai.gov.in copyright policy covers this host. Licensee search results concern identifiable businesses and may be captcha-gated - do not automate. Capture fee/category facts manually with a dated screenshot.
+  permission_contact: ""
+  update_frequency: continuous
+  quality_limitations:
+    - Not inspected beyond shell
+    - Fee tables should be reconciled with the governing FSS (Licensing and Registration) Regulations
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://foscos.fssai.gov.in/"
+  checked_on: '2026-11-24'
+  confidence: partially_verified
+
+- slug: midc-maharashtra
+  name: MIDC - Maharashtra Industrial Development Corporation
+  publisher: Maharashtra Industrial Development Corporation (Government of Maharashtra undertaking)
+  source_type: government_dataset
+  authority_level: quasi_government
+  base_url: "https://midc.maharashtra.gov.in/"
+  information_available: "Industrial policies and incentives section (seen in site menu); expected to carry industrial-area listings, land rates/plot allotment information, circulars and tenders - those documents were not opened today. (midcindia.org redirects here.)"
+  geographic_coverage: "state:Maharashtra; industrial-area level"
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: "www.midcindia.org redirects to https://midc.maharashtra.gov.in/ (HTTP 200). One later request was reset (curl 35) - intermittent."
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://midc.maharashtra.gov.in/robots.txt"
+    status: fetched
+    summary: "User-agent: * ; Disallow: /wp-admin/ ; Disallow: /wp-includes/. Nothing else disallowed."
+  licence:
+    name: MIDC Disclaimer and Policies - Copyright Policy
+    url: "https://midc.maharashtra.gov.in/en/disclaimer-and-policies/"
+    quoted_terms: "Material featured on this website may be reproduced free of charge after taking proper permission by sending mail to us. However, the material has to be reproduced accurately and not to be used in a derogatory manner or in a misleading context."
+  reuse_status: permission_required
+  reuse_notes: "Reproduction is conditional on first obtaining permission by email; source must be acknowledged; third-party material excluded. robots.txt would allow crawling, but the licence does not allow reuse without permission, so no adapter until MIDC grants written permission."
+  permission_contact: "MIDC ('by sending mail to us' - no address given in the policy text; head office phone numbers are on the page)"
+  update_frequency: ad hoc; land rates revised periodically
+  quality_limitations:
+    - Land rates change by circular - always capture circular date
+    - "Rates are MIDC allotment rates, not open-market rents"
+  candidate_adapter: midc_mh
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://midc.maharashtra.gov.in/"
+    - "https://midc.maharashtra.gov.in/robots.txt"
+    - "https://midc.maharashtra.gov.in/en/disclaimer-and-policies/"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: state-idc-other
+  name: Other state industrial development corporations (generic placeholder)
+  publisher: "Various state undertakings (e.g. GIDC, KIADB, TIDCO/SIPCOT, RIICO, UPSIDA)"
+  source_type: government_dataset
+  authority_level: quasi_government
+  base_url: ""
+  information_available: "Industrial estate lists, land allotment rates, state incentive policies. None of these sites was visited today; listed only so that each is evaluated individually before use."
+  geographic_coverage: varies
+  access_method: manual_download
+  accessible: "no"
+  accessibility_notes: Not tested today.
+  api_available: unknown
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: ""
+    status: unreachable
+    summary: Not checked - each state site needs its own robots.txt check.
+  licence:
+    name: Not verified - varies by state
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "Do not generalise from one state to another: the two Maharashtra sites read today (MIDC, Industries Department) both require prior permission by email, which is stricter than the common Government of India wording. Evaluate each state body separately and add its own registry entry."
+  permission_contact: ""
+  update_frequency: varies
+  quality_limitations:
+    - Placeholder entry - no evidence collected
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: maharashtra-industries-dept
+  name: "Maharashtra Industries, Investment and Services Department"
+  publisher: "Industries, Investment and Services Department, Government of Maharashtra"
+  source_type: scheme_portal
+  authority_level: primary_government
+  base_url: "https://industry.maharashtra.gov.in/"
+  information_available: "State industrial policy and incentive schemes, CMEGP and MAITRI dashboards (linked), department notifications."
+  geographic_coverage: "state:Maharashtra"
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: "HTTP 200 (homepage, robots.txt, policy pages)."
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://industry.maharashtra.gov.in/robots.txt"
+    status: fetched
+    summary: "Drupal default: disallows /core/, /profiles/, /admin/, /comment/reply/, /filter/tips, /node/..., README files; public content paths not disallowed."
+  licence:
+    name: Copyright Statement
+    url: "https://industry.maharashtra.gov.in/en/industries-useful-link/copyright-statement"
+    quoted_terms: "Material featured on this website may be reproduced free of charge after taking proper permission by sending an e-Mail to us. However, the material has to be reproduced accurately and not to be used in a derogatory manner or in a misleading context."
+  reuse_status: permission_required
+  reuse_notes: Same permission-first wording as MIDC. Third-party material excluded. No adapter until written permission is on file.
+  permission_contact: "Department ('by sending an e-Mail to us' - address not given in the statement)"
+  update_frequency: ad hoc
+  quality_limitations:
+    - Incentive eligibility is policy-period specific (check policy validity dates)
+  candidate_adapter: mh_industries
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://industry.maharashtra.gov.in/"
+    - "https://industry.maharashtra.gov.in/robots.txt"
+    - "https://industry.maharashtra.gov.in/en/industries-useful-link/copyright-statement"
+    - "https://industry.maharashtra.gov.in/en/industries-useful-link/terms-use"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: maharashtra-maitri
+  name: MAITRI - Maharashtra single window (investor facilitation)
+  publisher: "Maharashtra Industry, Trade and Investment Facilitation Cell, Government of Maharashtra"
+  source_type: regulatory_portal
+  authority_level: primary_government
+  base_url: "https://maitri.mahaonline.gov.in/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): list of state approvals/NOCs by department with documents, fees and timelines; online single-window applications."
+  geographic_coverage: "state:Maharashtra"
+  access_method: portal_login
+  accessible: "no"
+  accessibility_notes: "maitri.mahaonline.gov.in and maitri.maharashtra.gov.in: curl exit 35 'Connection reset by peer' on every attempt (3+)."
+  api_available: unknown
+  api_notes: ""
+  requires_auth: true
+  robots_txt:
+    url: "https://maitri.mahaonline.gov.in/robots.txt"
+    status: unreachable
+    summary: Connection reset.
+  licence:
+    name: Not verified
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: No page could be read. Cross-check approvals against NSWS (Maharashtra) which was reachable.
+  permission_contact: ""
+  update_frequency: continuous (unverified)
+  quality_limitations:
+    - Not inspected today
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: icar-portal
+  name: ICAR - Indian Council of Agricultural Research
+  publisher: "Indian Council of Agricultural Research (DARE, Ministry of Agriculture and Farmers Welfare)"
+  source_type: academic_extension
+  authority_level: primary_government
+  base_url: "https://icar.org.in/"
+  information_available: "Publications catalogue, e-books, annual reports, technology/extension material, links to institutes and open-access journals. Technology cost sheets were not inspected today."
+  geographic_coverage: national
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://icar.org.in/robots.txt"
+    status: fetched
+    summary: "Drupal default: disallows /core/, /profiles/, /admin/, /search/, /user/*, /node/add/, /media/oembed, /index.php/*; content pages not disallowed."
+  licence:
+    name: "All rights reserved (the page titled 'Copyright Policy' contains only linking terms)"
+    url: "https://icar.org.in/en/copyright-policy"
+    quoted_terms: Copyrights © 2026 All Rights Reserved By ICAR
+  reuse_status: permission_required
+  reuse_notes: "The page titled Copyright Policy carries only hyperlinking text (linking to ICAR pages needs no prior permission; framing not permitted) and no reproduction grant; the Terms & Conditions page is a liability disclaimer; the footer reserves all rights. ICAR journals/e-books may carry their own licences (not checked). Seek permission for reuse beyond citation of facts."
+  permission_contact: "pddkma[at]icar[dot]org[dot]in (Directorate of Knowledge Management in Agriculture - contact shown in site footer; not stated to be a permissions desk)"
+  update_frequency: continuous
+  quality_limitations:
+    - Institute-level sites (hundreds) have their own terms
+    - "Technology economics are trial/field-station figures, not commercial operating data"
+  candidate_adapter: icar
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://icar.org.in/"
+    - "https://icar.org.in/robots.txt"
+    - "https://icar.org.in/en/copyright-policy"
+    - "https://icar.org.in/en/terms-conditions"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: kvk-portal
+  name: Krishi Vigyan Kendra (KVK) Knowledge Network portal
+  publisher: ICAR - Division of Agricultural Extension
+  source_type: academic_extension
+  authority_level: primary_government
+  base_url: "https://kvk.icar.gov.in/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): directory of 700+ KVKs by district (incl. Pune and Nanded district KVKs), training calendars, technology demonstrations and district agri-contingency information."
+  geographic_coverage: district-level
+  access_method: manual_download
+  accessible: "no"
+  accessibility_notes: "kvk.icar.gov.in: curl 'CONNECT tunnel failed, response 502' on every attempt; WebFetch: DNS failure (getaddrinfo ENOTFOUND). www.kvkportal.icar.gov.in also 502."
+  api_available: unknown
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://kvk.icar.gov.in/robots.txt"
+    status: unreachable
+    summary: 502 / DNS failure.
+  licence:
+    name: Not verified
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: No page read. Do not assume the icar.org.in terms apply.
+  permission_contact: ""
+  update_frequency: continuous (unverified)
+  quality_limitations:
+    - Not inspected today
+    - Individual KVKs are hosted by universities/NGOs with their own sites and terms
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: mpkv-rahuri
+  name: MPKV Rahuri - Mahatma Phule Krishi Vidyapeeth
+  publisher: "Mahatma Phule Krishi Vidyapeeth, Rahuri (Maharashtra state agricultural university)"
+  source_type: academic_extension
+  authority_level: academic
+  base_url: "https://mpkv.ac.in/"
+  information_available: "University extension publications, crop/processing technology recommendations, research station information for western Maharashtra (incl. Pune region). Specific cost-of-cultivation or processing documents not opened today."
+  geographic_coverage: "state:Maharashtra (western Maharashtra)"
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: mpkv.ac.in HTTP 200. www.mpkv.ac.in fails TLS hostname check (curl 60) - use the apex host. /robots.txt HTTP 404.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://mpkv.ac.in/robots.txt"
+    status: not_found
+    summary: HTTP 404 - no robots.txt.
+  licence:
+    name: Site disclaimer (non-commercial purpose)
+    url: "https://mpkv.ac.in/Home/PrivacePolicy"
+    quoted_terms: "The information is for noncommercial purpose such as teaching, research and extension."
+  reuse_status: permission_required
+  reuse_notes: "The disclaimer states site information is for non-commercial purposes; no reproduction grant. Our use is commercial, so written permission from the university is needed before reusing content. Linking is allowed without prior permission (framing is not)."
+  permission_contact: ""
+  update_frequency: ad hoc
+  quality_limitations:
+    - "Extension figures are recommendations/trial results, not market data"
+    - Much material is in Marathi
+  candidate_adapter: mpkv
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://mpkv.ac.in/"
+    - "https://mpkv.ac.in/Home/PrivacePolicy"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: vnmkv-parbhani
+  name: VNMKV Parbhani - Vasantrao Naik Marathwada Krishi Vidyapeeth
+  publisher: "Vasantrao Naik Marathwada Krishi Vidyapeeth, Parbhani (Maharashtra state agricultural university; jurisdiction includes Nanded)"
+  source_type: academic_extension
+  authority_level: academic
+  base_url: "https://www.vnmkv.ac.in/"
+  information_available: "University extension and research information for the Marathwada region incl. Nanded district; colleges, research stations and KVK links. Documents not opened today."
+  geographic_coverage: "state:Maharashtra (Marathwada incl. Nanded)"
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: "Homepage HTTP 200. The homepage 'Disclaimer' link (disclaimer_vnmkv.php) returns HTTP 404 'File not found.'"
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.vnmkv.ac.in/robots.txt"
+    status: fetched
+    summary: "Cloudflare-managed: 'User-agent: * / Content-Signal: search=yes,ai-train=no,use=reference / Allow: /'. Named AI-training crawlers (GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended, Bytespider, Amazonbot etc.) are Disallow: /. The file states content signals are express reservations of rights."
+  licence:
+    name: No policy page available (Disclaimer link broken); robots.txt content signals
+    url: "https://www.vnmkv.ac.in/robots.txt"
+    quoted_terms: "User-agent: * Content-Signal: search=yes,ai-train=no,use=reference Allow: /"
+  reuse_status: unclear
+  reuse_notes: "No copyright/terms text could be read (link 404). robots.txt allows general crawling but reserves rights against AI training and blocks AI-training crawlers by name; any PlanB crawler must not present as, or feed, model training. Without a reuse grant, treat document reuse as needing permission."
+  permission_contact: ""
+  update_frequency: ad hoc
+  quality_limitations:
+    - No licence text available
+    - Much material is in Marathi
+  candidate_adapter: vnmkv
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://www.vnmkv.ac.in/"
+    - "https://www.vnmkv.ac.in/robots.txt"
+    - "https://www.vnmkv.ac.in/disclaimer_vnmkv.php"
+  checked_on: '2026-11-24'
+  confidence: partially_verified
+
+- slug: nsdc
+  name: NSDC - National Skill Development Corporation
+  publisher: National Skill Development Corporation (PPP under Ministry of Skill Development and Entrepreneurship)
+  source_type: skills_training
+  authority_level: quasi_government
+  base_url: "https://www.nsdcindia.org/"
+  information_available: "Sector skill council information, job roles/qualification packs, skill-gap studies, training partner information."
+  geographic_coverage: national
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: "HTTP 200 (homepage, robots.txt, terms-of-use)."
+  api_available: unknown
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.nsdcindia.org/robots.txt"
+    status: fetched
+    summary: "User-agent: * / Allow: / ; sitemap declared."
+  licence:
+    name: Proprietary Terms of Use
+    url: "https://nsdcindia.org/terms-of-use"
+    quoted_terms: "Users are strictly prohibited from downloading, copying, reproducing, distributing, publishing, displaying, or transmitting any part of the Content available on the Platform, in any form, whether digital or physical, unless explicitly permitted"
+  reuse_status: prohibited
+  reuse_notes: "Terms grant only a personal, non-exclusive, revocable licence and state 'Any use of such information for commercial purposes is strictly prohibited', listing sale of content or derivative works as outside permitted use. robots.txt allowing crawling does not override this. Reference facts only via our own reading and citation, or obtain a written licence."
+  permission_contact: Grievance Officer named in clause 15(i) of the Terms of Use (details on that page)
+  update_frequency: continuous
+  quality_limitations:
+    - Skill-gap reports are dated studies
+    - "Training cost norms are scheme norms, not market prices"
+  candidate_adapter: ""
+  recommended_ingestion: do_not_ingest
+  evidence_urls:
+    - "https://www.nsdcindia.org/"
+    - "https://www.nsdcindia.org/robots.txt"
+    - "https://nsdcindia.org/terms-of-use"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: skill-india-digital-hub
+  name: Skill India Digital Hub (SIDH)
+  publisher: Ministry of Skill Development and Entrepreneurship / NSDC
+  source_type: skills_training
+  authority_level: primary_government
+  base_url: "https://www.skillindiadigital.gov.in/"
+  information_available: "Course and training-centre discovery, job roles, apprenticeships (expected; content is client-rendered and was not read today)."
+  geographic_coverage: national; centre-level
+  access_method: manual_download
+  accessible: partial
+  accessibility_notes: Homepage HTTP 200 on one attempt and connection reset on another; /robots.txt HTTP 200 on retry.
+  api_available: unknown
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.skillindiadigital.gov.in/robots.txt"
+    status: fetched
+    summary: "User-agent: * / Disallow: / - all crawling disallowed except named search engines (Googlebot, googlebot-image, googlebot-mobile, Bingbot, ...: Allow: /)."
+  licence:
+    name: Terms not read (client-rendered); robots.txt disallows all generic crawlers
+    url: "https://www.skillindiadigital.gov.in/robots.txt"
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "robots.txt disallows all non-search-engine agents, so automated collection is ruled out regardless of licence. Terms of use were not readable without running the app."
+  permission_contact: ""
+  update_frequency: continuous
+  quality_limitations:
+    - Terms not read
+    - Course fees/durations change frequently
+  candidate_adapter: ""
+  recommended_ingestion: do_not_ingest
+  evidence_urls:
+    - "https://www.skillindiadigital.gov.in/"
+    - "https://www.skillindiadigital.gov.in/robots.txt"
+  checked_on: '2026-11-24'
+  confidence: partially_verified
+
+- slug: niesbud
+  name: NIESBUD - National Institute for Entrepreneurship and Small Business Development
+  publisher: "NIESBUD, Ministry of Skill Development and Entrepreneurship"
+  source_type: skills_training
+  authority_level: primary_government
+  base_url: "https://niesbud.nic.in/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): entrepreneurship development programme (EDP) calendars, course fees, training material."
+  geographic_coverage: national
+  access_method: manual_download
+  accessible: "no"
+  accessibility_notes: "niesbud.nic.in and www.niesbud.nic.in: curl exit 60 'unable to get local issuer certificate'. niesbud.gov.in: 'CONNECT tunnel failed, response 502'."
+  api_available: unknown
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://niesbud.nic.in/robots.txt"
+    status: unreachable
+    summary: TLS chain error / 502.
+  licence:
+    name: Not verified
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: No page read.
+  permission_contact: ""
+  update_frequency: unknown
+  quality_limitations:
+    - Not inspected today
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: ni-msme
+  name: "ni-msme - National Institute for Micro, Small and Medium Enterprises"
+  publisher: "ni-msme, Hyderabad (organisation of the Ministry of MSME)"
+  source_type: skills_training
+  authority_level: primary_government
+  base_url: "https://www.nimsme.gov.in/"
+  information_available: "Training programmes and fees, journals, annual reports, empanelled agencies."
+  geographic_coverage: national
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200. /robots.txt HTTP 404.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.nimsme.gov.in/robots.txt"
+    status: not_found
+    summary: HTTP 404 - no robots.txt.
+  licence:
+    name: Proprietary Terms of Use
+    url: "https://www.nimsme.gov.in/page/terms-of-use"
+    quoted_terms: "You may not copy, reproduce, modify, amend, lease, loan, sell and/or create derivative works from, upload, transmit, and/or distribute the Intellectual Property of the Web Site in any way without NI-MSME's prior written permission or that of an appropriate third party."
+  reuse_status: permission_required
+  reuse_notes: "Despite being a government institute, the terms are commercial-style: no copying, reproduction, republication or redistribution of content or information without prior written consent. Programme fees can be noted as facts with citation; documents must not be stored or republished without permission."
+  permission_contact: "NI-MSME, Yousufguda, Hyderabad 500 045 (address in site footer; no permissions email stated)"
+  update_frequency: ad hoc
+  quality_limitations:
+    - Programme calendars change each financial year
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://www.nimsme.gov.in/"
+    - "https://www.nimsme.gov.in/page/terms-of-use"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: rseti
+  name: RSETIs - Rural Self Employment Training Institutes
+  publisher: Ministry of Rural Development / National Academy of RUDSETI (NACER) and sponsor banks
+  source_type: skills_training
+  authority_level: quasi_government
+  base_url: "https://www.nacer.in/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): district-wise RSETI directory, approved course list (duration, trade), annual action plans."
+  geographic_coverage: district-level
+  access_method: manual_download
+  accessible: "no"
+  accessibility_notes: "www.nacer.in: connection reset (curl 35). www.nirdpr.org.in: curl 60 TLS chain error. nrlm.gov.in: TLS hostname mismatch (curl 60)."
+  api_available: unknown
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.nacer.in/robots.txt"
+    status: unreachable
+    summary: Connection reset.
+  licence:
+    name: Not verified
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: No page read; the correct canonical host for RSETI data was not confirmed today.
+  permission_contact: ""
+  update_frequency: unknown
+  quality_limitations:
+    - Not inspected today
+    - Canonical URL unconfirmed
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: mced-maharashtra
+  name: MCED - Maharashtra Centre for Entrepreneurship Development
+  publisher: Maharashtra Centre for Entrepreneurship Development (Government of Maharashtra promoted)
+  source_type: skills_training
+  authority_level: quasi_government
+  base_url: "https://www.mced.co.in/"
+  information_available: Entrepreneurship training programmes in Maharashtra (a Training module with refund/cancellation policies is linked from the homepage); course fee pages were not opened today.
+  geographic_coverage: "state:Maharashtra; district offices"
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200. /robots.txt HTTP 404.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.mced.co.in/robots.txt"
+    status: not_found
+    summary: HTTP 404 - no robots.txt.
+  licence:
+    name: No copyright/terms page found (only refund and cancellation policies linked)
+    url: "https://www.mced.co.in/"
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: Homepage HTML contains no copyright notice or terms link (only training Refund/Cancellation policy links). No grant means permission should be sought before reuse beyond citing facts such as course fee and duration.
+  permission_contact: ""
+  update_frequency: ad hoc
+  quality_limitations:
+    - No licence text
+    - Mostly Marathi content
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://www.mced.co.in/"
+  checked_on: '2026-11-24'
+  confidence: partially_verified
+
+- slug: aifpa
+  name: "AIFPA - All India Food Processors' Association"
+  publisher: "All India Food Processors' Association"
+  source_type: industry_association
+  authority_level: industry_association
+  base_url: "https://aifpa.net/"
+  information_available: "Regulatory circular reposts (FSSAI/DGFT notifications), membership information, member list, publications (journal). Member-only material not accessed."
+  geographic_coverage: national
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://aifpa.net/robots.txt"
+    status: fetched
+    summary: "User-agent: * ; Disallow: /wp-admin/ (Allow: /wp-admin/admin-ajax.php); sitemaps declared."
+  licence:
+    name: All rights reserved (footer notice; no terms page found)
+    url: "https://aifpa.net/"
+    quoted_terms: "Copyright © 2026. All India Food Processors' Association | All Rights Reserved"
+  reuse_status: permission_required
+  reuse_notes: All rights reserved and no reuse terms. Reposted government notifications should be sourced from the issuing authority instead. Association publications/journal are membership or paid items - obtain a licence before reuse.
+  permission_contact: ""
+  update_frequency: ad hoc
+  quality_limitations:
+    - Secondary reposts of government circulars - cite the original
+    - Member data is not for redistribution
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://aifpa.net/"
+    - "https://aifpa.net/robots.txt"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: nrai
+  name: NRAI - National Restaurant Association of India (incl. India Food Services Report)
+  publisher: National Restaurant Association of India
+  source_type: industry_association
+  authority_level: industry_association
+  base_url: "https://nrai.org/"
+  information_available: "India Food Services Report (ordered via a 'Book Your Copy' form with Member / Non-Member / International Buyer categories), 'Course Beyond Metros' report, Covid impact report (form-gated), circulars and notices, member directory."
+  geographic_coverage: national; city-level sections in reports
+  access_method: paid_subscription
+  accessible: "yes"
+  accessibility_notes: HTTP 200. /robots.txt HTTP 404.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: true
+  robots_txt:
+    url: "https://nrai.org/robots.txt"
+    status: not_found
+    summary: HTTP 404 - no robots.txt.
+  licence:
+    name: Proprietary (association copyright; flagship report sold/ordered by form)
+    url: "https://nrai.org/BookYourCopy.aspx"
+    quoted_terms: Copyright © 2024 National Restaurant Association of India(NRAI)
+  reuse_status: permission_required
+  reuse_notes: "The flagship report is obtained through an order form (price not displayed on the page read) and is a proprietary paid publication; no reuse terms are published on the site. Buying a copy gives a reader's licence, not a right to load its tables into a commercial database - negotiate a data licence or cite sparingly with permission."
+  permission_contact: "info@nrai.org (general contact in site footer)"
+  update_frequency: report editions periodic (unverified cadence)
+  quality_limitations:
+    - Paid report; price and licence terms not public
+    - "Survey-based estimates, organised-sector weighted"
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://nrai.org/"
+    - "https://nrai.org/BookYourCopy.aspx"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: gem
+  name: GeM - Government e Marketplace
+  publisher: "GeM SPV, Department of Commerce, Government of India"
+  source_type: procurement_portal
+  authority_level: primary_government
+  base_url: "https://gem.gov.in/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): catalogue prices of products/services offered to government buyers, bid documents, seller listings; usable as a price reference for machinery/equipment."
+  geographic_coverage: national
+  access_method: portal_login
+  accessible: "no"
+  accessibility_notes: "gem.gov.in, www.gem.gov.in and mkp.gem.gov.in: curl exit 35 'Connection reset by peer' on 3+ attempts; WebFetch of https://gem.gov.in/termsCondition: HTTP 503."
+  api_available: unknown
+  api_notes: ""
+  requires_auth: true
+  robots_txt:
+    url: "https://gem.gov.in/robots.txt"
+    status: unreachable
+    summary: Connection reset.
+  licence:
+    name: Not verified
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "Terms could not be read. Until they are, do not collect: marketplace prices are seller-submitted commercial data and bid search is commonly captcha-gated (not tested)."
+  permission_contact: ""
+  update_frequency: continuous (unverified)
+  quality_limitations:
+    - Not inspected today
+    - Government-buyer prices may differ from open-market quotes
+  candidate_adapter: ""
+  recommended_ingestion: do_not_ingest
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: cppp-eprocure
+  name: CPPP - Central Public Procurement Portal
+  publisher: "National Informatics Centre / Department of Expenditure, Ministry of Finance"
+  source_type: procurement_portal
+  authority_level: primary_government
+  base_url: "https://eprocure.gov.in/eprocure/app"
+  information_available: "Active and archived central government tenders, corrigenda, award information; links to state/PSU procurement portals."
+  geographic_coverage: national
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: "eprocure.gov.in HTTP 200 (root meta-refreshes to /cppp, a script-rendered 'GeM-CPPP' page; /eprocure/app serves HTML directly). /robots.txt HTTP 404."
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://eprocure.gov.in/robots.txt"
+    status: not_found
+    summary: HTTP 404 - no robots.txt.
+  licence:
+    name: Portal policies - Copyright Policy
+    url: "https://eprocure.gov.in/eprocure/app?page=Disclaimer&service=page"
+    quoted_terms: "Material featured on this Portal maybe reproduced free of charge after taking proper permission from the respective Organisation / Department. However, the material has to be reproduced accurately and not to be used in a derogatory manner or in a misleading context"
+  reuse_status: permission_required
+  reuse_notes: "Content is 'primarily owned by the respective Government / Organisation/Department' and reproduction needs that body's permission - i.e. per-tender permission, which is impractical at scale. Tender searches typically involve captcha (not tested, never bypass). Use only for manual spot checks of equipment price benchmarks."
+  permission_contact: The respective tendering organisation/department
+  update_frequency: continuous
+  quality_limitations:
+    - "Tender values are estimates/bids, not market list prices"
+    - Permission is per publishing department
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://eprocure.gov.in/"
+    - "https://eprocure.gov.in/eprocure/app"
+    - "https://eprocure.gov.in/eprocure/app?page=Disclaimer&service=page"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: indiamart
+  name: IndiaMART (machinery listings and supplier catalogues)
+  publisher: IndiaMART InterMESH Ltd
+  source_type: b2b_marketplace
+  authority_level: commercial
+  base_url: "https://www.indiamart.com/"
+  information_available: "Supplier listings for machinery/equipment with indicative prices, specifications, supplier location; request-for-quote flows."
+  geographic_coverage: national; supplier city-level
+  access_method: manual_download
+  accessible: partial
+  accessibility_notes: Homepage and dir.indiamart.com returned HTTP 429 (rate-limited) to curl; /robots.txt and /terms-of-use.html returned HTTP 200.
+  api_available: "no"
+  api_notes: No public data API offered on the pages read.
+  requires_auth: false
+  robots_txt:
+    url: "https://www.indiamart.com/robots.txt"
+    status: fetched
+    summary: "User-agent: * disallows /pd/, /stats/, /cgi/, /temp/, /company1/, /proddetail1*, /proddetail2*, /mdc/ and more; about 48 named crawlers (incl. AI/data bots such as meta-externalagent, omgili) are 'Disallow: /'."
+  licence:
+    name: Proprietary Terms of Use
+    url: "https://www.indiamart.com/terms-of-use.html"
+    quoted_terms: "Systematic retrieval of IIL Content to create or compile, directly or indirectly, a collection, compilation, database or directory (whether through robots, spiders, automatic devices or manual processes) without written permission from IIL is prohibited."
+  reuse_status: prohibited
+  reuse_notes: "The prohibition covers exactly our use case - compiling a database - and expressly includes manual processes, so neither scraping nor systematic manual copying of listings is allowed. Permitted route: use the site as a directory to contact suppliers, then record quotations they give us with consent (see supplier-quotations-consented)."
+  permission_contact: IndiaMART InterMESH Ltd (written permission required per ToU; no permissions address captured)
+  update_frequency: continuous
+  quality_limitations:
+    - "Listed prices are indicative/negotiable and often 'ask for price'"
+    - Duplicate and reseller listings common
+  candidate_adapter: ""
+  recommended_ingestion: do_not_ingest
+  evidence_urls:
+    - "https://www.indiamart.com/robots.txt"
+    - "https://www.indiamart.com/terms-of-use.html"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: tradeindia
+  name: TradeIndia (machinery listings and supplier catalogues)
+  publisher: Infocom Network Pvt Ltd (tradeindia.com)
+  source_type: b2b_marketplace
+  authority_level: commercial
+  base_url: "https://www.tradeindia.com/"
+  information_available: Supplier and product listings with indicative prices and specifications; trade leads; tenders service.
+  geographic_coverage: national; supplier city-level
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: "HTTP 200 (homepage, robots.txt, terms page)."
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.tradeindia.com/robots.txt"
+    status: fetched
+    summary: "User-agent: * disallows /search/, /Exporters_Suppliers/, /Buyer/, /TradeLeads/..., /credit_reports/, /login/, /my_tradeindia/, /registration/, /advance_search.html and others - i.e. search and supplier-directory paths are off limits."
+  licence:
+    name: "Proprietary Terms & Conditions (User Agreement)"
+    url: "https://www.tradeindia.com/about-us/terms/terms_01.html"
+    quoted_terms: intellectual property rights in relation to any of the Services of the Company shall become and remain the sole and exclusive property of the Company and the User shall have no claim to the same.
+  reuse_status: permission_required
+  reuse_notes: "No explicit anti-scraping sentence was found in the terms page read (searched for scrape/spider/robot/crawl/harvest), but all IP in the services is reserved to the company, no reuse licence is granted, and robots.txt disallows the search and supplier-directory paths an adapter would need. Treat like IndiaMART operationally: no ingestion; contact suppliers and record consented quotations."
+  permission_contact: "grievances@tradeindia.com / helpdesk@tradeindia.com (grievance contacts shown on the terms page; not a licensing desk)"
+  update_frequency: continuous
+  quality_limitations:
+    - Indicative prices only
+    - "Terms page is long (63k characters); only keyword-searched, not read end to end"
+  candidate_adapter: ""
+  recommended_ingestion: do_not_ingest
+  evidence_urls:
+    - "https://www.tradeindia.com/"
+    - "https://www.tradeindia.com/robots.txt"
+    - "https://www.tradeindia.com/about-us/terms/terms_01.html"
+  checked_on: '2026-11-24'
+  confidence: partially_verified
+
+- slug: manufacturer-catalogues
+  name: Machinery manufacturer catalogues and price lists (generic)
+  publisher: Individual OEMs and dealers
+  source_type: manufacturer_catalogue
+  authority_level: commercial
+  base_url: ""
+  information_available: "Model specifications (capacity, power load, footprint), brochures and sometimes list prices published on manufacturers' own sites or sent as PDFs. No individual manufacturer site was reviewed today."
+  geographic_coverage: varies
+  access_method: email_request
+  accessible: partial
+  accessibility_notes: Not tested - each manufacturer site must be checked individually (robots.txt + terms) before any collection.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: ""
+    status: unreachable
+    summary: Not checked - per-site.
+  licence:
+    name: Varies; default is manufacturer copyright in brochures and images
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "Brochures, photographs and drawings are copyright works of the manufacturer; technical facts (rated capacity, kW) can be recorded with citation. Preferred route is to request the catalogue/price list directly and get written consent to store and quote it, logged per supplier."
+  permission_contact: "The manufacturer's sales contact (per supplier)"
+  update_frequency: varies
+  quality_limitations:
+    - Placeholder entry - no site reviewed
+    - List prices exclude GST/freight/installation unless stated
+    - Specifications are vendor claims
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: supplier-quotations-consented
+  name: Consented supplier quotations (PlanB primary research)
+  publisher: PlanB (collected from machinery/raw-material suppliers)
+  source_type: primary_research
+  authority_level: primary_research
+  base_url: ""
+  information_available: "Dated written quotations for specific machines/inputs: model, capacity, ex-works price, GST, freight, installation, warranty, lead time, validity, supplier location."
+  geographic_coverage: city-level
+  access_method: primary_collection
+  accessible: "yes"
+  accessibility_notes: n/a - collected directly by PlanB.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: ""
+    status: not_found
+    summary: n/a - not a website.
+  licence:
+    name: "n/a (own primary data, subject to supplier consent terms)"
+    url: ""
+    quoted_terms: ""
+  reuse_status: permitted
+  reuse_notes: "Reusable to the extent the supplier consents. Before recording: tell the supplier the quotation will be stored and used (anonymised or attributed, as agreed) in a commercial database; keep the consent record with the quote; honour any 'confidential'/'not for circulation' marking. Contact names/phones are personal data (DPDP Act 2023) - store only with consent and a stated purpose. This is PlanB's internal consent protocol, not a third-party licence."
+  permission_contact: PlanB research lead (internal)
+  update_frequency: continuous (each quote has a validity date)
+  quality_limitations:
+    - Quotes are point-in-time and negotiable
+    - Small samples per machine type
+    - Supplier may quote differently to a researcher than to a buyer
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: knight-frank-india
+  name: Knight Frank India research reports
+  publisher: Knight Frank (India) Pvt Ltd
+  source_type: commercial_report
+  authority_level: commercial
+  base_url: "https://www.knightfrank.co.in/"
+  information_available: Office/retail/residential market reports (India Real Estate half-yearly etc.) with city and micro-market rents and vacancy; property listings.
+  geographic_coverage: city-level (major metros incl. Pune)
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: "HTTP 200 (homepage, robots.txt, terms)."
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.knightfrank.co.in/robots.txt"
+    status: fetched
+    summary: "User-agent: * disallows query-parameter URLs (?curr, ?order, ?sort, ?type, ?query=, ...) and some sections; 7 named bots (incl. CCBot, SemrushBot, awsbot, rogerbot) are Disallow: /."
+  licence:
+    name: Proprietary Terms and Conditions
+    url: "https://www.knightfrank.co.in/legals/terms-and-conditions"
+    quoted_terms: "You must not engage in spamming, flooding, harvesting of e-mail addresses or other personal information, spidering, screen scraping, database scraping, or any other activity with the purpose of obtaining lists of users or any other information, including specifically, property listings"
+  reuse_status: prohibited
+  reuse_notes: Scraping/spidering for any information is expressly prohibited. Report content is proprietary; quoting a headline figure with attribution may be tolerated in practice but is not licensed by the page read - obtain permission for any systematic use. Coverage rarely reaches tier-3 cities such as Nanded.
+  permission_contact: ""
+  update_frequency: half-yearly / quarterly reports
+  quality_limitations:
+    - "Grade-A, metro-focused: not representative of small-shop rents"
+    - Micro-market definitions differ between consultancies
+  candidate_adapter: ""
+  recommended_ingestion: do_not_ingest
+  evidence_urls:
+    - "https://www.knightfrank.co.in/"
+    - "https://www.knightfrank.co.in/robots.txt"
+    - "https://www.knightfrank.co.in/legals/terms-and-conditions"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: jll-india
+  name: JLL India research reports
+  publisher: Jones Lang LaSalle
+  source_type: commercial_report
+  authority_level: commercial
+  base_url: "https://www.jll.com/en-in/"
+  information_available: "India office, retail, logistics market research and city reports."
+  geographic_coverage: city-level (major metros)
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: "www.jll.co.in redirects to https://www.jll.com/en-in/ (HTTP 200)."
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.jll.com/robots.txt"
+    status: fetched
+    summary: "User-agent: * disallows */content-search, /content/dam/jllcom/ (except research-report folders under /en/us/ and /en/global/ which are Allow), /content/dam/legacy/, and all URLs with query strings (/*?)."
+  licence:
+    name: Proprietary Terms of Use
+    url: "https://www.jll.com/en-in/terms-of-use"
+    quoted_terms: "you may not: send automated queries of any kind to the Site without the express, advance, written permission of Jones Lang LaSalle"
+  reuse_status: prohibited
+  reuse_notes: Automated queries of any kind are prohibited without advance written permission. Reports are proprietary. Manual reading and attributed citation of a figure only; no storage of reports in the database without a licence.
+  permission_contact: ""
+  update_frequency: quarterly reports
+  quality_limitations:
+    - "Grade-A, metro-focused"
+    - The India (en-in) document folder is not in the robots Allow list
+  candidate_adapter: ""
+  recommended_ingestion: do_not_ingest
+  evidence_urls:
+    - "https://www.jll.com/en-in/"
+    - "https://www.jll.com/robots.txt"
+    - "https://www.jll.com/en-in/terms-of-use"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: cbre-india
+  name: CBRE India research reports
+  publisher: CBRE South Asia Pvt Ltd
+  source_type: commercial_report
+  authority_level: commercial
+  base_url: "https://www.cbre.co.in/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): India market monitor / city reports on office, retail and industrial rents."
+  geographic_coverage: city-level (major metros)
+  access_method: manual_download
+  accessible: "no"
+  accessibility_notes: "www.cbre.co.in: HTTP 403 to curl for homepage and /robots.txt; WebFetch of the terms page also HTTP 403 (bot protection). Not bypassed."
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.cbre.co.in/robots.txt"
+    status: unreachable
+    summary: HTTP 403.
+  licence:
+    name: Not verified (assume proprietary)
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "Terms not readable. The site actively blocks automated clients, which is itself a signal not to automate. Assume proprietary, all rights reserved, pending a manual read."
+  permission_contact: ""
+  update_frequency: quarterly (unverified)
+  quality_limitations:
+    - Not inspected today
+  candidate_adapter: ""
+  recommended_ingestion: do_not_ingest
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: anarock
+  name: ANAROCK research reports
+  publisher: Anarock Property Consultants Limited
+  source_type: commercial_report
+  authority_level: commercial
+  base_url: "https://www.anarock.com/"
+  information_available: "Residential/retail/commercial market research and media releases (city-level supply, absorption, price trends)."
+  geographic_coverage: city-level (top cities)
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: "HTTP 200 (homepage, robots.txt, terms-of-use)."
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.anarock.com/robots.txt"
+    status: fetched
+    summary: "User-agent: * / Allow: / ; sitemap declared."
+  licence:
+    name: Proprietary Terms of Use
+    url: "https://www.anarock.com/terms-of-use"
+    quoted_terms: "You may download the contents from this Site exclusively for purpose of non-commercial and personal use only, provided the copyright, trademark or other proprietary notices remain unchanged, un-altered and are visible at all times to the readers."
+  reuse_status: permission_required
+  reuse_notes: "Downloads are for non-commercial personal use only; the terms add that users will not copy, display, distribute or sell materials 'without the prior written permission of Anarock Property Consultants Limited'. Permissive robots.txt does not change that. Needs a written licence for commercial database use."
+  permission_contact: Anarock Property Consultants Limited (written permission; no address captured)
+  update_frequency: quarterly / ad hoc
+  quality_limitations:
+    - Top-7-city focus
+    - Residential-heavy
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://www.anarock.com/"
+    - "https://www.anarock.com/robots.txt"
+    - "https://www.anarock.com/terms-of-use"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: 99acres
+  name: 99acres commercial property listings
+  publisher: Info Edge (India) Ltd
+  source_type: property_listing
+  authority_level: commercial
+  base_url: "https://www.99acres.com/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): shop/office/warehouse rental and sale listings with asking rents by locality."
+  geographic_coverage: city / locality-level
+  access_method: manual_download
+  accessible: "no"
+  accessibility_notes: "www.99acres.com: HTTP 403 'Access Denied' (Akamai) to curl for homepage, /robots.txt and terms page; WebFetch also HTTP 403. Not bypassed."
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.99acres.com/robots.txt"
+    status: unreachable
+    summary: HTTP 403 Access Denied.
+  licence:
+    name: Not verified (assume proprietary)
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "Terms could not be read; a web search returned only third-party scraper vendors, not the ToS. The site blocks automated clients. Default to no collection; for rent evidence use consented broker/owner quotes or manual, non-systematic lookups recorded as our own observation."
+  permission_contact: ""
+  update_frequency: continuous
+  quality_limitations:
+    - Not inspected today
+    - "Asking rents, not transacted rents; duplicate/stale listings"
+  candidate_adapter: ""
+  recommended_ingestion: do_not_ingest
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: magicbricks
+  name: MagicBricks commercial property listings
+  publisher: Magicbricks Realty Services Ltd (Times Group)
+  source_type: property_listing
+  authority_level: commercial
+  base_url: "https://www.magicbricks.com/"
+  information_available: Shop/office/commercial rental and sale listings with asking rents by locality; locality price trends.
+  geographic_coverage: city / locality-level
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: "HTTP 200 (homepage, robots.txt, terms page on property.magicbricks.com)."
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.magicbricks.com/robots.txt"
+    status: fetched
+    summary: "User-agent: * disallows /trapscript/, /maintenance/, /admin/ (a path named 'trapscript' suggests bot traps); some named bots Disallow: /; a few named AI agents are Allow: /."
+  licence:
+    name: "Proprietary Terms & Conditions"
+    url: "https://property.magicbricks.com/terms/terms.html"
+    quoted_terms: "using bots, scrapers, or similar tools without permission is strictly prohibited. User shall not print, download, delete, amend, or misuse data posted by others, nor shall they use third-party data without consent except for lawful transactions."
+  reuse_status: prohibited
+  reuse_notes: Bots/scrapers are prohibited without permission and users may not download or use data posted by others. robots.txt permissiveness does not override the ToS. No ingestion.
+  permission_contact: ""
+  update_frequency: continuous
+  quality_limitations:
+    - "Asking rents, not transacted rents"
+    - Duplicate/stale listings; broker-posted
+  candidate_adapter: ""
+  recommended_ingestion: do_not_ingest
+  evidence_urls:
+    - "https://www.magicbricks.com/"
+    - "https://www.magicbricks.com/robots.txt"
+    - "https://property.magicbricks.com/terms/terms.html"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: maharashtra-igr-asr
+  name: Maharashtra IGR Annual Statement of Rates (Ready Reckoner / e-ASR)
+  publisher: "Department of Registration and Stamps (Inspector General of Registration), Government of Maharashtra"
+  source_type: government_dataset
+  authority_level: primary_government
+  base_url: "https://igrmaharashtra.gov.in/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): Annual Statement of Rates (ready-reckoner values per sq m by zone/survey number for land, residential, office, shop, industrial), stamp duty and registration fee rules."
+  geographic_coverage: "state:Maharashtra; zone/sub-zone level within each taluka/city"
+  access_method: manual_download
+  accessible: "no"
+  accessibility_notes: "igrmaharashtra.gov.in: curl exit 35 'Connection reset by peer' on 3+ attempts; WebFetch HTTP 503."
+  api_available: unknown
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://igrmaharashtra.gov.in/robots.txt"
+    status: unreachable
+    summary: Connection reset.
+  licence:
+    name: Not verified
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "No policy read. ASR lookups are (from prior knowledge, unverified) form/captcha driven - never automate. Capture values manually with year, zone and screenshot."
+  permission_contact: ""
+  update_frequency: annual (rates normally effective 1 April; unverified for the current year)
+  quality_limitations:
+    - Not inspected today
+    - "ASR is a stamp-duty floor value, not a market rent or price"
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: franchise-india-portal
+  name: Franchise India portal (franchise opportunity listings)
+  publisher: Franchise India Holdings Ltd
+  source_type: franchise_disclosure
+  authority_level: commercial
+  base_url: "https://www.franchiseindia.com/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): franchisor-submitted opportunity listings (investment range, area required, franchise fee, royalty, claimed payback)."
+  geographic_coverage: national
+  access_method: manual_download
+  accessible: "no"
+  accessibility_notes: "www.franchiseindia.com: HTTP 403 with a Cloudflare 'Just a moment...' challenge for homepage, /robots.txt and /terms; WebFetch also 403. The challenge was not bypassed."
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.franchiseindia.com/robots.txt"
+    status: unreachable
+    summary: HTTP 403 (challenge page).
+  licence:
+    name: Not verified (assume proprietary)
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "Terms unread; the site uses an active bot challenge, so automated access is clearly unwelcome. Listing figures are marketing claims by franchisors. Default: no ingestion."
+  permission_contact: ""
+  update_frequency: continuous
+  quality_limitations:
+    - Not inspected today
+    - "Self-reported, unaudited investment and return claims"
+  candidate_adapter: ""
+  recommended_ingestion: do_not_ingest
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: franchisor-disclosures
+  name: Franchisor websites and franchise information kits (generic)
+  publisher: Individual franchisors
+  source_type: franchise_disclosure
+  authority_level: commercial
+  base_url: ""
+  information_available: "Franchise fee, royalty, capex range, store format/area, territory terms and unit-economics claims as published on franchisor sites or supplied in franchise kits/agreements on request. No franchisor site was reviewed today."
+  geographic_coverage: varies
+  access_method: email_request
+  accessible: partial
+  accessibility_notes: Not tested - per franchisor.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: ""
+    status: unreachable
+    summary: Not checked - per-site.
+  licence:
+    name: "Varies; franchisor copyright, kits often shared under confidentiality"
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "Background (general legal knowledge, not from a page read today): India has no franchise-specific statute and no mandated Franchise Disclosure Document comparable to the US FDD; disclosure is contractual, so there is no public filing to rely on. Franchise kits are frequently marked confidential or sent under NDA - do not ingest those without written consent. Publicly advertised fee/royalty figures can be recorded as attributed claims."
+  permission_contact: "The franchisor's franchise-development contact (per brand)"
+  update_frequency: varies
+  quality_limitations:
+    - Placeholder entry - no site reviewed
+    - Unaudited marketing claims; survivorship bias
+    - No statutory disclosure standard
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: owner-interviews-consented
+  name: Consented business-owner interviews (PlanB primary research)
+  publisher: PlanB
+  source_type: primary_research
+  authority_level: primary_research
+  base_url: ""
+  information_available: "Operating data from owners: rent, staffing and wages, utilities, input costs, sales range, seasonality, licences actually obtained, setup cost and time."
+  geographic_coverage: "city / locality-level (Pune, Nanded first)"
+  access_method: primary_collection
+  accessible: "yes"
+  accessibility_notes: n/a - collected directly by PlanB.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: ""
+    status: not_found
+    summary: n/a - not a website.
+  licence:
+    name: "n/a (own primary data, subject to interview consent terms)"
+    url: ""
+    quoted_terms: ""
+  reuse_status: permitted
+  reuse_notes: "PlanB owns its notes/recordings; reuse is bounded by what each interviewee consented to. Use a written or recorded consent covering purpose, commercial use, anonymisation level and withdrawal; store identifiers separately. Owner details are personal data under the DPDP Act 2023 - collect the minimum and publish only aggregated or anonymised figures unless attribution is agreed. Internal protocol, not a third-party licence."
+  permission_contact: PlanB research lead (internal)
+  update_frequency: continuous
+  quality_limitations:
+    - "Self-reported, unaudited; recall and under-reporting bias (especially revenue)"
+    - "Small, non-random samples"
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: census-india
+  name: "Census of India (census tables, District Census Handbooks, digital library)"
+  publisher: "Office of the Registrar General and Census Commissioner, India (Ministry of Home Affairs)"
+  source_type: statistical_agency
+  authority_level: primary_government
+  base_url: "https://censusindia.gov.in/census.website/"
+  information_available: "Population Finder, Census Tables (2011, 2001, 1991), District Census Handbooks, recast PCA data 1971-2011, a NADA-based Digital Library (/nada/), gazette notifications."
+  geographic_coverage: national down to village/ward level
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: censusindia.gov.in HTTP 200 (redirects to /census.website/). www.censusindia.gov.in homepage reset once. /robots.txt HTTP 404.
+  api_available: unknown
+  api_notes: "The digital library runs NADA software, which normally exposes a catalogue API; not tested today."
+  requires_auth: false
+  robots_txt:
+    url: "https://censusindia.gov.in/robots.txt"
+    status: not_found
+    summary: HTTP 404 - no robots.txt.
+  licence:
+    name: ORGI Website Policy - Copyright policy
+    url: "https://censusindia.gov.in/census.website/en/node/286"
+    quoted_terms: "The material displayed on this portal may be reproduced free of charge after taking proper permission by sending a mail to us. However, the material must be reproduced accurately and must not be used in a derogatory manner or in a misleading context."
+  reuse_status: permission_required
+  reuse_notes: "Surprise: unlike the common GoI wording, the Census site makes reproduction conditional on prior permission by email, with source acknowledgement. Census tables that are also published on data.gov.in under GODL can be taken from there once that licence is verified per dataset; otherwise request ORGI permission."
+  permission_contact: "ORGI ('by sending a mail to us' - address not given in the policy text)"
+  update_frequency: decennial (latest full tables are Census 2011)
+  quality_limitations:
+    - Latest complete data is 2011
+    - Administrative boundaries have changed since 2011 - map to LGD codes
+  candidate_adapter: census_india
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://censusindia.gov.in/census.website/"
+    - "https://censusindia.gov.in/census.website/en"
+    - "https://censusindia.gov.in/census.website/en/node/286"
+    - "https://censusindia.gov.in/census.website/en/node/288"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: mospi
+  name: "MoSPI website (NIC-2008 classification, survey reports, publications)"
+  publisher: "Ministry of Statistics and Programme Implementation (National Statistics Office), Government of India"
+  source_type: statistical_agency
+  authority_level: primary_government
+  base_url: "https://www.mospi.gov.in/"
+  information_available: "Official statistical publications and reports (ASUSE, PLFS, ASI, NAS, CPI), classifications such as NIC-2008, acts and policies. Specific classification files were not opened today."
+  geographic_coverage: national; state-level tables
+  access_method: http_download
+  accessible: "yes"
+  accessibility_notes: "HTTP 200. Client-rendered app; page text is served by JSON endpoints under https://www.mospi.gov.in/api/ (the copyright policy was read from the endpoint the /CopyrightPolicy route calls)."
+  api_available: unknown
+  api_notes: "The site's own content endpoints under /api/ are public but undocumented. For data, prefer eSankhyiki (separate entry)."
+  requires_auth: false
+  robots_txt:
+    url: "https://www.mospi.gov.in/robots.txt"
+    status: not_found
+    summary: "The URL returns the application's HTML shell (HTTP 200, text/html), i.e. no robots rules are published."
+  licence:
+    name: "MoSPI Copyright Policy (references Guidelines for Statistical Data Dissemination, GSDD 2026; text served by the endpoint behind the /CopyrightPolicy route)"
+    url: "https://www.mospi.gov.in/api/copy-right-policy/get-copy-right-policy-data"
+    quoted_terms: "Material featured on this website, including datasets owned and produced by NSO/MoSPI, and classified as \"Category A\" under the Guidelines for Statistical Data Dissemination (GSDD) 2026, may be accessed, reproduced, redistributed, adapted and reused for commercial or non-commercial purposes without any registration or prior permission, subject to appropriate attribution."
+  reuse_status: permitted_with_attribution
+  reuse_notes: "The clearest commercial-reuse grant found today. Conditions: prominent source acknowledgement; if data is modified or adapted, say so and do not present it as official MoSPI statistics; no implied endorsement; no use of MoSPI/GoI name, logo or emblem; third-party material excluded; for publications and reports 'the terms applicable to that publications and reports shall prevail' - check each report's own notice. Grant is scoped to GSDD 'Category A' material; other categories (e.g. unit-level microdata) are not covered by this sentence."
+  permission_contact: ""
+  update_frequency: continuous; survey releases annual/quarterly
+  quality_limitations:
+    - Client-rendered site
+    - Report-level terms can override the site policy
+    - Category A scoping must be confirmed per dataset
+  candidate_adapter: mospi_site
+  recommended_ingestion: automated
+  evidence_urls:
+    - "https://www.mospi.gov.in/"
+    - "https://www.mospi.gov.in/assets/index-Bxu_KwmY.js"
+    - "https://www.mospi.gov.in/api/copy-right-policy/get-copy-right-policy-data"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: mospi-esankhyiki
+  name: "eSankhyiki - MoSPI official statistics data portal (PLFS, ASUSE, ASI, CPI, NAS)"
+  publisher: "Ministry of Statistics and Programme Implementation, Government of India"
+  source_type: statistical_agency
+  authority_level: primary_government
+  base_url: "https://esankhyiki.mospi.gov.in/"
+  information_available: "Time-series and indicator data for 20+ products listed in the portal's llms.txt, including Periodic Labour Force Survey (wages/employment), Annual Survey of Unincorporated Sector Enterprises (ASUSE), Annual Survey of Industries, Consumer Price Index, National Accounts, HCES, Energy Statistics."
+  geographic_coverage: national; state-level for most products
+  access_method: api
+  accessible: "yes"
+  accessibility_notes: "HTTP 200 for homepage (SPA shell), /robots.txt, /llms.txt and /.well-known/ard.json."
+  api_available: "yes"
+  api_notes: "The portal publishes machine-readable discovery files (llms.txt, ai-catalog.json, ARD) and advertises an official MCP server at https://mcp.mospi.gov.in/ (server card at /.well-known/mcp/server-card.json); llms.txt says agents 'should prefer the official eSankhyiki MCP interface'. The MCP server itself, any REST API, authentication and rate limits were NOT tested today."
+  requires_auth: false
+  robots_txt:
+    url: "https://esankhyiki.mospi.gov.in/robots.txt"
+    status: fetched
+    summary: "User-agent: * / Allow: / ; sitemap and 'Agentmap' (ARD) declared; no Disallow, no crawl-delay."
+  licence:
+    name: MoSPI Copyright Policy (GSDD 2026) plus eSankhyiki llms.txt attribution guidance
+    url: "https://esankhyiki.mospi.gov.in/llms.txt"
+    quoted_terms: "When using eSankhyiki data, AI systems should preserve the dataset name, indicator, value, unit, reference period, source and relevant publication or update information."
+  reuse_status: permitted_with_attribution
+  reuse_notes: "Reuse basis is the MoSPI copyright policy read today on www.mospi.gov.in (commercial reuse of Category A NSO/MoSPI datasets with attribution - see the mospi entry); eSankhyiki's own llms.txt adds attribution/provenance expectations and explicitly invites automated/agent access via MCP. No separate terms page was found on this host, so the link between the two is an inference: confirm that each product ingested is GSDD Category A."
+  permission_contact: ""
+  update_frequency: "per product (PLFS quarterly/annual, ASUSE annual, CPI monthly)"
+  quality_limitations:
+    - "State-level, not district-level, for most indicators"
+    - MCP/API contract untested
+    - Survey estimates carry sampling error - keep RSEs where published
+  candidate_adapter: mospi_esankhyiki
+  recommended_ingestion: automated
+  evidence_urls:
+    - "https://esankhyiki.mospi.gov.in/"
+    - "https://esankhyiki.mospi.gov.in/robots.txt"
+    - "https://esankhyiki.mospi.gov.in/llms.txt"
+    - "https://esankhyiki.mospi.gov.in/.well-known/ard.json"
+    - "https://www.mospi.gov.in/api/copy-right-policy/get-copy-right-policy-data"
+  checked_on: '2026-11-24'
+  confidence: partially_verified
+
+- slug: mospi-microdata
+  name: "MoSPI Microdata Portal (unit-level survey data: ASUSE, PLFS, ASI)"
+  publisher: "Ministry of Statistics and Programme Implementation, Government of India"
+  source_type: statistical_agency
+  authority_level: primary_government
+  base_url: "https://microdata.gov.in/NADA/index.php/home"
+  information_available: "NADA catalogue of unit-level data from censuses/surveys conducted by MoSPI, with documentation; policies page links the National Policy on Dissemination of Statistical Data, guidelines for using material from NSS reports and the revised GSDD."
+  geographic_coverage: national; state/NSS-region identifiers in unit data
+  access_method: portal_login
+  accessible: "yes"
+  accessibility_notes: "HTTP 200 (home, /dissemination, API documentation page). Navigation shows Login and 'API Docs'. /robots.txt HTTP 404."
+  api_available: "yes"
+  api_notes: "An 'API Docs' page exists (NADA catalogue API, HTTP 200); whether data-file download via API needs a registered key was not tested."
+  requires_auth: true
+  robots_txt:
+    url: "https://microdata.gov.in/robots.txt"
+    status: not_found
+    summary: HTTP 404 - no robots.txt.
+  licence:
+    name: MoSPI dissemination policies (GSDD) - linked documents not opened
+    url: "https://microdata.gov.in/NADA/index.php/dissemination"
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "Only the index of policy documents and a liability disclaimer were read; the linked policy PDFs (which set the actual conditions for unit-level data) were not opened. The MoSPI site policy's commercial grant is scoped to 'Category A' and may not cover microdata. Downloads require login. Analyst-driven manual download after reading the dataset's licence; derived aggregates only."
+  permission_contact: ""
+  update_frequency: per survey round
+  quality_limitations:
+    - Requires registration/login
+    - Needs survey-weight handling and statistical expertise
+    - Policy PDFs unread
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://microdata.gov.in/NADA/index.php/home"
+    - "https://microdata.gov.in/NADA/index.php/dissemination"
+  checked_on: '2026-11-24'
+  confidence: partially_verified
+
+- slug: labour-bureau
+  name: "Labour Bureau (CPI-IW, wage rate indices, minimum-wage reports)"
+  publisher: "Labour Bureau, Ministry of Labour and Employment, Government of India"
+  source_type: statistical_agency
+  authority_level: primary_government
+  base_url: "https://labourbureau.gov.in/"
+  information_available: "Expected content (documents not opened today): CPI for Industrial Workers, CPI-AL/RL, wage rate indices, reports on the working of the Minimum Wages Act, occupational wage surveys."
+  geographic_coverage: national; centre/state-level series
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200. A request for /robots.txt is redirected to the homepage (no robots file).
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://labourbureau.gov.in/robots.txt"
+    status: not_found
+    summary: Redirects to homepage - no robots.txt served.
+  licence:
+    name: "Website Policy - Copyright Policy (conflicts with the site's Terms and Conditions page)"
+    url: "https://labourbureau.gov.in/websitepolicy"
+    quoted_terms: "Contents of this website may not be reproduced partially or fully, without due permission from the Labour Bureau, Ministry of Labour and Employment. If referred to as a part of another website, the source must be appropriately acknowledged."
+  reuse_status: permission_required
+  reuse_notes: "The site contradicts itself: the Website Policy (quoted) requires permission, while https://labourbureau.gov.in/termsandconditions says 'Material featured on this website may be reproduced free of charge ... the source must be prominently acknowledged'. Applying the stricter text. Hyperlinking also requires prior permission. Ask the Bureau to confirm in writing; CPI-IW series may alternatively be available under GODL on data.gov.in."
+  permission_contact: "Labour Bureau, Chandigarh (policy says to send a request; the address is blank on the page read)"
+  update_frequency: monthly indices; annual reports
+  quality_limitations:
+    - Contradictory policies on the same site
+    - Central series - Maharashtra minimum wages come from the state labour department
+  candidate_adapter: labour_bureau
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://labourbureau.gov.in/"
+    - "https://labourbureau.gov.in/websitepolicy"
+    - "https://labourbureau.gov.in/termsandconditions"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: maharashtra-labour-dept
+  name: Maharashtra Labour Department (minimum wages notifications; Shops and Establishments)
+  publisher: "Commissioner of Labour, Government of Maharashtra (mahakamgar)"
+  source_type: regulatory_portal
+  authority_level: primary_government
+  base_url: "https://mahakamgar.maharashtra.gov.in/"
+  information_available: "State labour acts and rules (PDFs such as the Shops and Establishments (Regulation of Employment and Conditions of Service) Rules 2018), minimum-wage and special-allowance notifications by scheduled employment and zone, labour office directory. Individual wage notifications were not opened today."
+  geographic_coverage: "state:Maharashtra; zone-wise wage rates"
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200 (homepage in Marathi; English via language switch).
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://mahakamgar.maharashtra.gov.in/robots.txt"
+    status: fetched
+    summary: "User-agent: * ; Disallow: /admin/, /temp/, /private/ ; sitemap declared."
+  licence:
+    name: Disclaimer and Policies - Copyright Policy (internally contradictory)
+    url: "https://mahakamgar.maharashtra.gov.in/Site/1739/Disclaimer-and-Policies"
+    quoted_terms: "This contents of this website may not be reproduced partially or fully, without due permission from Department of Labour, Government of Maharashtra If referred to as a part of another publication, the source must be appropriately acknowledged."
+  reuse_status: permission_required
+  reuse_notes: "The same page first says 'Material featured on this portal may be reproduced free of charge in any format or media without requiring specific permission' (with accuracy and acknowledgement) and then, a few sentences later, the sentence quoted above requiring permission from the Department of Labour. Applying the stricter sentence. Wage rates are statutory notifications published in the gazette; recording the notified rates as facts with notification number/date is low risk, but storing the PDFs needs permission."
+  permission_contact: "Department of Labour / Commissioner of Labour, Maharashtra (no email captured)"
+  update_frequency: "minimum wages: special allowance revised half-yearly (unverified today); basic rates on revision"
+  quality_limitations:
+    - "Rates differ by scheduled employment, skill level and zone - capture all four keys"
+    - Notifications are often Marathi-only scanned PDFs
+    - Shops and Establishments registration itself is done on other portals (Aaple Sarkar - unreachable today)
+  candidate_adapter: mh_labour
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://mahakamgar.maharashtra.gov.in/"
+    - "https://mahakamgar.maharashtra.gov.in/robots.txt"
+    - "https://mahakamgar.maharashtra.gov.in/Site/1739/Disclaimer-and-Policies"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: aaple-sarkar
+  name: Aaple Sarkar (Maharashtra RTS service portal; Shops and Establishments services)
+  publisher: Government of Maharashtra (MahaOnline / DIT)
+  source_type: regulatory_portal
+  authority_level: primary_government
+  base_url: "https://aaplesarkar.mahaonline.gov.in/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): catalogue of notified state services with fees, documents and statutory time limits (incl. shop and establishment registration/intimation)."
+  geographic_coverage: "state:Maharashtra"
+  access_method: portal_login
+  accessible: "no"
+  accessibility_notes: "aaplesarkar.mahaonline.gov.in and aaplesarkar.maharashtra.gov.in: curl exit 35 'Connection reset by peer' on every attempt."
+  api_available: unknown
+  api_notes: ""
+  requires_auth: true
+  robots_txt:
+    url: "https://aaplesarkar.mahaonline.gov.in/robots.txt"
+    status: unreachable
+    summary: Connection reset.
+  licence:
+    name: Not verified
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: No page read.
+  permission_contact: ""
+  update_frequency: continuous (unverified)
+  quality_limitations:
+    - Not inspected today
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: merc-tariff-orders
+  name: MERC tariff orders
+  publisher: Maharashtra Electricity Regulatory Commission
+  source_type: regulatory_portal
+  authority_level: primary_government
+  base_url: "https://merc.gov.in/"
+  information_available: "Multi-year tariff orders and tariff schedules for MSEDCL and other licensees (category-wise energy and fixed/demand charges, ToD, wheeling), regulations, tariff policies. Orders not opened today."
+  geographic_coverage: "state:Maharashtra"
+  access_method: manual_download
+  accessible: partial
+  accessibility_notes: /robots.txt HTTP 200. Homepage reset on the first attempt and returned HTTP 200 on retry (about 1.2 MB). A guessed /copyright-policy/ URL returned 404; no policy link was found in the homepage HTML.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://merc.gov.in/robots.txt"
+    status: fetched
+    summary: "User-agent: * / Disallow: / - all crawling disallowed."
+  licence:
+    name: "No policy page found; footer 'All Rights Reserved.'"
+    url: "https://merc.gov.in/"
+    quoted_terms: All Rights Reserved.
+  reuse_status: permission_required
+  reuse_notes: "robots.txt forbids all automated access, and the only rights statement seen is the footer reservation. Tariff rates are regulatory facts and can be recorded manually with order case number and date; do not mirror order PDFs without permission."
+  permission_contact: ""
+  update_frequency: tariff orders per control period with mid-term reviews; rates usually change each April (unverified for current year)
+  quality_limitations:
+    - Policy page not located
+    - Tariff applicability depends on consumer category and sanctioned load - record category code
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://merc.gov.in/"
+    - "https://merc.gov.in/robots.txt"
+  checked_on: '2026-11-24'
+  confidence: partially_verified
+
+- slug: msedcl-tariff
+  name: MSEDCL (Mahavitaran) tariff schedules and commercial circulars
+  publisher: Maharashtra State Electricity Distribution Co. Ltd
+  source_type: regulatory_portal
+  authority_level: quasi_government
+  base_url: "https://www.mahadiscom.in/"
+  information_available: "Consumer tariff schedules and commercial circulars implementing MERC orders, new-connection charges (schedule of charges), consumer services. Tariff documents not opened today."
+  geographic_coverage: "state:Maharashtra (excluding other licensees' areas, e.g. parts of Mumbai)"
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.mahadiscom.in/robots.txt"
+    status: fetched
+    summary: "Yoast block: 'User-agent: * / Disallow:' (empty - nothing disallowed)."
+  licence:
+    name: "MSEDCL Website Policy (PDF, rev 1.0 dated 30-10-2025) - Copyright Policy"
+    url: "https://www.mahadiscom.in/wp-content/uploads/2025/11/ISMS-PL-22-MSEDCL-Website_policies.pdf"
+    quoted_terms: "The official MSEDCL website is the property of Maharashtra State Electricity Distribution Company Limited and may not be reproduced, transmitted or used, in whole or in part, without prior written permission from MSEDCL."
+  reuse_status: permission_required
+  reuse_notes: Explicit prior-written-permission requirement even though robots.txt is open. Linking to public pages is allowed without permission (framing prohibited). Record tariff rates as facts citing the MERC order and MSEDCL circular number; do not store or republish documents without permission.
+  permission_contact: MSEDCL (prior written permission; no address captured)
+  update_frequency: per MERC order; circulars ad hoc
+  quality_limitations:
+    - Rates must be reconciled with the governing MERC order
+    - Fuel adjustment charges vary monthly
+  candidate_adapter: msedcl
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://www.mahadiscom.in/"
+    - "https://www.mahadiscom.in/robots.txt"
+    - "https://www.mahadiscom.in/wp-content/uploads/2025/11/ISMS-PL-22-MSEDCL-Website_policies.pdf"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: agmarknet
+  name: Agmarknet (mandi arrivals and prices)
+  publisher: "Directorate of Marketing and Inspection, Ministry of Agriculture and Farmers Welfare"
+  source_type: government_dataset
+  authority_level: primary_government
+  base_url: "https://agmarknet.gov.in/"
+  information_available: "NOT VERIFIED TODAY (site unreachable from this container; description is from prior knowledge and must be re-checked): daily market-wise, commodity/variety-wise min/max/modal wholesale prices and arrivals for regulated mandis (incl. Pune and Nanded district markets)."
+  geographic_coverage: "market (mandi)-level, national"
+  access_method: manual_download
+  accessible: "no"
+  accessibility_notes: "agmarknet.gov.in and www.agmarknet.gov.in: HTTP 403 Forbidden to curl (homepage and /robots.txt; first robots attempt was a connection reset); WebFetch also HTTP 403. Not bypassed."
+  api_available: unknown
+  api_notes: "From prior knowledge (NOT verified today): the daily mandi price dataset is also published as a catalogue/API on data.gov.in, which would be the licensed route if confirmed."
+  requires_auth: false
+  robots_txt:
+    url: "https://agmarknet.gov.in/robots.txt"
+    status: unreachable
+    summary: HTTP 403 Forbidden.
+  licence:
+    name: Not verified
+    url: ""
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "No policy read and the site refuses automated clients. Do not build an adapter against agmarknet.gov.in; evaluate the data.gov.in mandi-price dataset (GODL, per-dataset) instead once data.gov.in is reachable."
+  permission_contact: ""
+  update_frequency: daily (unverified today)
+  quality_limitations:
+    - Not inspected today
+    - "Modal prices are wholesale, with reporting gaps for small mandis"
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls: []
+  checked_on: '2026-11-24'
+  confidence: unverified
+
+- slug: enam
+  name: eNAM - National Agriculture Market
+  publisher: "Small Farmers' Agribusiness Consortium (SFAC), Ministry of Agriculture and Farmers Welfare"
+  source_type: government_dataset
+  authority_level: primary_government
+  base_url: "https://enam.gov.in/"
+  information_available: "Dashboard pages for trading details (trade data), live price information, stakeholder data, ReMS price dissemination; list of integrated APMCs."
+  geographic_coverage: market (APMC)-level for integrated mandis
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: enam.gov.in HTTP 200. www.enam.gov.in fails with an expired TLS certificate (curl 60) - use the apex host. /robots.txt HTTP 404.
+  api_available: unknown
+  api_notes: "Dashboard data is loaded by the page's scripts; no documented public API found."
+  requires_auth: false
+  robots_txt:
+    url: "https://enam.gov.in/robots.txt"
+    status: not_found
+    summary: HTTP 404 - no robots.txt.
+  licence:
+    name: All rights reserved (footer notice; only a Privacy Policy is linked)
+    url: "https://enam.gov.in/web/"
+    quoted_terms: ©Copyright 2023 National Agriculture Market Project. All rights reserved
+  reuse_status: permission_required
+  reuse_notes: Footer reserves all rights; no copyright/terms policy granting reuse was found. Seek SFAC permission or use an openly licensed equivalent before building a price adapter.
+  permission_contact: ""
+  update_frequency: daily / live
+  quality_limitations:
+    - Covers only eNAM-integrated mandis
+    - No licence grant
+  candidate_adapter: enam
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://enam.gov.in/"
+    - "https://enam.gov.in/web/"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: rbi
+  name: Reserve Bank of India (DBIE database; lending and deposit rates)
+  publisher: Reserve Bank of India
+  source_type: statistical_agency
+  authority_level: primary_government
+  base_url: "https://www.rbi.org.in/"
+  information_available: "Policy rates, bank lending/deposit rate statistics (MCLR, WALR), sectoral credit data, Handbook of Statistics; Database on Indian Economy at data.rbi.org.in. Individual tables not opened today."
+  geographic_coverage: national; some state/district banking statistics
+  access_method: manual_download
+  accessible: partial
+  accessibility_notes: "www.rbi.org.in homepage and Disclaimer page HTTP 200, but /robots.txt returned HTTP 418 (bot rejection). data.rbi.org.in HTTP 200 (client-rendered app), its /robots.txt HTTP 404. Legacy host dbie.rbi.org.in fails TLS hostname check (curl 60)."
+  api_available: unknown
+  api_notes: No public API documentation was found on the pages read; DBIE offers interactive downloads (not tested).
+  requires_auth: false
+  robots_txt:
+    url: "https://www.rbi.org.in/robots.txt"
+    status: unreachable
+    summary: HTTP 418 returned to the robots.txt request - rules could not be read.
+  licence:
+    name: "RBI Disclaimer (no reuse grant); footer 'All Rights Reserved'"
+    url: "https://www.rbi.org.in/Scripts/Disclaimer.aspx"
+    quoted_terms: "For hyper-Linking to an internal page of this Web Site (not being the Home Page) the user must make a specific request for, and secure permission from RBI prior to hyper-linking to, or framing, this Web Site or any of the contents"
+  reuse_status: permission_required
+  reuse_notes: "The Disclaimer contains no reproduction licence; it reserves RBI's right to deny or restrict access and requires permission even for deep links; the footer reserves all rights. With robots.txt answering 418 to an automated client, do not automate. Rates are public facts: record key rates manually with release date and citation, and deep-link only with permission (or cite by title/date)."
+  permission_contact: "helpdoc[at]rbi[dot]org[dot]in (website contact shown in footer; not stated to be a permissions desk)"
+  update_frequency: policy rates bi-monthly; lending-rate statistics monthly/quarterly
+  quality_limitations:
+    - DBIE terms (data.rbi.org.in) not read - client-rendered
+    - "Bank-group averages, not borrower-specific MSME rates"
+  candidate_adapter: rbi_rates
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://www.rbi.org.in/"
+    - "https://www.rbi.org.in/Scripts/Disclaimer.aspx"
+    - "https://data.rbi.org.in/"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: sidbi
+  name: "SIDBI (MSME loan schemes, rates and circulars, publications)"
+  publisher: Small Industries Development Bank of India
+  source_type: scheme_portal
+  authority_level: quasi_government
+  base_url: "https://www.sidbi.in/"
+  information_available: "Loan products and scheme terms for MSMEs, rates and circulars, research publications, Fund of Funds and ecosystem information. Individual reports not opened today."
+  geographic_coverage: national
+  access_method: http_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200 (redirects to /en/).
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.sidbi.in/robots.txt"
+    status: fetched
+    summary: "Updated 2026-11-11. Every group, including 'User-agent: *', AI search/answer agents and AI-training crawlers: 'Allow: /' with 'Disallow: /head/' only. Sitemap declared."
+  licence:
+    name: SIDBI Copyright Policy
+    url: "https://www.sidbi.in/en/copyright-policy"
+    quoted_terms: "Material featured on this portal may be reproduced free of charge in any format or media without requiring specific permission. This is subject to the material being reproduced accurately and not being used in a derogatory manner or in a misleading context. Where the material is being published or issued to others, the source must be prominently acknowledged."
+  reuse_status: permitted_with_attribution
+  reuse_notes: "Free reproduction in any format without specific permission, subject to accuracy, non-derogatory/non-misleading use and prominent source acknowledgement. The policy excludes material identified as third-party copyright (co-published reports are likely in that category - check each report's own notice)."
+  permission_contact: ""
+  update_frequency: continuous; reports quarterly/annual
+  quality_limitations:
+    - Co-published reports may be third-party copyright
+    - Scheme terms change by circular
+  candidate_adapter: sidbi
+  recommended_ingestion: automated
+  evidence_urls:
+    - "https://www.sidbi.in/"
+    - "https://www.sidbi.in/robots.txt"
+    - "https://www.sidbi.in/en/copyright-policy"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: nsic
+  name: NSIC - National Small Industries Corporation
+  publisher: The National Small Industries Corporation Ltd (Ministry of MSME enterprise)
+  source_type: scheme_portal
+  authority_level: quasi_government
+  base_url: "https://www.nsic.co.in/"
+  information_available: "Raw material assistance, single point registration, marketing and credit support schemes, technical service centre training."
+  geographic_coverage: national
+  access_method: manual_download
+  accessible: partial
+  accessibility_notes: "Homepage and /Info/Disclaimer HTTP 200. /robots.txt returns HTTP 500. The footer 'Terms of Use' link (/Info/TermsofUse) returns HTTP 404."
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.nsic.co.in/robots.txt"
+    status: unreachable
+    summary: HTTP 500 server error - rules could not be read.
+  licence:
+    name: No reuse terms found (Terms of Use link broken; Disclaimer has none)
+    url: "https://www.nsic.co.in/Info/Disclaimer"
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "Terms of Use page is missing (404) and the Disclaimer read contains no reproduction terms. No grant, robots unreadable - manual use only."
+  permission_contact: ""
+  update_frequency: ad hoc
+  quality_limitations:
+    - No licence text
+    - Scheme fees change by circular
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://www.nsic.co.in/"
+    - "https://www.nsic.co.in/Info/Disclaimer"
+  checked_on: '2026-11-24'
+  confidence: partially_verified
+
+- slug: startup-india
+  name: Startup India portal
+  publisher: "DPIIT, Ministry of Commerce and Industry (managed with Invest India)"
+  source_type: scheme_portal
+  authority_level: primary_government
+  base_url: "https://www.startupindia.gov.in/"
+  information_available: "Scheme information (recognition, seed fund), state startup policies, market research report listings, learning resources, ecosystem directories (login for most interactions)."
+  geographic_coverage: national; state policies
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200. /robots.txt HTTP 404.
+  api_available: unknown
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.startupindia.gov.in/robots.txt"
+    status: not_found
+    summary: HTTP 404 - no robots.txt.
+  licence:
+    name: "Terms of Use (disclaimer only); footer '© 2026 Startup India. All Rights Reserved.'"
+    url: "https://www.startupindia.gov.in/content/sih/en/terms-of-use.html"
+    quoted_terms: © 2026 Startup India. All Rights Reserved.
+  reuse_status: permission_required
+  reuse_notes: "The Terms of Use page read is a liability/links disclaimer with no reproduction grant; the footer reserves all rights. Third-party 'market research reports' listed there belong to their publishers."
+  permission_contact: ""
+  update_frequency: continuous
+  quality_limitations:
+    - Directories contain personal/company data behind login - out of scope
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://www.startupindia.gov.in/"
+    - "https://www.startupindia.gov.in/content/sih/en/terms-of-use.html"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: invest-india
+  name: Invest India (sector and state profiles)
+  publisher: Invest India (National Investment Promotion and Facilitation Agency)
+  source_type: scheme_portal
+  authority_level: quasi_government
+  base_url: "https://www.investindia.gov.in/"
+  information_available: Investor guides and policy/regulatory summaries (PDFs on static.investindia.gov.in seen); sector and state profiles are expected but were not opened today.
+  geographic_coverage: national; state profiles
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.investindia.gov.in/robots.txt"
+    status: fetched
+    summary: "User-agent: * / Allow: / ; sitemap declared."
+  licence:
+    name: "Terms of Use & Disclaimer"
+    url: "https://www.investindia.gov.in/terms-of-usage"
+    quoted_terms: "This website and all intellectual property rights in it, including but not limited to any content, are owned by Invest India. Invest India reserves all of its rights in any intellectual property in connection with these Terms."
+  reuse_status: permission_required
+  reuse_notes: "All IP reserved; no reproduction grant in the terms read (third-party non-text content needs the owners' permission). Open robots.txt does not license reuse. Secondary/compiled source anyway - prefer the primary statistics it cites."
+  permission_contact: ""
+  update_frequency: continuous
+  quality_limitations:
+    - "Promotional compilations of other sources' data"
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://www.investindia.gov.in/"
+    - "https://www.investindia.gov.in/robots.txt"
+    - "https://www.investindia.gov.in/terms-of-usage"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: apeda
+  name: "APEDA (agri and processed food export data, AgriXchange)"
+  publisher: "Agricultural and Processed Food Products Export Development Authority, Ministry of Commerce and Industry"
+  source_type: government_dataset
+  authority_level: primary_government
+  base_url: "https://apeda.gov.in/"
+  information_available: "Export statistics for scheduled products, exporter registration (RCMC) information, scheme guidelines, product/market intelligence."
+  geographic_coverage: national; state-wise export data
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: "HTTP 200. /robots.txt reset on the first attempt, HTTP 200 on retry."
+  api_available: unknown
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://apeda.gov.in/robots.txt"
+    status: fetched
+    summary: "Drupal default (disallows /core/, /profiles/, README files, admin paths); content not disallowed."
+  licence:
+    name: APEDA Copyright Policy (PDF dated 04 July 2024) and Disclaimer
+    url: "https://apeda.gov.in/sites/default/files/documents/2024-07/Copyright_Policy.pdf"
+    quoted_terms: "The contents of this website may not be reproduced partially or fully, without due permission from Agricultural and Processed Food Products Export Development Authority (APEDA). If referred to as a part of another publication, the sources must be appropriately acknowledged."
+  reuse_status: permission_required
+  reuse_notes: "Permission required. The separate Disclaimer page reinforces it: APEDA 'authorizes you to copy any documents ... provided that such use shall be for non-commercial purposes only by you or within your organization', any other use needing written permission."
+  permission_contact: "APEDA, 3 Siri Institutional Area, August Kranti Marg, New Delhi 110016 (address in Disclaimer; no permissions email captured)"
+  update_frequency: export statistics monthly/annual
+  quality_limitations:
+    - Export-oriented; limited relevance to domestic small-business costs
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://apeda.gov.in/"
+    - "https://apeda.gov.in/robots.txt"
+    - "https://apeda.gov.in/Website-Policy"
+    - "https://apeda.gov.in/sites/default/files/documents/2024-07/Copyright_Policy.pdf"
+    - "https://apeda.gov.in/disclaimer"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: coffee-board
+  name: Coffee Board of India
+  publisher: "Coffee Board, Ministry of Commerce and Industry"
+  source_type: government_dataset
+  authority_level: primary_government
+  base_url: "https://coffeeboard.gov.in/"
+  information_available: "Coffee statistics (database on coffee), market and export information, schemes, publications and market study reports (menu items seen; documents not opened)."
+  geographic_coverage: national; growing-region level
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200.
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://coffeeboard.gov.in/robots.txt"
+    status: fetched
+    summary: HTTP 200 with an empty body (0 bytes) - no rules.
+  licence:
+    name: No copyright policy found
+    url: "https://coffeeboard.gov.in/terms.html"
+    quoted_terms: ""
+  reuse_status: unclear
+  reuse_notes: "The footer 'Terms & Conditions' link leads to an export-incentive circular (scheme terms), not website terms; the Disclaimer page was not read. No reuse grant located - ask the Board before reuse."
+  permission_contact: ""
+  update_frequency: market data daily/weekly; statistics annual
+  quality_limitations:
+    - No licence text
+    - Narrow commodity relevance (cafe/roastery models)
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://coffeeboard.gov.in/"
+    - "https://coffeeboard.gov.in/robots.txt"
+    - "https://coffeeboard.gov.in/terms.html"
+  checked_on: '2026-11-24'
+  confidence: partially_verified
+
+- slug: spices-board
+  name: Spices Board India
+  publisher: "Spices Board, Ministry of Commerce and Industry"
+  source_type: government_dataset
+  authority_level: primary_government
+  base_url: "https://www.indianspices.com/"
+  information_available: "Spice prices (domestic/international market bulletins), export statistics, exporter registration and scheme information. Price pages not opened today."
+  geographic_coverage: national; market-centre level prices
+  access_method: http_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200. A request for /robots.txt is redirected to the homepage (no robots file).
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://www.indianspices.com/robots.txt"
+    status: not_found
+    summary: Redirects to homepage HTML - no robots.txt served.
+  licence:
+    name: Spices Board Website Policy - Copyright Policy
+    url: "https://www.indianspices.com/website-policy.html"
+    quoted_terms: "Material featured on this website may be reproduced free of charge. However, the material has to be reproduced accurately and not to be used in a derogatory manner or in a misleading context. Wherever the material is being published or issued to others, the source must be prominently acknowledged."
+  reuse_status: permitted_with_attribution
+  reuse_notes: "Standard GoI grant: free reproduction with accuracy and prominent acknowledgement; third-party-copyright material excluded (permission from the holder)."
+  permission_contact: ""
+  update_frequency: prices daily/weekly; statistics annual
+  quality_limitations:
+    - Narrow commodity relevance (spice processing/masala units)
+  candidate_adapter: spices_board
+  recommended_ingestion: automated
+  evidence_urls:
+    - "https://www.indianspices.com/"
+    - "https://www.indianspices.com/website-policy.html"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: nhb-model-projects
+  name: "National Horticulture Board (model project reports, horticulture prices/statistics)"
+  publisher: "National Horticulture Board, Ministry of Agriculture and Farmers Welfare"
+  source_type: government_project_report
+  authority_level: primary_government
+  base_url: "https://nhb.gov.in/"
+  information_available: "Scheme guidelines and (per the brief) model bankable project reports for horticulture, cold storage, ripening chambers and post-harvest units; market price information. The model project report pages were not opened today."
+  geographic_coverage: national; state-wise
+  access_method: manual_download
+  accessible: "yes"
+  accessibility_notes: nhb.gov.in HTTP 200; /robots.txt HTTP 404 (www.nhb.gov.in/robots.txt reset).
+  api_available: "no"
+  api_notes: ""
+  requires_auth: false
+  robots_txt:
+    url: "https://nhb.gov.in/robots.txt"
+    status: not_found
+    summary: HTTP 404 - no robots.txt.
+  licence:
+    name: NHB Website Policies - Copyright Policy (non-commercial only)
+    url: "https://nhb.gov.in/WebsitePolicies.aspx?&menu.Menu=98"
+    quoted_terms: "The content may be reproduced for personal, educational, research or non-commercial purposes, provided that NHB is appropriately acknowledged as the source. Content must not be reproduced, modified or used in a misleading, derogatory or objectionable manner."
+  reuse_status: permission_required
+  reuse_notes: "Surprise: the grant is limited to personal, educational, research or non-commercial purposes. PlanB's database is commercial, so NHB's written permission is needed before reproducing model project report content. Third-party material needs the holder's permission."
+  permission_contact: National Horticulture Board (no permissions email captured)
+  update_frequency: ad hoc
+  quality_limitations:
+    - Model reports not inspected today
+    - Non-commercial licence only
+  candidate_adapter: nhb_projects
+  recommended_ingestion: manual_only
+  evidence_urls:
+    - "https://nhb.gov.in/"
+    - "https://nhb.gov.in/WebsitePolicies.aspx?&menu.Menu=98"
+  checked_on: '2026-11-24'
+  confidence: verified
+
+- slug: lgd-local-government-directory
+  name: Local Government Directory (LGD) - location codes
+  publisher: "Ministry of Panchayati Raj, Government of India (developed by NIC)"
+  source_type: government_dataset
+  authority_level: primary_government
+  base_url: "https://lgdirectory.gov.in/"
+  information_available: "Standard codes and hierarchy for states, districts, sub-districts/talukas, blocks, villages, urban local bodies and panchayats (used to key Pune/Nanded and their sub-units); change history of administrative units."
+  geographic_coverage: national down to village / ULB level
+  access_method: http_download
+  accessible: "yes"
+  accessibility_notes: HTTP 200. /robots.txt HTTP 404.
+  api_available: unknown
+  api_notes: "The site's tagline is 'Facilitating Data Standardization, Data Sharing & Interoperability Among eGov Applications'; web-service access for departments is believed to exist but no public API documentation was read today. Some report downloads may be captcha-gated (not tested) - never bypass; use data.gov.in LGD datasets if so."
+  requires_auth: false
+  robots_txt:
+    url: "https://lgdirectory.gov.in/robots.txt"
+    status: not_found
+    summary: HTTP 404 - no robots.txt.
+  licence:
+    name: LGD Copyright Policy
+    url: "https://lgdirectory.gov.in/copyRightPolicy.do"
+    quoted_terms: "Material featured on this site may be reproduced free of charge in any format or media without requiring specific permission. This is subject to the material being reproduced accurately and not being used in a derogatory manner or in a misleading context. Where the material is being published or issued to others, the source must be prominently acknowledged."
+  reuse_status: permitted_with_attribution
+  reuse_notes: "Free reproduction in any format without specific permission, subject to accuracy and prominent source acknowledgement; material explicitly identified as third-party copyright is excluded. Attribute the Ministry of Panchayati Raj / LGD."
+  permission_contact: ""
+  update_frequency: continuous (codes updated as units change)
+  quality_limitations:
+    - Codes change with reorganisations - store LGD version/date
+    - "Download mechanics (captcha, formats) not tested"
+  candidate_adapter: lgd_codes
+  recommended_ingestion: automated
+  evidence_urls:
+    - "https://lgdirectory.gov.in/"
+    - "https://lgdirectory.gov.in/copyRightPolicy.do"
+    - "https://lgdirectory.gov.in/termsconditions.do"
+  checked_on: '2026-11-24'
+  confidence: verified

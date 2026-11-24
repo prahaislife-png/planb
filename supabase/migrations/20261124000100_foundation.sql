@@ -37,6 +37,7 @@ end $$;
 grant usage on schema intel, ops, gt, pub to authenticated, planb_worker;
 grant usage on schema customer to authenticated;
 grant usage on schema pub to anon;
+grant usage on schema extensions to planb_worker;
 
 -- ── Generic helpers ──────────────────────────────────────────────────────────
 create or replace function ops.set_updated_at() returns trigger
@@ -45,6 +46,15 @@ begin
   new.updated_at := now();
   return new;
 end $$;
+
+-- The authenticated user's id (NULL for workers and background jobs). All PlanB functions, triggers and
+-- policies call this wrapper rather than auth.uid() so that roles without access to the `auth` schema
+-- (the research worker) can still execute them.
+create or replace function ops.current_user_id() returns uuid
+language sql stable security definer set search_path = ''
+as $$ select auth.uid() $$;
+revoke all on function ops.current_user_id() from public;
+grant execute on function ops.current_user_id() to anon, authenticated, planb_worker;
 
 -- ── Staff & RBAC ─────────────────────────────────────────────────────────────
 create table ops.staff_members (
@@ -72,7 +82,7 @@ as $$
     select 1
     from ops.staff_roles r
     join ops.staff_members m on m.user_id = r.user_id and m.is_active
-    where r.user_id = auth.uid() and r.role = any (roles)
+    where r.user_id = ops.current_user_id() and r.role = any (roles)
   )
 $$;
 comment on function ops.has_role is 'True when the current JWT subject holds any of the given staff roles. SECURITY DEFINER so RLS policies can call it without recursive policy checks.';
@@ -82,7 +92,7 @@ language sql stable security definer set search_path = ops, pg_temp
 as $$
   select exists (
     select 1 from ops.staff_members m
-    where m.user_id = auth.uid() and m.is_active
+    where m.user_id = ops.current_user_id() and m.is_active
       and exists (select 1 from ops.staff_roles r where r.user_id = m.user_id)
   )
 $$;
@@ -149,7 +159,7 @@ begin
     v_new := null;
   end if;
   insert into ops.audit_log (schema_name, table_name, row_id, action, actor_user_id, actor_db_role, research_run_id, changed_fields, old_row, new_row)
-  values (tg_table_schema, tg_table_name, v_row_id, tg_op, auth.uid(),
+  values (tg_table_schema, tg_table_name, v_row_id, tg_op, ops.current_user_id(),
           coalesce(nullif(current_setting('role', true), 'none'), session_user::text), v_run, v_changed, v_old, v_new);
   return coalesce(new, old);
 end $$;

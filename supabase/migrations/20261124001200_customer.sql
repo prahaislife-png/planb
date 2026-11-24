@@ -119,7 +119,7 @@ create or replace function customer.erase_user_data(p_user uuid) returns void
 language plpgsql security definer set search_path = customer, pg_temp
 as $$
 begin
-  if auth.uid() is distinct from p_user and not ops.has_role('admin') then
+  if ops.current_user_id() is distinct from p_user and not ops.has_role('admin') then
     raise exception 'not permitted' using errcode = '42501';
   end if;
   delete from customer.recommendations where user_id = p_user;

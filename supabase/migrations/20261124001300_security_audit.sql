@@ -67,7 +67,7 @@ language plpgsql as $$
 begin
   if new.verification_status = 'verified'
      and (tg_op = 'INSERT' or old.verification_status is distinct from 'verified')
-     and auth.uid() is not null
+     and ops.current_user_id() is not null
      and not ops.has_role('admin', 'reviewer') then
     raise exception 'only a reviewer or admin can mark evidence as verified' using errcode = '42501';
   end if;
@@ -93,7 +93,7 @@ begin
     if ops.is_worker() then
       raise exception 'automated workers cannot accept or reject claims' using errcode = '42501';
     end if;
-    if auth.uid() is not null and not ops.has_role('admin', 'reviewer', 'researcher') then
+    if ops.current_user_id() is not null and not ops.has_role('admin', 'reviewer', 'researcher') then
       raise exception 'not permitted to review claims' using errcode = '42501';
     end if;
     if new.data_origin = 'research' and new.reviewed_by is null then
@@ -118,12 +118,12 @@ create policy worker_read on gt.questionnaire_questions for select to planb_work
 
 -- PII: admins, plus the interviewer assigned to (or who created) the subject. Nobody else — not even other staff.
 create policy pii_read on gt.interview_subjects for select to authenticated
-  using (ops.has_role('admin') or (ops.is_staff() and (assigned_interviewer = auth.uid() or created_by = auth.uid())));
+  using (ops.has_role('admin') or (ops.is_staff() and (assigned_interviewer = ops.current_user_id() or created_by = ops.current_user_id())));
 create policy pii_insert on gt.interview_subjects for insert to authenticated
-  with check (ops.has_role('admin', 'researcher') and created_by = auth.uid());
+  with check (ops.has_role('admin', 'researcher') and created_by = ops.current_user_id());
 create policy pii_update on gt.interview_subjects for update to authenticated
-  using (ops.has_role('admin') or (ops.is_staff() and (assigned_interviewer = auth.uid() or created_by = auth.uid())))
-  with check (ops.has_role('admin') or (ops.is_staff() and (assigned_interviewer = auth.uid() or created_by = auth.uid())));
+  using (ops.has_role('admin') or (ops.is_staff() and (assigned_interviewer = ops.current_user_id() or created_by = ops.current_user_id())))
+  with check (ops.has_role('admin') or (ops.is_staff() and (assigned_interviewer = ops.current_user_id() or created_by = ops.current_user_id())));
 create policy pii_delete on gt.interview_subjects for delete to authenticated using (ops.has_role('admin'));
 
 create policy consent_read on gt.consents for select to authenticated
@@ -186,10 +186,10 @@ declare t text;
 begin
   foreach t in array array['user_profiles', 'profile_documents', 'user_capabilities', 'user_assets', 'saved_businesses']
   loop
-    execute format('create policy owner_all on customer.%I for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid())', t);
+    execute format('create policy owner_all on customer.%I for all to authenticated using (user_id = ops.current_user_id()) with check (user_id = ops.current_user_id())', t);
   end loop;
 end $$;
-create policy owner_read on customer.recommendations for select to authenticated using (user_id = auth.uid());
+create policy owner_read on customer.recommendations for select to authenticated using (user_id = ops.current_user_id());
 create policy public_read on customer.pricing_plans for select to anon, authenticated using (is_active or ops.is_staff());
 create policy admin_write on customer.pricing_plans for all to authenticated using (ops.has_role('admin')) with check (ops.has_role('admin'));
 grant insert, update, delete on customer.pricing_plans to authenticated;
@@ -203,9 +203,9 @@ grant select, insert, update on ops.research_runs, ops.research_run_steps to pla
 grant select, insert on ops.research_run_logs, ops.llm_usage, ops.ingestion_log to planb_worker;
 grant select on ops.publication_policy to planb_worker;
 
-create policy staff_read on ops.staff_members for select to authenticated using (ops.is_staff() or user_id = auth.uid());
+create policy staff_read on ops.staff_members for select to authenticated using (ops.is_staff() or user_id = ops.current_user_id());
 create policy admin_write on ops.staff_members for all to authenticated using (ops.has_role('admin')) with check (ops.has_role('admin'));
-create policy staff_read on ops.staff_roles for select to authenticated using (ops.is_staff() or user_id = auth.uid());
+create policy staff_read on ops.staff_roles for select to authenticated using (ops.is_staff() or user_id = ops.current_user_id());
 create policy admin_write on ops.staff_roles for all to authenticated using (ops.has_role('admin')) with check (ops.has_role('admin'));
 create policy staff_read on ops.audit_log for select to authenticated using (ops.has_role('admin', 'reviewer'));
 create policy staff_read on ops.publication_policy for select to authenticated using (ops.is_staff());
@@ -230,9 +230,16 @@ create policy staff_enqueue on ops.research_runs for insert to authenticated
 create policy staff_cancel on ops.research_runs for update to authenticated
   using (ops.has_role('admin', 'researcher')) with check (ops.has_role('admin', 'researcher') and status in ('queued', 'cancelled'));
 
-grant execute on all functions in schema intel, pub, ops to authenticated, planb_worker;
+-- Functions are not callable by default: PostgreSQL grants EXECUTE to PUBLIC on creation, so take that away
+-- and grant per role. (Trigger functions fire regardless; RLS helper functions were granted in 0001.)
+revoke execute on all functions in schema intel, pub, ops, gt, customer from public;
+grant execute on function ops.has_role(text[]), ops.is_staff(), ops.is_worker(), ops.current_user_id() to anon, authenticated, planb_worker;
+grant execute on function customer.erase_user_data(uuid), gt.erase_subject(uuid) to authenticated;
+grant execute on all functions in schema intel, pub, ops to authenticated;
+grant execute on all functions in schema intel, ops to planb_worker;
+grant execute on function pub.publication_blockers(uuid) to planb_worker;
 grant usage on all sequences in schema ops to planb_worker;
-revoke execute on function pub.publish_business_version(uuid), pub.withdraw_publication(uuid, text) from planb_worker;
+revoke execute on function intel.decide_business_version(uuid, text, text) from planb_worker;
 
 -- ── Audit triggers ───────────────────────────────────────────────────────────
 -- Everything that carries research meaning or personal data is audited. High-volume machine tables

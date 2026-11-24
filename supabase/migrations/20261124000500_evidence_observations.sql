@@ -181,6 +181,7 @@ create table intel.cost_items (
   revenue_stream_id uuid references intel.revenue_streams (id),
   quantity numeric not null default 1 check (quantity > 0),
   quantity_unit_code text references intel.units (code),
+  pricing_basis text not null default 'per_unit' check (pricing_basis in ('per_unit', 'stated_total')),
   recurrence text not null check (recurrence in ('one_time', 'monthly', 'annual', 'per_unit_output', 'pct_of_revenue')),
   useful_life_years numeric check (useful_life_years > 0),
   is_optional boolean not null default false,
@@ -193,6 +194,7 @@ create table intel.cost_items (
   unique (business_variant_id, key)
 );
 comment on table intel.cost_items is 'A line in a variant''s cost structure (a machine, the rent, a staff role, a raw material). Holds NO price: prices are cost_observations, and several contradictory ones may exist.';
+comment on column intel.cost_items.pricing_basis is 'per_unit: observations price one unit and the model multiplies by quantity. stated_total: the source only states a total for the line (e.g. an annual P&L amount).';
 comment on column intel.cost_items.quantity is 'Units required by the variant (machines, head-count, sq ft…). Observations price ONE unit unless flagged is_line_total.';
 create index cost_items_variant_idx on intel.cost_items (business_variant_id);
 create trigger cost_items_updated before update on intel.cost_items for each row execute function ops.set_updated_at();
@@ -215,6 +217,7 @@ create table intel.cost_observations (
   location_id uuid references intel.locations (id),
   geographic_scope text not null default 'unspecified' check (geographic_scope in ('locality', 'city', 'district', 'state', 'national', 'unspecified')),
   scale_note text,
+  projection_year int check (projection_year between 1 and 30),
   capacity_value numeric,
   capacity_unit text,
   -- provenance
@@ -278,6 +281,7 @@ create table intel.parameter_observations (
   location_id uuid references intel.locations (id),
   geographic_scope text not null default 'unspecified' check (geographic_scope in ('locality', 'city', 'district', 'state', 'national', 'unspecified')),
   scale_note text,
+  projection_year int check (projection_year between 1 and 30),
   source_id uuid not null references intel.sources (id),
   source_document_id uuid references intel.source_documents (id),
   page_ref text,
@@ -304,6 +308,7 @@ create table intel.parameter_observations (
   check (value_low is null or value_high is null or value_low <= value_high)
 );
 comment on table intel.parameter_observations is 'Observed values of operating and revenue parameters (selling price, capacity, utilisation, yield, transactions/day, working days…) with the same passport as cost observations. Append-only.';
+comment on column intel.parameter_observations.projection_year is 'When the source gives a multi-year projection, the projection year this value belongs to (1 = first operating year).';
 comment on column intel.parameter_observations.parameter_key is 'Key in intel.financial_parameter_definitions (FK added in migration 0006).';
 create index parameter_observations_subject_idx on intel.parameter_observations (business_variant_id, parameter_key, observed_on desc);
 create index parameter_observations_doc_idx on intel.parameter_observations (source_document_id);

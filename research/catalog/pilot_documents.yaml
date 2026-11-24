@@ -1,0 +1,732 @@
+# Pilot document catalog - government / quasi-government project reports for the 10 pilot business models.
+# Every entry below was downloaded from the listed URL on 2026-11-24 (HTTP 200, verified as PDF with `file`,
+# text checked with `pdftotext -layout`). sha256/bytes/pages are computed from the downloaded file.
+# PDFs live outside the repo under the scratchpad path in `local_path` (ephemeral - re-download via `url`).
+# Fetch etiquette: robots.txt fetched per host first; UA "PlanB-Research/0.1"; >=2 s between requests per host.
+# Coverage: 9 of 10 models have >=1 verified document. NO document was obtained for commercial-laundry
+# (the only known government profile, KVIC PMEGP DryCleaners.pdf, is on an unreachable host - see bottom).
+# Entries flagged "NEAREST SUBSTITUTE" / "SUBSTITUTE" in `notes` are not exact matches for the business model.
+- business_model: bakery
+  title: DETAILED PROJECT REPORT BREAD MAKING UNIT UNDER PMFME SCHEME
+  publisher: NIFTEM, Kundli (PMFME scheme, Ministry of Food Processing Industries)
+  source_slug_hint: niftem-pmfme-dpr
+  url: https://niftem.ac.in/newsite/pmfme/wp-content/uploads/2022/07/breaddpr.pdf
+  listing_page_url: https://niftem.ac.in/newsite/pmfme/?taining_category=bakery-and-confectionery
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: a5819d1a62c3cfeb1ca6843d4128ebbb55c5e9aea130180071467b63936b6979
+  bytes: 396696
+  pages: 26
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/niftem_bread_dpr.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 232800 Kg/annum bread (55-70% capacity utilisation in years 1-5)
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: Rs.18.69 Lakh
+  robots_txt_ok: true
+  notes: 'Standard NIFTEM PMFME template: term-loan schedule, depreciation, projected balance sheet, cash flow and DSCR also present. No printed date (PDF metadata created 2021-03-04). Machinery cost stated as excluding GST and transport. No land/building cost (assumed rented/owned). Summary numbering skips item 7 and 10 (template quirk).'
+- business_model: bakery
+  title: PROJECT REPORT Of BREAD MAKING
+  publisher: Department of MSME & Export Promotion, Government of Uttar Pradesh (UP MSME 1-Connect portal)
+  source_slug_hint: other:up-msme-1connect
+  url: https://msme1connect.up.gov.in/Projectreport/Project%20Report638658532098915940.pdf
+  listing_page_url: https://msme1connect.up.gov.in/Home/BusinessDetails?Id=29
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 9e1f07b962ad29f4702fa37f9d09f4ef767ad3ed3ffeafddd59f5cb7a248e99b
+  bytes: 978021
+  pages: 15
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/upmsme_bread_making.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 30 lacs loaves of 400 gm per annum
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability (profit % on sales, ROI; no break-even)
+  total_project_cost_as_stated: '''Cost of Project ... Total 41.10'' (Rs lakh) and separately ''TOTAL CAPITAL INVESTMENT ... Total 89.20'' (Rs lakh)'
+  robots_txt_ok: true
+  notes: 'No printed date or author; PDF metadata created 2024-10-18. Generic consultant-style ''pre-feasibility'' template with entrepreneur fields blanked and a disclaimer that figures are drawn from internet/suppliers. INTERNALLY INCONSISTENT: two different totals (41.10 vs 89.20 lakh) in the same document, and the cost-of-project item list skips machinery. Includes land (Rs 5.50 lakh) and building (Rs 18 lakh), unlike the NIFTEM DPR. Page 3 has no text (image). Much larger scale than the NIFTEM bread DPR - useful contrast.'
+- business_model: bakery
+  title: Detailed Project Report on Establishment of a Bakery Unit by PACS
+  publisher: National Cooperative Development Corporation (NCDC), Ministry of Cooperation
+  source_slug_hint: other:ncdc-sample-dpr
+  url: https://www.ncdc.in/documents/downloads/09180405204.Sample-DPR_BAKERY-UNIT.pdf
+  listing_page_url: not found (URL located via web search)
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 445348faaf14b8ce661fd43c36cbdd506b43cf884b3a884614513faa99576865
+  bytes: 418704
+  pages: 24
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/ncdc_sample_dpr_bakery_unit.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: Installed plant capacity = 500 Kg/day (khari, toast, biscuits etc.)
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: Rs 60.000 lakhs
+  robots_txt_ok: true
+  notes: Sample DPR for a cooperative (PACS) bakery; PDF metadata created 2020-04-30. Block cost Rs 60 lakh funded by NCDC loan @11.10% plus MoFPI subsidy; includes civil works. Tables are text but some are wide year-by-year grids in raw rupees (not lakh) - mixed units within one document. robots.txt returns HTTP 404 (no robots file) - treated as no restriction.
+- business_model: bakery
+  title: DETAILED PROJECT REPORT FOR PROCESSING OF BANANA FLOUR COOKIES
+  publisher: NIFTEM-Thanjavur, formerly IIFPT (PMFME scheme, Ministry of Food Processing Industries)
+  source_slug_hint: niftem-pmfme-dpr
+  url: https://niftem-t.ac.in/pmfme/dpr-cookies.pdf
+  listing_page_url: https://niftem-t.ac.in/pmfme/
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: d9bbde9ed3b0f843bffd6d18e1a5971b64442899429628d478b316ffbfb29dd1
+  bytes: 1259230
+  pages: 31
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/niftemt_cookies_dpr.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 150 MT/annum banana cookies (biscuits)
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: Total project cost (Lakhs) 28.44
+  robots_txt_ok: true
+  notes: Niche bakery product (banana-flour cookies), not a generic bakery. No printed date (PDF last modified 2025-12-03). First ~10 pages are crop/horticulture background before the economics. Includes land development/civil works (6.3 lakh). robots.txt returns HTTP 404 (no robots file) - treated as no restriction; listing page is an open Apache directory index.
+- business_model: spice-processing
+  title: DETAILED PROJECT REPORT RED CHILLI POWDER UNIT UNDER PMFME SCHEME
+  publisher: NIFTEM, Kundli (PMFME scheme, Ministry of Food Processing Industries)
+  source_slug_hint: niftem-pmfme-dpr
+  url: https://niftem.ac.in/newsite/pmfme/wp-content/uploads/2022/08/chillipowderdpr.pdf
+  listing_page_url: https://niftem.ac.in/newsite/pmfme/?taining_category=spices-plantation-crops
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 08f33a95496e0f6b98fcbe1a5dea5d2848641d03aa111150892fc0d02b30f520
+  bytes: 293403
+  pages: 25
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/niftem_chillipowder_dpr.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 114000 Kg/annum red chilli powder (50 kg per hr; 60-80% capacity utilisation in years 1-5)
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: Rs. 14.71 Lakh
+  robots_txt_ok: true
+  notes: 'Standard NIFTEM PMFME template: term-loan schedule, depreciation, projected balance sheet, cash flow and DSCR also present. No printed date (PDF metadata created 2021-04-13). Machinery cost stated as excluding GST and transport. No land/building cost (assumed rented/owned). Single-spice (chilli) unit rather than mixed masala.'
+- business_model: spice-processing
+  title: SPICES GRINDING
+  publisher: National Scheduled Tribes Finance and Development Corporation (NSTFDC), Ministry of Tribal Affairs
+  source_slug_hint: other:nstfdc-model-project-profiles
+  url: https://nstfdc.tribal.gov.in/UploadData/pdf/spices_grinding.pdf
+  listing_page_url: https://nstfdc.tribal.gov.in/frm_model_project_profiles.aspx
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: ad928ec5dd72131b2b761c653985ec6f9b195fc357bdb3b5bcd2a475a549bc07
+  bytes: 19013
+  pages: 6
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/nstfdc_spices_grinding.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 1,745 kg each of chilli, jeera, dhania and haldi powder per annum (2 chakkis of 30 kg capacity)
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: 1,00,000.00 (Amount in Rs.)
+  robots_txt_ok: true
+  notes: Short, clean, fully text-extractable profile with simple tables - easy to parse. Undated (PDF metadata created 2012-06-19); unit prices and wages are clearly much older than 2012 (e.g. wages Rs 2,000-3,000/month), so price basis is stale. robots.txt returns HTTP 404 (no robots file) - treated as no restriction. Working-capital table sums to 57,250 but 57,000 is carried into project cost (small internal mismatch). Two orders of magnitude smaller than the NIFTEM DPR - good contradictory-cost pair.
+- business_model: mushroom-cultivation
+  title: MUSHROOM CULTIVATION
+  publisher: National Scheduled Tribes Finance and Development Corporation (NSTFDC), Ministry of Tribal Affairs
+  source_slug_hint: other:nstfdc-model-project-profiles
+  url: https://nstfdc.tribal.gov.in/UploadData/pdf/mushroomcultiv.pdf
+  listing_page_url: https://nstfdc.tribal.gov.in/frm_model_project_profiles.aspx
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 6685b45d1c72d8eccda0559eb5b04cc360c3ffb5b950fce9dc446bd52f8eb8cb
+  bytes: 22585
+  pages: 5
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/nstfdc_mushroom_cultivation.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 'Production target: 8000 kg per annum'
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: 1,40,000.00 (Rs.)
+  robots_txt_ok: true
+  notes: Short, clean, fully text-extractable profile with simple tables - easy to parse. Undated (PDF metadata created 2012-06-14); unit prices and wages are clearly much older than 2012 (e.g. wages Rs 2,000-3,000/month), so price basis is stale. robots.txt returns HTTP 404 (no robots file) - treated as no restriction. Sales assumed at Rs.40/kg. One duplicated line in extracted text.
+- business_model: mushroom-cultivation
+  title: 'PROJECT REPORT FOR SETTING UP OF INTEGRATED MUSHROOM CULTIVATION UNIT (cover: FEASIBILITY REPORT)'
+  publisher: Directorate of Horticulture, Government of Bihar (HORTMIS)
+  source_slug_hint: other:bihar-horticulture
+  url: https://horticulture.bihar.gov.in/HORTMIS/ProjectBasedActivity/ProjectDocuments/Mushroom/Small_MUSHROOM_UNIT%202.00%20lakh.pdf
+  listing_page_url: not found (URL located via web search)
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: a2fa7ee1c97949eff1ea2e208ed72a2c5f35e413b0379e3873190fb7aece0c6b
+  bytes: 505279
+  pages: 20
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/biharhort_small_mushroom_unit.pdf
+  document_date: not stated
+  price_basis_year: not stated (statistics tables run to 2024)
+  capacity_described: Around 3.00 tons of white button mushroom production (3.00 TPA fresh)
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: Rs. 2.10 lakhs
+  robots_txt_ok: true
+  notes: Blank-promoter template for a small button-mushroom unit; file name says '2.00 lakh' but text says Rs 2.10 lakh. About half the 20 pages are cultivation technique / market background. Sales at Rs 120/kg vs Rs 40/kg in the NSTFDC profile. Staffing detail is thin. robots.txt returns HTTP 404 (empty body) - treated as no restriction.
+- business_model: mushroom-cultivation
+  title: PROJECT REPORT Of MUSHROOM CULTIVATION & PROCESSING
+  publisher: Department of MSME & Export Promotion, Government of Uttar Pradesh (UP MSME 1-Connect portal)
+  source_slug_hint: other:up-msme-1connect
+  url: https://msme1connect.up.gov.in/Projectreport/Project%20Report638665945067973721.pdf
+  listing_page_url: https://msme1connect.up.gov.in/Home/BusinessDetails?Id=18
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 4176d951fee6c46e7cc2c97804e8faffc181f3984bad47b64e8b9f1a07b117eb
+  bytes: 770343
+  pages: 8
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/upmsme_mushroom_cultivation.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: not stated
+  contains:
+  - sales realisation
+  - profitability / break-even
+  - projected balance sheet & cash flow
+  total_project_cost_as_stated: not stated
+  robots_txt_ok: true
+  notes: 'No printed date or author; PDF metadata created 2024-11-07. Generic consultant-style ''pre-feasibility'' template with entrepreneur fields blanked and a disclaimer that figures are drawn from internet/suppliers. ABBREVIATED report: text contains only introduction plus projected balance sheet, cash flow and profitability statement (Rs lakh) - no machinery list, no explicit cost-of-project table, no capacity statement. Project cost must be inferred (gross fixed assets 13.69, term loan 12.77, cash credit 5.22, capital 2.00; year-1 sales 76.95). GST treatment not stated.'
+- business_model: mushroom-cultivation
+  title: DETAILED PROJECT REPORT CANNED MUSHROOM UNIT UNDER PMFME SCHEME
+  publisher: NIFTEM, Kundli (PMFME scheme, Ministry of Food Processing Industries)
+  source_slug_hint: niftem-pmfme-dpr
+  url: https://niftem.ac.in/newsite/pmfme/wp-content/uploads/2022/07/cannedmushroomdpr.pdf
+  listing_page_url: https://niftem.ac.in/newsite/pmfme/?taining_category=fruits-and-vegetables
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 278706a7de28d950a05b9c87f82cf8a8e6f99ca52a73c2e962d3de495592ca1b
+  bytes: 896881
+  pages: 28
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/niftem_cannedmushroom_dpr.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 235200 Kg/annum canned mushroom (100 kg per hr; 50-70% capacity utilisation in years 1-5)
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: Rs. 39.14 Lakh
+  robots_txt_ok: true
+  notes: 'NEAREST SUBSTITUTE: mushroom PROCESSING (canning), not cultivation. Standard NIFTEM PMFME template: term-loan schedule, depreciation, projected balance sheet, cash flow and DSCR also present. No printed date (PDF metadata created 2021-02-10). Machinery cost stated as excluding GST and transport. No land/building cost (assumed rented/owned). Cover-page text is garbled by overlapping glyphs (e.g. "DET TAILED PROJECT") although body tables extract cleanly.'
+- business_model: mushroom-cultivation
+  title: Model Detailed Project Report CANNED MUSHROOM UNIT Under the Formalization of Micro Food Processing Enterprises Scheme
+  publisher: Indian Institute of Food Processing Technology (IIFPT), Thanjavur - now NIFTEM-T (PMFME scheme, Ministry of Food Processing Industries)
+  source_slug_hint: niftem-pmfme-dpr
+  url: https://niftem-t.ac.in/pmfme/dpr-cmushroom.pdf
+  listing_page_url: https://niftem-t.ac.in/pmfme/
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: eefd2ec8c2b17d5e820f708f828434223d01a5168dca991ce2cab6321adea860
+  bytes: 531375
+  pages: 20
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/niftemt_cmushroom_dpr.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 'Canned Mushroom: 180000 kg/annum (50-70% capacity utilisation in years 1-5)'
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: Rs. 31.8Lakh
+  robots_txt_ok: true
+  notes: 'NEAREST SUBSTITUTE: mushroom PROCESSING (canning), not cultivation. Same product as the NIFTEM-Kundli canned mushroom DPR but different institute, capacity (180,000 vs 235,200 kg/annum) and cost (31.8 vs 39.14 lakh) - a direct contradictory-cost pair, though both sit under the same PMFME scheme. No printed date (PDF created 2021-01-12). robots.txt returns HTTP 404 (no robots file) - treated as no restriction.'
+- business_model: corrugated-box-manufacturing
+  title: PROJECT REPORT Of CORRUGATED BOXES
+  publisher: Department of MSME & Export Promotion, Government of Uttar Pradesh (UP MSME 1-Connect portal)
+  source_slug_hint: other:up-msme-1connect
+  url: https://msme1connect.up.gov.in/Projectreport/Project%20Report638658577659968214.pdf
+  listing_page_url: https://msme1connect.up.gov.in/Home/BusinessDetails?Id=15
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 661b2dd28fc5b80863b17313a57f8261f513669ae13033fe484b09243a66bcf3
+  bytes: 928001
+  pages: 8
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/upmsme_corrugated_box.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: not stated
+  contains:
+  - sales realisation
+  - profitability / break-even
+  - projected balance sheet & cash flow
+  total_project_cost_as_stated: not stated
+  robots_txt_ok: true
+  notes: 'No printed date or author; PDF metadata created 2024-10-18. Generic consultant-style ''pre-feasibility'' template with entrepreneur fields blanked and a disclaimer that figures are drawn from internet/suppliers. ABBREVIATED report: text contains only introduction plus projected balance sheet, cash flow and profitability statement (Rs lakh) - no machinery list, no explicit cost-of-project table, no capacity statement. Project cost must be inferred (gross fixed assets 16.15, term loan 14.99, cash credit 7.37, capital 2.48; year-1 sales 61.56). GST treatment not stated.'
+- business_model: corrugated-box-manufacturing
+  title: PROJECT PROFILE ON CARD BOARD BOXES MANUFACTURING UNIT (PROF. NO.37)
+  publisher: National Scheduled Tribes Finance and Development Corporation (NSTFDC), Ministry of Tribal Affairs
+  source_slug_hint: other:nstfdc-model-project-profiles
+  url: https://nstfdc.tribal.gov.in/UploadData/pdf/cardboard_boxes(1).pdf
+  listing_page_url: https://nstfdc.tribal.gov.in/frm_model_project_profiles.aspx
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 677e408e2ac98e4556d3764fdfc79ef58e9ea4f964fba6b96b02acfdeb49a611
+  bytes: 19438
+  pages: 6
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/nstfdc_cardboard_boxes.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 'Card Board Boxes: Quantity (Nos) 120000 per year, Value (Rs) 1200000'
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: Total 184000 (Rs; TOTAL CAPITAL INVESTMENT = machinery 110000 + one month working capital 74000)
+  robots_txt_ok: true
+  notes: 'NEAREST SUBSTITUTE: straw-board (card board) box unit with creasing/cutting/stitching machines, NOT a corrugation line. Short, clean, fully text-extractable profile with simple tables - easy to parse. Undated (PDF metadata created 2012-06-11); unit prices and wages are clearly much older than 2012 (e.g. wages Rs 2,000-3,000/month), so price basis is stale. robots.txt returns HTTP 404 (no robots file) - treated as no restriction. Several machinery items priced only as ''L.S.'' (lump sum) with no value; machinery total includes ''Sales Tax, Freight & Insurance'' (pre-GST).'
+- business_model: paper-products
+  title: PROJECT REPORT Of PAPER CUP
+  publisher: Department of MSME & Export Promotion, Government of Uttar Pradesh (UP MSME 1-Connect portal)
+  source_slug_hint: other:up-msme-1connect
+  url: https://msme1connect.up.gov.in/Projectreport/Project%20Report638658513876419061.pdf
+  listing_page_url: https://msme1connect.up.gov.in/Home/BusinessDetails?Id=38
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 696f07c8edaa5c19f5a59e01b534cca312b0508560f1c2ce290a36565270f353
+  bytes: 1298861
+  pages: 18
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/upmsme_paper_cup.pdf
+  document_date: not stated
+  price_basis_year: 2019-20 (projected sales labelled 2019-20)
+  capacity_described: 'Fully automatic paper cup unit: 50 pieces per minute, 30,000 pieces per day, 9,000,000 pieces per annum'
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: Rs 21.03 Lacs
+  robots_txt_ok: true
+  notes: 'No printed date or author; PDF metadata created 2024-10-30. Generic consultant-style ''pre-feasibility'' template with entrepreneur fields blanked and a disclaimer that figures are drawn from internet/suppliers. Full 18-page report with ''Project at a glance'', cost of project, means of finance (mentions KVIC margin money - PMEGP-style), DSCR 2.24 and BEP 44%. Typo in source: annual capacity once labelled ''pieces per day''. Some very long lines are truncated in layout extraction. Cover page nearly empty (image).'
+- business_model: paper-products
+  title: 'PROJECT REPORT PROJECT: PAPER BAG'
+  publisher: Department of MSME & Export Promotion, Government of Uttar Pradesh (UP MSME 1-Connect portal)
+  source_slug_hint: other:up-msme-1connect
+  url: https://msme1connect.up.gov.in/Projectreport/Project%20Report638652317325580261.pdf
+  listing_page_url: https://msme1connect.up.gov.in/Home/BusinessDetails?Id=39
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 72cdbb77ee3265fb07cde1e4902d516a165d01962c8f835e0fd94bac32d08e2f
+  bytes: 341223
+  pages: 7
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/upmsme_paper_bag.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 'not stated in text (listing page title: Paper Bag Manufacturing Unit (600KG/Day)); capacity utilisation 75%-90% over 6 years'
+  contains:
+  - sales realisation
+  - profitability / break-even
+  - projected balance sheet & cash flow
+  total_project_cost_as_stated: not stated
+  robots_txt_ok: true
+  notes: 'No printed date or author; PDF metadata created 2024-10-18. Generic consultant-style ''pre-feasibility'' template with entrepreneur fields blanked and a disclaimer that figures are drawn from internet/suppliers. ABBREVIATED report: text contains only introduction plus projected balance sheet, cash flow and profitability statement (Rs lakh) - no machinery list, no explicit cost-of-project table, no capacity statement. Project cost must be inferred (gross fixed assets 6.89, term loan 5.17, cash credit 6.00; year-1 sales 43.56). GST treatment not stated. Page 2 has no text (image).'
+- business_model: paper-products
+  title: PROJECT PROFILE ON PAPER NAPKINS MANUFACTURINGUNIT (PROF. NO.34)
+  publisher: National Scheduled Tribes Finance and Development Corporation (NSTFDC), Ministry of Tribal Affairs
+  source_slug_hint: other:nstfdc-model-project-profiles
+  url: https://nstfdc.tribal.gov.in/UploadData/pdf/paper_napkins.pdf
+  listing_page_url: https://nstfdc.tribal.gov.in/frm_model_project_profiles.aspx
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: ea9c217df79025b0efb940a207603dabaff2861e3c308e6b3da9d01ea0f65c9d
+  bytes: 18787
+  pages: 6
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/nstfdc_paper_napkins.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 'Paper Napkins: Quantity (Kg) 150000 per year, Value (Rs) 6750000'
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: Total 1279100 (Rs; TOTAL CAPITAL INVESTMENT)
+  robots_txt_ok: true
+  notes: 'NEAREST SUBSTITUTE: paper napkins, not cups/plates/bags (no second-publisher cup/plate/bag profile was reachable). Short, clean, fully text-extractable profile with simple tables - easy to parse. Undated (PDF metadata created 2012-06-12); unit prices and wages are clearly much older than 2012 (e.g. wages Rs 2,000-3,000/month), so price basis is stale. robots.txt returns HTTP 404 (no robots file) - treated as no restriction. Some machinery priced only as ''L.S.''.'
+- business_model: food-dehydration
+  title: Model Detailed Project Report ONION PROCESSING UNIT Under the Formalization of Micro Food Processing Enterprises Scheme
+  publisher: Indian Institute of Food Processing Technology (IIFPT), Thanjavur - now NIFTEM-T (PMFME scheme, Ministry of Food Processing Industries)
+  source_slug_hint: niftem-pmfme-dpr
+  url: https://niftem-t.ac.in/pmfme/DPR-Onion.pdf
+  listing_page_url: https://niftem-t.ac.in/pmfme/
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: bed92385a39ced785d71438d22fce63a4f3d9af1baa38e2c32a8839c3705cd82
+  bytes: 935966
+  pages: 27
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/niftemt_onion_dpr.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 150 MT/annum (70, 80 & 90% capacity utilization in the 2nd, 3rd and 4th years onwards)
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: Rs. 30 Lakhs
+  robots_txt_ok: true
+  notes: Covers dehydrated onion flakes and powder PLUS onion paste and vacuum-packed onion in one unit, so not a pure dehydration line. Machinery table lists power rating, capacity, qty and cost (Rs lakh) incl. solar dryer and slicer. No printed date (PDF modified 2020-09-01). robots.txt returns HTTP 404 (no robots file) - treated as no restriction.
+- business_model: food-dehydration
+  title: PROJECT REPORT Of GARLIC POWDER & FLAKES
+  publisher: Department of MSME & Export Promotion, Government of Uttar Pradesh (UP MSME 1-Connect portal)
+  source_slug_hint: other:up-msme-1connect
+  url: https://msme1connect.up.gov.in/Projectreport/Project%20Report638665731337389196.pdf
+  listing_page_url: https://msme1connect.up.gov.in/Home/BusinessDetails?Id=91
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 62d902c3891ba848f8da9a87fc8b8ae09dc1454492498c29616135a10dcfd805
+  bytes: 871981
+  pages: 8
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/upmsme_garlic_powder_flakes.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: not stated
+  contains:
+  - sales realisation
+  - profitability / break-even
+  - projected balance sheet & cash flow
+  total_project_cost_as_stated: not stated
+  robots_txt_ok: true
+  notes: 'No printed date or author; PDF metadata created 2024-11-07. Generic consultant-style ''pre-feasibility'' template with entrepreneur fields blanked and a disclaimer that figures are drawn from internet/suppliers. ABBREVIATED report: text contains only introduction plus projected balance sheet, cash flow and profitability statement (Rs lakh) - no machinery list, no explicit cost-of-project table, no capacity statement. Project cost must be inferred (gross fixed assets 17.38, term loan 16.18, cash credit 6.32, capital 2.50; year-1 sales 153.90). GST treatment not stated. Dehydrated garlic rather than onion/vegetables/fruit.'
+- business_model: beekeeping-honey
+  title: DETAILED PROJECT REPORT HONEY PROCESSING BUSINESS UNDER PMFME SCHEME
+  publisher: NIFTEM, Kundli (PMFME scheme, Ministry of Food Processing Industries)
+  source_slug_hint: niftem-pmfme-dpr
+  url: https://niftem.ac.in/newsite/pmfme/wp-content/uploads/2022/08/honeyprocessingdpr.pdf
+  listing_page_url: https://niftem.ac.in/newsite/pmfme/?taining_category=minor-forest-based-products
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 69aa631898449de22a68f03fac58eea8c2df2b2d2cbb08b01ae913a5f902968a
+  bytes: 407746
+  pages: 25
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/niftem_honeyprocessing_dpr.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 176640 Kg/annum honey (80 Kg per hour; 55-62% capacity utilisation in years 1-5)
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: Rs.20.56 Lakh
+  robots_txt_ok: true
+  notes: 'Standard NIFTEM PMFME template: term-loan schedule, depreciation, projected balance sheet, cash flow and DSCR also present. No printed date (PDF metadata created 2021-03-06). Machinery cost stated as excluding GST and transport. No land/building cost (assumed rented/owned). Honey PROCESSING/packing only (buys raw honey) - no apiary/beekeeping costs.'
+- business_model: beekeeping-honey
+  title: PROJECT PROFILE ON BEE KEEPING & HONEY PROCESSING UNIT (PROF. NO.8)
+  publisher: National Scheduled Tribes Finance and Development Corporation (NSTFDC), Ministry of Tribal Affairs
+  source_slug_hint: other:nstfdc-model-project-profiles
+  url: https://nstfdc.tribal.gov.in/UploadData/pdf/bee_keeping.pdf
+  listing_page_url: https://nstfdc.tribal.gov.in/frm_model_project_profiles.aspx
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: c1f4e32ac7f043339ab00c322341cc19f589bac3632f6156f28021af9ca1474d
+  bytes: 22297
+  pages: 7
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/nstfdc_bee_keeping.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 'not reliably stated: production-target table reads ''Ginned Cotton, Quantity (Kg) 75000, Value (Rs) 3000000'' (template error); machinery list is 100 honey boxes'
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: Total 342900 (Rs; TOTAL CAPITAL INVESTMENT)
+  robots_txt_ok: true
+  notes: 'Short, clean, fully text-extractable profile with simple tables - easy to parse. Undated (PDF metadata created 2012-06-08); unit prices and wages are clearly much older than 2012 (e.g. wages Rs 2,000-3,000/month), so price basis is stale. robots.txt returns HTTP 404 (no robots file) - treated as no restriction. SOURCE ERROR: the production-target block is copied from a cotton-ginning profile (''Ginned Cotton'') - a good test case for anomaly flagging. Covers beekeeping (hive boxes) plus processing, unlike the NIFTEM processing-only DPR.'
+- business_model: beekeeping-honey
+  title: PROJECT REPORT Of HONEY BEE FARMING
+  publisher: Department of MSME & Export Promotion, Government of Uttar Pradesh (UP MSME 1-Connect portal)
+  source_slug_hint: other:up-msme-1connect
+  url: https://msme1connect.up.gov.in/Projectreport/Project%20Report638658902786138807.pdf
+  listing_page_url: https://msme1connect.up.gov.in/Home/BusinessDetails?Id=35
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: dfa90e0b60ad8805f3165939f14b856f7f10e82d45bca501f6625399cfac0e45
+  bytes: 946298
+  pages: 8
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/upmsme_honey_bee_farming.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: not stated
+  contains:
+  - sales realisation
+  - profitability / break-even
+  - projected balance sheet & cash flow
+  total_project_cost_as_stated: not stated
+  robots_txt_ok: true
+  notes: 'No printed date or author; PDF metadata created 2024-10-30. Generic consultant-style ''pre-feasibility'' template with entrepreneur fields blanked and a disclaimer that figures are drawn from internet/suppliers. ABBREVIATED report: text contains only introduction plus projected balance sheet, cash flow and profitability statement (Rs lakh) - no machinery list, no explicit cost-of-project table, no capacity statement. Project cost must be inferred (gross fixed assets 5.46, term loan 5.05, cash credit 0.90, capital 0.66; year-1 sales 9.12). GST treatment not stated. Listing page links the identical file twice (second URL .../Project%20Report638665940280623607.pdf returned a file of identical size and text; only one copy kept).'
+- business_model: readymade-garments
+  title: READYMADE GARMENTS
+  publisher: National Scheduled Tribes Finance and Development Corporation (NSTFDC), Ministry of Tribal Affairs
+  source_slug_hint: other:nstfdc-model-project-profiles
+  url: https://nstfdc.tribal.gov.in/UploadData/pdf/readymade_garments.pdf
+  listing_page_url: https://nstfdc.tribal.gov.in/frm_model_project_profiles.aspx
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: d51d16c681947be7111e0ddfbca63349acfe121bbca977270fbfd23519e93dcb
+  bytes: 21639
+  pages: 4
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/nstfdc_readymade_garments.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 4,800 garments per annum (shirts/tops 1000, trousers 900, ladies suits 1,900, nighties 1,000)
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: 1,00,000.00 (Rs.)
+  robots_txt_ok: true
+  notes: Short, clean, fully text-extractable profile with simple tables - easy to parse. Undated (PDF metadata created 2012-06-19); unit prices and wages are clearly much older than 2012 (e.g. wages Rs 2,000-3,000/month), so price basis is stale. robots.txt returns HTTP 404 (no robots file) - treated as no restriction. Micro tailoring-scale unit (3 foot-operated sewing machines + 1 overlock).
+- business_model: readymade-garments
+  title: PROJECT REPORT Of UNIFORM
+  publisher: Department of MSME & Export Promotion, Government of Uttar Pradesh (UP MSME 1-Connect portal)
+  source_slug_hint: other:up-msme-1connect
+  url: https://msme1connect.up.gov.in/Projectreport/Project%20Report638665896660878640.pdf
+  listing_page_url: https://msme1connect.up.gov.in/Home/BusinessDetails?Id=57
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 7e18f3c84895e2c79204c66e66e1439ae34b51b53bc4fe6ce7f0d54f87cc733c
+  bytes: 881750
+  pages: 8
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/upmsme_uniform.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: not stated
+  contains:
+  - sales realisation
+  - profitability / break-even
+  - projected balance sheet & cash flow
+  total_project_cost_as_stated: not stated
+  robots_txt_ok: true
+  notes: 'No printed date or author; PDF metadata created 2024-11-07. Generic consultant-style ''pre-feasibility'' template with entrepreneur fields blanked and a disclaimer that figures are drawn from internet/suppliers. ABBREVIATED report: text contains only introduction plus projected balance sheet, cash flow and profitability statement (Rs lakh) - no machinery list, no explicit cost-of-project table, no capacity statement. Project cost must be inferred (gross fixed assets 13.55, term loan 12.57, cash credit 9.90, capital 2.50; year-1 sales 119.70). GST treatment not stated. Uniform-making unit (a readymade-garment sub-type).'
+- business_model: readymade-garments
+  title: PROJECT REPORT Of BABY GARMENTS
+  publisher: Department of MSME & Export Promotion, Government of Uttar Pradesh (UP MSME 1-Connect portal)
+  source_slug_hint: other:up-msme-1connect
+  url: https://msme1connect.up.gov.in/Projectreport/Project%20Report638652132660954105.pdf
+  listing_page_url: https://msme1connect.up.gov.in/Home/BusinessDetails?Id=55
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 67d452eef3e611f95b93a4ae1a03828edd87368aefa8e3ea5a7bdd6c0c41633f
+  bytes: 808661
+  pages: 7
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/upmsme_baby_garments.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: not stated
+  contains:
+  - sales realisation
+  - profitability / break-even
+  - projected balance sheet & cash flow
+  total_project_cost_as_stated: not stated
+  robots_txt_ok: true
+  notes: 'No printed date or author; PDF metadata created 2024-10-18. Generic consultant-style ''pre-feasibility'' template with entrepreneur fields blanked and a disclaimer that figures are drawn from internet/suppliers. ABBREVIATED report: text contains only introduction plus projected balance sheet, cash flow and profitability statement (Rs lakh) - no machinery list, no explicit cost-of-project table, no capacity statement. Project cost must be inferred (gross fixed assets 15.95, term loan 14.73, cash credit 8.26, capital 2.56; year-1 sales 82.08). GST treatment not stated.'
+- business_model: coffee-kiosk-cafe
+  title: DETAILED PROJECT REPORT FOR PROCESSING OF COFFEE POWDER
+  publisher: NIFTEM-Thanjavur, formerly IIFPT (PMFME scheme, Ministry of Food Processing Industries)
+  source_slug_hint: niftem-pmfme-dpr
+  url: https://niftem-t.ac.in/pmfme/dpr-cpowder.pdf
+  listing_page_url: https://niftem-t.ac.in/pmfme/
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: ea1f84700395b6af4b27f17785b856f5dc29821f089e53bc3ea8639d9afe2010
+  bytes: 1320163
+  pages: 29
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/niftemt_cpowder_dpr.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: 40 MT/annum coffee powder (70, 80 & 90% capacity utilization in the 2nd, 3rd and 4th years onwards)
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: Rs. 30.00 Lakhs
+  robots_txt_ok: true
+  notes: 'SUBSTITUTE: roasted-and-ground coffee PROCESSING unit, not a kiosk/cafe (no government cafe/kiosk profile was reachable). No printed date (PDF last modified 2025-12-03). Long crop/processing background before economics; ''project at a glance'' table wraps across lines in extraction. Machinery table has roaster/grinder with unit prices; one row appears arithmetically odd (2 roasters x 50000 shown as 10,00,000) - check. robots.txt returns HTTP 404 (no robots file) - treated as no restriction.'
+- business_model: coffee-kiosk-cafe
+  title: PROJECT REPORT Of FOOD TRUCK BUSINESS
+  publisher: Department of MSME & Export Promotion, Government of Uttar Pradesh (UP MSME 1-Connect portal)
+  source_slug_hint: other:up-msme-1connect
+  url: https://msme1connect.up.gov.in/Projectreport/Project%20Report638658907292524711.pdf
+  listing_page_url: https://msme1connect.up.gov.in/Home/BusinessDetails?Id=79
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: e78946910cd57947c2e7682379690e0d974e711ff15d1185db4d2688a24cecbe
+  bytes: 1148693
+  pages: 15
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/upmsme_food_truck.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: not stated (single food truck; projected sales Rs 9.00-18.00 lakh over 5 years in one table, Rs 22.50 lakh in working-capital calculation)
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: 'Grand Total 9.84 (Rs lakh: machinery/equipment 6.84 + working capital 3.00)'
+  robots_txt_ok: true
+  notes: 'SUBSTITUTE: mobile fast-food/snack outlet, nearest retail food-service analogue to a coffee kiosk. No printed date or author; PDF metadata created 2024-10-28. Generic consultant-style ''pre-feasibility'' template with entrepreneur fields blanked and a disclaimer that figures are drawn from internet/suppliers. Equipment list itemised in rupees (Rs 6,83,500) while summaries are in lakh; projected-sales figures differ between sections (9.00 vs 22.50 lakh). No raw-material cost breakdown.'
+- business_model: coffee-kiosk-cafe
+  title: ROADSIDE DHABA
+  publisher: National Scheduled Tribes Finance and Development Corporation (NSTFDC), Ministry of Tribal Affairs
+  source_slug_hint: other:nstfdc-model-project-profiles
+  url: https://nstfdc.tribal.gov.in/UploadData/pdf/roadside_dhaba.pdf
+  listing_page_url: https://nstfdc.tribal.gov.in/frm_model_project_profiles.aspx
+  retrieved_on: '2026-11-24'
+  http_status: 200
+  sha256: 1e549d3d5e897117cff78682415c8554af1b4258b02995287ceabf61f1d4fe92
+  bytes: 20892
+  pages: 4
+  text_extractable: true
+  local_path: /tmp/claude-0/-home-user-planb/bed3fda5-0d82-5ec6-8f03-c3b0bdc170cc/scratchpad/pilot_docs/nstfdc_roadside_dhaba.pdf
+  document_date: not stated
+  price_basis_year: not stated
+  capacity_described: about 39 meals, 50 teas and 40 snack plates per day; annual sales Rs. 1625 x 300 days = 4,87,500/-
+  contains:
+  - machinery list with prices
+  - project cost summary
+  - raw material costs
+  - staffing & salaries
+  - sales realisation
+  - profitability / break-even
+  total_project_cost_as_stated: 70,000.00 (Rs.)
+  robots_txt_ok: true
+  notes: 'SUBSTITUTE: roadside eatery/tea-snack outlet, not a coffee kiosk. Short, clean, fully text-extractable profile with simple tables - easy to parse. Undated (PDF metadata created 2012-06-19); unit prices and wages are clearly much older than 2012 (e.g. wages Rs 2,000-3,000/month), so price basis is stale. robots.txt returns HTTP 404 (no robots file) - treated as no restriction. Tea priced at Rs 2/cup - shows how dated the price basis is.'
+
+# ---------------------------------------------------------------------------------------------------------
+# PROMISING URLS THAT FAILED FROM THIS CONTAINER ON 2026-11-24 - retry from an Indian network.
+# (URLs marked [search] were surfaced by web search only and were never successfully fetched or verified here.)
+#
+# KVIC PMEGP model project profiles - host www.kviconline.gov.in / kviconline.gov.in: connection failed at the
+# egress proxy on every attempt (4 tries, curl -m 40, exit 56 "connect unreachable"); robots.txt not obtainable.
+#   https://www.kviconline.gov.in/pmegp/pmegpweb/docs/commonprojectprofile/DryCleaners.pdf          [search] commercial-laundry (dry cleaning & laundry, ~Rs 9.97 lakh) - ONLY laundry lead found
+#   https://www.kviconline.gov.in/pmegp/pmegpweb/docs/commonprojectprofile/ReadymadeGarmentsDPR.pdf [search] readymade-garments
+#   https://www.kviconline.gov.in/pmegp/pmegpweb/docs/commonprojectprofile/LaundrySoap.pdf          [search] (laundry SOAP manufacturing - not a laundry service)
+#   Directory to browse for bakery / masala / paper cup / corrugated box / bee keeping profiles:
+#   https://www.kviconline.gov.in/pmegp/pmegpweb/docs/commonprojectprofile/
+# www.kvic.gov.in: reachable, but robots.txt is "User-agent: * / Disallow: /" - NOT crawled, honour or seek permission.
+#
+# DC-MSME / MSME-DI project profiles - dcmsme.gov.in and www.dcmsme.gov.in: TLS certificate could not be verified
+# (curl exit 60, "unable to get local issuer certificate"); verification was not bypassed.
+#   https://www.dcmsme.gov.in/publications/pmryprof/food/ch9.pdf                        [search] food-dehydration (dehydrated vegetables)
+#   https://www.dcmsme.gov.in/publications/pmryprof/food/ch6.pdf                        [search] food profile (unverified topic)
+#   https://dcmsme.gov.in/HOSIERY/GENT%20SHIRT%20AND%20TROUSER%20(1).pdf               [search] readymade-garments
+#   https://dcmsme.gov.in/39_Garment%20Sector%20%20by%20AK%20Verma.pdf                 [search] readymade-garments (2021, 100-machine unit)
+#   https://my.msme.gov.in/MyMsmeMob/MsmeProjectProfile/Home.htm                       [search] MSME project-profile index (TLS verify failure, exit 60)
+# msme.gov.in / www.msme.gov.in: HTTP 403 "Access Denied" (Akamai) even for robots.txt.
+# State MSME-DI sites (msmedimumbai.gov.in, www.msmedikolkata.gov.in, www.msmedibangalore.gov.in,
+#   www.msmedi-chennai.gov.in, msmedithrissur.gov.in): TLS handshake failed (curl exit 35).
+#
+# NABARD model bankable projects - www.nabard.org / nabard.org: TLS handshake failed after ~10 s (curl exit 35), 4 tries.
+#
+# Bihar Udyami Yojana - udyami.bihar.gov.in: TLS certificate has expired (curl exit 60); not bypassed.
+#   https://udyami.bihar.gov.in/pdf/Project_profiles.pdf                               [search] compilation incl. bakery, readymade garments, curry/rice powder
+# APICOL Odisha - apicol.nic.in: TLS handshake failed (exit 35).
+#   https://apicol.nic.in/images/Model%20DPRs/Agriculture/Model%20DPR-Bakery%20and%20Confectionery.pdf   [search] bakery
+# Ministry of Textiles - www.technotex.gov.in: TLS certificate verify failure (exit 60).
+#   https://www.technotex.gov.in/html/projectRMGIntroduction.pdf                       [search] readymade-garments (50/100/150/300-machine model reports)
+# MoFPI - www.mofpi.gov.in: TLS certificate verify failure (exit 60). pmfme.mofpi.gov.in is reachable but is a JS app (not explored).
+# CFTRI - www.cftri.res.in reachable, but both search-indexed PDFs now return HTTP 404:
+#   https://www.cftri.res.in/technologies/FVP/doo.pdf , https://cftri.res.in/kweb/technologies/FVP/dof.pdf   food-dehydration (dehydrated onion)
+# NHB - nhb.gov.in reachable (no robots.txt); its model project reports for button/oyster mushroom are HTML (.htm), not PDF,
+#   so they were not catalogued:  https://nhb.gov.in/model-project-reports/  [search]
+# Other hosts that failed (TLS handshake / proxy connect; nothing fetched): msmeonline.tn.gov.in, www.msmetamilnadu.tn.gov.in,
+#   www.editn.in, industry.kerala.gov.in, industries.kerala.gov.in, msme.odisha.gov.in, ganjam.odisha.gov.in, mpmsme.gov.in,
+#   www.mpcon.org, spicesboard.in, www.indiancoffee.org, dmrsolan.icar.gov.in, nsfdc.nic.in, nskfdc.nic.in, nhfdc.nic.in,
+#   textilescommittee.nic.in, www.nios.ac.in, udyamimitra.in, web.archive.org (Wayback copies of KVIC profiles exist per the
+#   archive.org availability API but web.archive.org itself was unreachable).
+# Reachable but not explored for lack of leads: www.nimsme.gov.in, coffeeboard.gov.in, nbcfdc.gov.in, www.nmdfc.org,
+#   agritech.tnau.ac.in, vikaspedia.in, www.ediindia.org, sidbi.in, dic.gov.in.

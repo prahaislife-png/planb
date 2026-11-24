@@ -40,6 +40,7 @@ create table intel.business_versions (
   stale_observations int not null default 0,
   parameters_c_or_better_pct numeric,
   non_research_rows int not null default 0,
+  restricted_source_rows int not null default 0,
   submitted_by uuid references auth.users (id),
   submitted_by_run uuid,
   submitted_at timestamptz not null default now(),
@@ -51,6 +52,7 @@ create table intel.business_versions (
 );
 comment on table intel.business_versions is 'Immutable, numbered snapshot of a business record submitted for human review. Version history is never rewritten: a newer approved version supersedes, it does not replace.';
 comment on column intel.business_versions.snapshot is 'Frozen JSON rendering of the normalised record at submission (built by intel.build_business_snapshot). The working data stays relational; this is the reviewable, diffable artefact.';
+comment on column intel.business_versions.restricted_source_rows is 'Observations at submission that come from sources whose recorded reuse terms do not (yet) permit commercial reuse. Must be 0 for publication.';
 comment on column intel.business_versions.non_research_rows is 'Number of demo/test rows feeding this version at submission. Must be 0 for publication.';
 create index business_versions_model_idx on intel.business_versions (business_model_id, version_no desc);
 create index business_versions_inbox_idx on intel.business_versions (status, submitted_at);
@@ -66,11 +68,11 @@ begin
   end if;
 
   if (new.business_model_id, new.version_no, new.snapshot, new.snapshot_hash, new.completeness_pct, new.critical_missing,
-      new.evidence_profile, new.open_conflicts, new.pending_claims, new.stale_observations, new.non_research_rows,
+      new.evidence_profile, new.open_conflicts, new.pending_claims, new.stale_observations, new.non_research_rows, new.restricted_source_rows,
       new.submitted_by, new.submitted_at, new.data_origin)
      is distinct from
      (old.business_model_id, old.version_no, old.snapshot, old.snapshot_hash, old.completeness_pct, old.critical_missing,
-      old.evidence_profile, old.open_conflicts, old.pending_claims, old.stale_observations, old.non_research_rows,
+      old.evidence_profile, old.open_conflicts, old.pending_claims, old.stale_observations, old.non_research_rows, old.restricted_source_rows,
       old.submitted_by, old.submitted_at, old.data_origin) then
     raise exception 'a submitted business version is immutable; submit a new version instead' using errcode = 'P0001';
   end if;
@@ -251,6 +253,18 @@ as $$
   )::int
 $$;
 
+-- Observations feeding a business model whose source may not (yet) be commercially reused.
+create or replace function intel.count_restricted_source_rows(p_model uuid) returns int
+language sql stable
+as $$
+  select count(*)::int
+  from intel.v_usable_observations o
+  join intel.sources s on s.id = o.source_id
+  where o.business_model_id = p_model
+    and not (s.reuse_status in ('permitted', 'permitted_with_attribution')
+             or (s.reuse_status = 'permission_required' and s.permission_granted_on is not null))
+$$;
+
 -- Submit the current state of a business record for human review.
 create or replace function intel.submit_business_version(p_model uuid, p_change_summary text default null, p_run uuid default null)
 returns intel.business_versions
@@ -278,18 +292,18 @@ begin
   insert into intel.business_versions (
     business_model_id, version_no, status, change_summary, snapshot, snapshot_hash,
     completeness_pct, critical_missing, missing_checks, evidence_profile, open_conflicts, pending_claims,
-    stale_observations, parameters_c_or_better_pct, non_research_rows, submitted_by, submitted_by_run, data_origin)
+    stale_observations, parameters_c_or_better_pct, non_research_rows, restricted_source_rows, submitted_by, submitted_by_run, data_origin)
   values (
     p_model,
     coalesce((select max(version_no) from intel.business_versions where business_model_id = p_model), 0) + 1,
-    'submitted', p_change_summary, v_snapshot, encode(extensions.digest(v_snapshot::text, 'sha256'), 'hex'),
+    'submitted', p_change_summary, v_snapshot, encode(sha256(convert_to(v_snapshot::text, 'UTF8')), 'hex'),
     v_c.completeness_pct, v_c.critical_missing, v_c.missing_checks,
     jsonb_build_object('A', v_q.grade_a, 'B', v_q.grade_b, 'C', v_q.grade_c, 'D', v_q.grade_d,
                        'verified', v_q.verified_count, 'unverified', v_q.unverified_count,
                        'assumptions', v_q.assumption_count, 'parameters', v_q.parameter_count,
                        'sections', v_q.section_profiles),
     v_q.open_conflicts, v_q.claims_pending_review, v_q.stale_count, v_q.parameters_c_or_better_pct,
-    intel.count_non_research_rows(p_model), auth.uid(), p_run, v_origin)
+    intel.count_non_research_rows(p_model), intel.count_restricted_source_rows(p_model), ops.current_user_id(), p_run, v_origin)
   returning * into v_row;
 
   update intel.business_models set lifecycle_status = 'in_review' where id = p_model;
@@ -310,12 +324,12 @@ begin
   if v_status is null then
     raise exception 'unknown decision %', p_decision using errcode = '22023';
   end if;
-  if auth.uid() is null then
+  if ops.current_user_id() is null then
     raise exception 'a review decision requires an authenticated reviewer' using errcode = '42501';
   end if;
 
   update intel.business_versions
-     set status = v_status, decided_by = auth.uid(), decided_at = now(), decision_comments = p_comments
+     set status = v_status, decided_by = ops.current_user_id(), decided_at = now(), decision_comments = p_comments
    where id = p_version
   returning * into v_row;
   if not found then
@@ -323,7 +337,7 @@ begin
   end if;
 
   insert into intel.research_reviews (subject_type, subject_id, business_model_id, decision, comments, reviewer)
-  values ('business_version', p_version, v_row.business_model_id, p_decision, p_comments, auth.uid());
+  values ('business_version', p_version, v_row.business_model_id, p_decision, p_comments, ops.current_user_id());
 
   update intel.business_models
      set lifecycle_status = case when v_status = 'approved' then 'approved' else 'researching' end
@@ -379,6 +393,9 @@ begin
   end if;
   if v.non_research_rows > 0 then
     blockers := blockers || format('%s demo/test rows feed this version', v.non_research_rows);
+  end if;
+  if v.restricted_source_rows > 0 then
+    blockers := blockers || format('%s observations come from sources whose reuse terms do not yet permit commercial publication', v.restricted_source_rows);
   end if;
   if v.completeness_pct < p.min_completeness_pct then
     blockers := blockers || format('completeness %s%% is below the required %s%%', v.completeness_pct, p.min_completeness_pct);
@@ -454,7 +471,7 @@ begin
     coalesce((select max(publication_no) from pub.publication_versions where business_model_id = v.business_model_id), 0) + 1,
     v.snapshot -> 'model' ->> 'slug', v.snapshot -> 'model' ->> 'name', v.snapshot,
     v.completeness_pct, v.evidence_profile,
-    (select to_jsonb(p) - 'singleton' - 'updated_by' from ops.publication_policy p), auth.uid())
+    (select to_jsonb(p) - 'singleton' - 'updated_by' from ops.publication_policy p), ops.current_user_id())
   returning * into v_row;
 
   update intel.business_versions set status = 'superseded'

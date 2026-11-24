@@ -1,0 +1,111 @@
+# Publishers of pilot documents that are not (yet) covered by the main registry research in sources.yaml.
+# Their reuse terms have NOT been read: reuse_status is "unclear", so automated ingestion cannot be enabled
+# and nothing derived from them can be published until a human checks the terms (task: verify_source_terms).
+- slug: nstfdc-model-project-profiles
+  name: "NSTFDC model project profiles"
+  publisher: "National Scheduled Tribes Finance and Development Corporation, Ministry of Tribal Affairs"
+  source_type: government_project_report
+  authority_level: quasi_government
+  base_url: "https://nstfdc.tribal.gov.in/"
+  information_available: "Short (4–7 page) model project profiles with machinery, project cost, wages, sales and profitability tables for very small units."
+  geographic_coverage: "national"
+  access_method: http_download
+  accessible: "yes"
+  accessibility_notes: "PDFs under /UploadData/pdf/ fetched with HTTP 200 on 2026-11-24."
+  api_available: "no"
+  requires_auth: false
+  reuse_status: unclear
+  reuse_notes: "Copyright / reuse policy page not yet read."
+  update_frequency: "unknown; documents are undated"
+  quality_limitations: ["Documents print no date or price-basis year", "Very small scales; prices appear old"]
+  candidate_adapter: "nstfdc_profiles"
+  recommended_ingestion: manual_only
+  evidence_urls: ["https://nstfdc.tribal.gov.in/UploadData/pdf/spices_grinding.pdf"]
+  checked_on: "2026-11-24"
+  confidence: unverified
+- slug: up-msme-1connect
+  name: "UP MSME 1-Connect project reports"
+  publisher: "Department of MSME and Export Promotion, Government of Uttar Pradesh"
+  source_type: government_project_report
+  authority_level: primary_government
+  base_url: "https://msme1connect.up.gov.in/"
+  information_available: "Project reports for small manufacturing and service units; some full, some abbreviated to projections only."
+  geographic_coverage: "state:Uttar Pradesh"
+  access_method: http_download
+  accessible: "yes"
+  accessibility_notes: "PDFs under /Projectreport/ fetched with HTTP 200 on 2026-11-24."
+  api_available: "no"
+  requires_auth: false
+  reuse_status: unclear
+  reuse_notes: "Copyright / reuse policy page not yet read."
+  update_frequency: "unknown"
+  quality_limitations: ["Several reports omit the machinery list and stated project cost", "Prepared for Uttar Pradesh; costs are not Maharashtra-specific"]
+  candidate_adapter: "up_msme_1connect"
+  recommended_ingestion: manual_only
+  evidence_urls: ["https://msme1connect.up.gov.in/"]
+  checked_on: "2026-11-24"
+  confidence: unverified
+- slug: ncdc-sample-dpr
+  name: "NCDC sample detailed project reports"
+  publisher: "National Cooperative Development Corporation"
+  source_type: government_project_report
+  authority_level: quasi_government
+  base_url: "https://www.ncdc.in/"
+  information_available: "Sample DPRs for cooperative-sector units."
+  geographic_coverage: "national"
+  access_method: http_download
+  accessible: "yes"
+  api_available: "no"
+  requires_auth: false
+  reuse_status: unclear
+  reuse_notes: "Copyright / reuse policy page not yet read."
+  update_frequency: "unknown"
+  quality_limitations: ["Cooperative-scale units, larger than a typical individual entrant"]
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls: ["https://www.ncdc.in/documents/downloads/09180405204.Sample-DPR_BAKERY-UNIT.pdf"]
+  checked_on: "2026-11-24"
+  confidence: unverified
+- slug: bihar-horticulture-projects
+  name: "Bihar Horticulture project documents"
+  publisher: "Directorate of Horticulture, Government of Bihar"
+  source_type: government_project_report
+  authority_level: primary_government
+  base_url: "https://horticulture.bihar.gov.in/"
+  information_available: "Model project documents for horticulture activities including mushroom cultivation."
+  geographic_coverage: "state:Bihar"
+  access_method: http_download
+  accessible: "yes"
+  api_available: "no"
+  requires_auth: false
+  reuse_status: unclear
+  reuse_notes: "Copyright / reuse policy page not yet read."
+  update_frequency: "unknown"
+  quality_limitations: ["Prepared for Bihar scheme norms; costs are not Maharashtra-specific"]
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
+  evidence_urls: ["https://horticulture.bihar.gov.in/"]
+  checked_on: "2026-11-24"
+  confidence: unverified
+# Placeholder until the main registry research lands in sources.yaml (which takes precedence for this slug).
+- slug: niftem-pmfme-dpr
+  name: "NIFTEM PMFME Detailed Project Reports"
+  publisher: "National Institute of Food Technology Entrepreneurship and Management (NIFTEM), Ministry of Food Processing Industries"
+  source_type: government_project_report
+  authority_level: primary_government
+  base_url: "https://niftem.ac.in/"
+  information_available: "Per-product detailed project reports for micro food-processing units prepared under the PMFME scheme: machinery lists, capacity, project cost, wages, five-year projections."
+  geographic_coverage: "national"
+  access_method: http_download
+  accessible: "yes"
+  api_available: "no"
+  requires_auth: false
+  reuse_status: unclear
+  reuse_notes: "Awaiting registry research."
+  update_frequency: "ad hoc"
+  quality_limitations: ["Documents print no date; PDF metadata suggests 2021–2022", "Template-generated; some sections contain leftovers from other products"]
+  candidate_adapter: "niftem_pmfme"
+  recommended_ingestion: manual_only
+  evidence_urls: ["https://niftem.ac.in/newsite/pmfme/wp-content/uploads/2022/08/chillipowderdpr.pdf"]
+  checked_on: "2026-11-24"
+  confidence: unverified
