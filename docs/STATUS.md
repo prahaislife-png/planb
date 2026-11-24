@@ -30,7 +30,7 @@ run" is three NIFTEM project reports processed end to end as the restricted `pla
 ## 2. Component status
 
 ### Database — ✅
-15 migrations; RLS on every table; audit trail; evidence-grade, review, versioning and publication rules in
+16 migrations; RLS on every table; audit trail; evidence-grade, review, versioning and publication rules in
 triggers and constraints; generated data dictionary and ERD. Applied and tested on PostgreSQL 16 with a local shim
 for Supabase's roles and `auth` schema. 🟡 **Never applied to an actual Supabase project.**
 

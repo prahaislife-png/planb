@@ -87,17 +87,17 @@ _RLS: enabled (7 policies) · audited: yes_
 | `slug` | text | no |  |  |  |
 | `name` | text | no |  |  |  |
 | `industry_id` | uuid | no |  | FK → intel.industries |  |
-| `family` | text | yes |  |  |  |
+| `family` | text | yes |  |  | Grouping of sibling operating models (e.g. "coffee"). Siblings are separate records. |
 | `description` | text | yes |  |  |  |
 | `operating_model` | text | yes |  |  |  |
 | `target_customers` | text | yes |  |  |  |
-| `revenue_archetype` | text | yes |  |  |  |
+| `revenue_archetype` | text | yes |  |  | Finance-engine driver kind expected for this model (triage hint from the backlog). |
 | `lifecycle_status` | text | no | `'backlog'::text` |  | backlog → researching → in_review → approved → published; needs_revalidation when evidence goes stale. Changed only by workflow functions. |
-| `is_pilot` | boolean | no | `false` |  |  |
+| `is_pilot` | boolean | no | `false` |  | One of the ten models researched in depth first. |
 | `research_priority` | integer | no | `3` |  |  |
 | `capital_tier_hypothesis` | text | yes |  |  | UNVERIFIED triage guess used only to prioritise the research backlog. Never shown to customers; real capital requirements come from cost observations. |
 | `geography_fit` | text[] | no | `'{}'::text[]` |  |  |
-| `backlog_notes` | text | yes |  |  |  |
+| `backlog_notes` | text | yes |  |  | Unverified research leads from the backlog (scales, regulatory leads, candidate sources). Never shown to customers. |
 | `data_origin` | ops.data_origin | yes |  |  |  |
 | `created_by` | uuid | yes |  | FK → auth.users |  |
 | `created_at` | timestamp with time zone | no | `now()` |  |  |
@@ -314,7 +314,7 @@ _RLS: enabled (7 policies) · audited: yes_
 | `capacity_period` | text | yes |  |  |  |
 | `geography_config` | text | yes |  |  |  |
 | `ownership_structure` | text | yes |  |  |  |
-| `financial_template_key` | text | yes |  | FK → intel.financial_model_templates |  |
+| `financial_template_key` | text | yes |  | FK → intel.financial_model_templates | Primary revenue archetype of this variant. |
 | `notes` | text | yes |  |  |  |
 | `data_origin` | ops.data_origin | yes |  |  |  |
 | `created_by` | uuid | yes |  | FK → auth.users |  |
@@ -357,13 +357,13 @@ _RLS: enabled (5 policies) · audited: yes_
 | `missing_checks` | text[] | no | `'{}'::text[]` |  |  |
 | `evidence_profile` | jsonb | no | `'{}'::jsonb` |  |  |
 | `open_conflicts` | integer | no | `0` |  |  |
-| `pending_claims` | integer | no | `0` |  |  |
+| `pending_claims` | integer | no | `0` |  | Extracted claims not yet reviewed at submission. Must be 0 for publication under the default policy. |
 | `stale_observations` | integer | no | `0` |  |  |
 | `parameters_c_or_better_pct` | numeric | yes |  |  |  |
 | `non_research_rows` | integer | no | `0` |  | Number of demo/test rows feeding this version at submission. Must be 0 for publication. |
 | `restricted_source_rows` | integer | no | `0` |  | Observations at submission that come from sources whose recorded reuse terms do not (yet) permit commercial reuse. Must be 0 for publication. |
 | `submitted_by` | uuid | yes |  | FK → auth.users |  |
-| `submitted_by_run` | uuid | yes |  |  |  |
+| `submitted_by_run` | uuid | yes |  |  | Pipeline run that submitted the version, when not submitted by a person. |
 | `submitted_at` | timestamp with time zone | no | `now()` |  |  |
 | `decided_by` | uuid | yes |  | FK → auth.users |  |
 | `decided_at` | timestamp with time zone | yes |  |  |  |
@@ -460,12 +460,12 @@ _RLS: enabled (7 policies) · audited: yes_
 | `description` | text | yes |  |  |  |
 | `equipment_id` | uuid | yes |  | FK → intel.equipment |  |
 | `raw_material_id` | uuid | yes |  | FK → intel.raw_materials |  |
-| `revenue_stream_id` | uuid | yes |  | FK → intel.revenue_streams |  |
+| `revenue_stream_id` | uuid | yes |  | FK → intel.revenue_streams | For variable costs: the revenue stream the cost belongs to. |
 | `quantity` | numeric | no | `1` |  | Units required by the variant (machines, head-count, sq ft…). Observations price ONE unit unless flagged is_line_total. |
 | `quantity_unit_code` | text | yes |  | FK → intel.units |  |
 | `pricing_basis` | text | no | `'per_unit'::text` |  | per_unit: observations price one unit and the model multiplies by quantity. stated_total: the source only states a total for the line (e.g. an annual P&L amount). |
-| `recurrence` | text | no |  |  |  |
-| `useful_life_years` | numeric | yes |  |  |  |
+| `recurrence` | text | no |  |  | one_time (capital), monthly, annual, per_unit_output or pct_of_revenue. |
+| `useful_life_years` | numeric | yes |  |  | Evidenced useful life. When NULL the category default is applied and recorded as a model assumption. |
 | `is_optional` | boolean | no | `false` |  |  |
 | `notes` | text | yes |  |  |  |
 | `research_run_id` | uuid | yes |  |  |  |
@@ -500,41 +500,41 @@ _RLS: enabled (6 policies) · audited: yes_
 | `id` | uuid | no | `gen_random_uuid()` | PK |  |
 | `cost_item_id` | uuid | no |  | FK → intel.cost_items |  |
 | `value` | numeric | no |  |  | Amount in `currency`, in absolute units (rupees, never lakh), for one `unit_code` per `period` — or for quantity_covered units when is_line_total. |
-| `value_low` | numeric | yes |  |  |  |
-| `value_high` | numeric | yes |  |  |  |
+| `value_low` | numeric | yes |  |  | Lower bound when the source gives a range. |
+| `value_high` | numeric | yes |  |  | Upper bound when the source gives a range. |
 | `currency` | character(3) | no | `'INR'::bpchar` |  |  |
-| `unit_code` | text | yes |  | FK → intel.units |  |
-| `period` | text | no |  |  |  |
-| `is_line_total` | boolean | no | `false` |  |  |
-| `quantity_covered` | numeric | yes |  |  |  |
-| `observed_on` | date | no |  |  |  |
-| `observed_on_precision` | text | no | `'day'::text` |  |  |
-| `location_id` | uuid | yes |  | FK → intel.locations |  |
-| `geographic_scope` | text | no | `'unspecified'::text` |  |  |
-| `scale_note` | text | yes |  |  |  |
-| `projection_year` | integer | yes |  |  |  |
+| `unit_code` | text | yes |  | FK → intel.units | Unit the value refers to (intel.units). Money is always 'inr' in absolute rupees. |
+| `period` | text | no |  |  | Time basis of the value: one_time, per_month, per_year, per_unit… |
+| `is_line_total` | boolean | no | `false` |  | True when value is the total for quantity_covered units rather than a price for one unit. |
+| `quantity_covered` | numeric | yes |  |  | Number of units a line-total value covers. |
+| `observed_on` | date | no |  |  | Date the figure refers to: quotation date, document date or observation date — not the date we recorded it. |
+| `observed_on_precision` | text | no | `'day'::text` |  | How precisely observed_on is known. 'year' = only the year is known; 'unknown' = the source is undated and the retrieval date was recorded instead. |
+| `location_id` | uuid | yes |  | FK → intel.locations | Geography node the figure applies to, when it is location-specific. |
+| `geographic_scope` | text | no | `'unspecified'::text` |  | Level at which the source says the figure applies (city, district, state, national). |
+| `scale_note` | text | yes |  |  | Free-text note on the scale or capacity the figure relates to. |
+| `projection_year` | integer | yes |  |  | When the source gives a multi-year projection, the projection year this value belongs to (1 = first operating year). |
 | `capacity_value` | numeric | yes |  |  |  |
 | `capacity_unit` | text | yes |  |  |  |
-| `source_id` | uuid | no |  | FK → intel.sources |  |
-| `source_document_id` | uuid | yes |  | FK → intel.source_documents |  |
-| `page_ref` | text | yes |  |  |  |
-| `section_ref` | text | yes |  |  |  |
-| `supplier_quote_id` | uuid | yes |  | FK → intel.supplier_quotes |  |
-| `tax_treatment` | text | no | `'unknown'::text` |  |  |
+| `source_id` | uuid | no |  | FK → intel.sources | Registry source the figure came from. |
+| `source_document_id` | uuid | yes |  | FK → intel.source_documents | Original document holding the figure, when there is one. |
+| `page_ref` | text | yes |  |  | Page of the source document that states the figure. |
+| `section_ref` | text | yes |  |  | Section or table of the source document. |
+| `supplier_quote_id` | uuid | yes |  | FK → intel.supplier_quotes | The supplier quotation this observation was created from, for evidence_type = supplier_quote. |
+| `tax_treatment` | text | no | `'unknown'::text` |  | Whether the figure includes GST. 'unknown' is a research gap, not 'exclusive'. |
 | `tax_rate_pct` | numeric | yes |  |  |  |
-| `installation` | text | no | `'unknown'::text` |  |  |
-| `evidence_type` | text | no |  |  |  |
-| `verification_status` | text | no | `'unverified'::text` |  |  |
-| `verified_by` | uuid | yes |  | FK → auth.users |  |
+| `installation` | text | no | `'unknown'::text` |  | Whether installation/commissioning is included in the figure. |
+| `evidence_type` | text | no |  |  | What kind of evidence this is. Determines the best grade the observation can reach. |
+| `verification_status` | text | no | `'unverified'::text` |  | unverified → verified / disputed / rejected. Only reviewers and admins can verify; rejected observations are kept but never used. |
+| `verified_by` | uuid | yes |  | FK → auth.users | Reviewer who verified the observation. |
 | `verified_at` | timestamp with time zone | yes |  |  |  |
-| `evidence_grade` | character(1) | no | `'D'::bpchar` |  | A current documented primary/authoritative evidence, verified · B corroborated by independent reasonably-current sources · C single source / older benchmark / self-reported · D estimate or assumption. |
-| `grade_basis` | text | yes |  |  |  |
-| `analyst_notes` | text | yes |  |  |  |
-| `valid_until` | date | yes |  |  |  |
-| `revalidate_by` | date | yes |  |  |  |
-| `supersedes_id` | uuid | yes |  | FK → intel.cost_observations | Points at the observation this one replaces (newer quotation, correction). The old row is retained as history. |
-| `research_run_id` | uuid | yes |  |  |  |
-| `data_origin` | ops.data_origin | yes |  |  |  |
+| `evidence_grade` | character(1) | no | `'D'::bpchar` |  | A verified primary/regulatory evidence · B corroborated by independent current sources · C single source, older benchmark or self-reported · D estimate or assumption. |
+| `grade_basis` | text | yes |  |  | Why the observation holds its grade (e.g. "corroborated by 2 independent sources"). |
+| `analyst_notes` | text | yes |  |  | Free-text notes by analysts. Private: never included in snapshots or publications. |
+| `valid_until` | date | yes |  |  | Date after which the figure itself expires (e.g. quotation validity). |
+| `revalidate_by` | date | yes |  |  | Date by which the figure must be re-confirmed. Past this date it counts as stale and blocks publication. |
+| `supersedes_id` | uuid | yes |  | FK → intel.cost_observations | The earlier observation this one replaces. The earlier row is retained as history. |
+| `research_run_id` | uuid | yes |  |  | Pipeline run that created the row, when created automatically. |
+| `data_origin` | ops.data_origin | yes |  |  | research = genuine research; demo / test rows can never be verified or published. |
 | `created_by` | uuid | yes |  | FK → auth.users |  |
 | `created_at` | timestamp with time zone | no | `now()` |  |  |
 | `updated_at` | timestamp with time zone | no | `now()` |  |  |
@@ -677,38 +677,38 @@ _RLS: enabled (6 policies) · audited: yes_
 |---|---|---|---|---|---|
 | `id` | uuid | no | `gen_random_uuid()` | PK |  |
 | `source_document_id` | uuid | no |  | FK → intel.source_documents |  |
-| `page_no` | integer | yes |  |  |  |
+| `page_no` | integer | yes |  |  | Page of the source document the claim was read from (1-based). |
 | `section_ref` | text | yes |  |  |  |
-| `quote` | text | no |  |  |  |
+| `quote` | text | no |  |  | Verbatim text from the page that states the claim. |
 | `quote_verified` | boolean | no | `false` |  | Set by a deterministic check that the quote text actually occurs on the cited page — the guard against hallucinated or injected extractions. LLMs never set this. |
-| `quote_match_score` | numeric | yes |  |  |  |
+| `quote_match_score` | numeric | yes |  |  | 1.0 = exact match after whitespace normalisation; lower = tolerant layout match. Diagnostic. |
 | `business_model_id` | uuid | yes |  | FK → intel.business_models |  |
 | `business_variant_id` | uuid | yes |  | FK → intel.business_variants |  |
 | `claim_type` | text | no |  |  |  |
-| `subject` | text | no |  |  |  |
-| `attribute` | text | yes |  |  |  |
-| `value_numeric` | numeric | yes |  |  |  |
+| `subject` | text | no |  |  | What the claim is about, as named in the source (e.g. a machine, a staff role). |
+| `attribute` | text | yes |  |  | Which property of the subject the value describes (unit_price, monthly_wage_per_head, annual_amount_year_1…). |
+| `value_numeric` | numeric | yes |  |  | The number exactly as printed in the source (2.80 for "Rs. 2.80 lakh"). |
 | `value_low` | numeric | yes |  |  |  |
 | `value_high` | numeric | yes |  |  |  |
 | `value_text` | text | yes |  |  |  |
-| `unit_raw` | text | yes |  |  |  |
+| `unit_raw` | text | yes |  |  | Unit exactly as printed, including any money scale ("Rs. in lacs"). |
 | `currency` | text | yes |  |  |  |
 | `period_raw` | text | yes |  |  |  |
 | `quantity` | numeric | yes |  |  |  |
-| `value_normalized` | numeric | yes |  |  |  |
+| `value_normalized` | numeric | yes |  |  | value_numeric converted to absolute units by the normalisation stage (280000 for 2.80 lakh). |
 | `unit_code` | text | yes |  | FK → intel.units |  |
 | `period` | text | yes |  |  |  |
-| `normalization_notes` | text | yes |  |  |  |
-| `qualifiers` | jsonb | no | `'{}'::jsonb` |  |  |
-| `target_kind` | text | yes |  |  |  |
+| `normalization_notes` | text | yes |  |  | What the normalisation stage did, or why it could not normalise. |
+| `qualifiers` | jsonb | no | `'{}'::jsonb` |  | Small closed set of extra facts from the extractor: revenue stream, projection year, tax treatment, recurrence… |
+| `target_kind` | text | yes |  |  | What kind of record the extractor proposes this claim should become. 'context' claims are kept as evidence but not materialised. |
 | `cost_category_slug` | text | yes |  |  |  |
 | `parameter_key` | text | yes |  |  |  |
-| `extraction_method` | text | no |  |  |  |
-| `extractor` | text | no |  |  |  |
+| `extraction_method` | text | no |  |  | llm, rule_based, manual (analyst correction) or import. |
+| `extractor` | text | no |  |  | Name and version of the extractor, or the model id. |
 | `extractor_confidence` | numeric | yes |  |  | Extractor self-reported confidence. Diagnostic only; never an evidence grade and never shown to customers. |
 | `research_run_id` | uuid | yes |  |  |  |
 | `dedupe_hash` | text | no |  |  | Hash of (page, subject, attribute, value, unit) so re-running extraction on the same document is idempotent. |
-| `status` | text | no | `'extracted'::text` |  |  |
+| `status` | text | no | `'extracted'::text` |  | extracted → accepted / rejected by a human; superseded when replaced by a correction. |
 | `reviewed_by` | uuid | yes |  | FK → auth.users |  |
 | `reviewed_at` | timestamp with time zone | yes |  |  |  |
 | `review_note` | text | yes |  |  |  |
@@ -858,13 +858,13 @@ _RLS: enabled (7 policies) · audited: yes_
 | `revenue_stream_id` | uuid | yes |  | FK → intel.revenue_streams |  |
 | `value` | numeric | no |  |  |  |
 | `unit_code` | text | yes |  | FK → intel.units |  |
-| `basis` | text | no |  |  |  |
-| `method` | text | no |  |  |  |
-| `rationale` | text | yes |  |  |  |
+| `basis` | text | no |  |  | observation = resolved from observations · derived = computed by the formula in rationale · assumption = explicit analyst or PlanB default value (always grade D). |
+| `method` | text | no |  |  | How the value was resolved from its sources (single observation, median, formula, manual…). |
+| `rationale` | text | yes |  |  | Why this value: the formula for derived values, the reason for assumptions, the conflict note for medians. |
 | `evidence_grade` | character(1) | no |  |  |  |
 | `location_level` | text | yes |  |  | Geographic level of the evidence behind this value after the fallback hierarchy (city-specific, district, state, national or assumed). |
-| `is_current` | boolean | no | `true` |  |  |
-| `set_by` | uuid | yes |  | FK → auth.users |  |
+| `is_current` | boolean | no | `true` |  | Exactly one current row per subject and scenario; superseded rows are retained as history. |
+| `set_by` | uuid | yes |  | FK → auth.users | Analyst who set the value by hand. Pipeline runs never overwrite an analyst-set value. |
 | `set_at` | timestamp with time zone | no | `now()` |  |  |
 | `superseded_at` | timestamp with time zone | yes |  |  |  |
 | `research_run_id` | uuid | yes |  |  |  |
@@ -900,14 +900,14 @@ _RLS: enabled (7 policies) · audited: yes_
 | `label` | text | no |  |  |  |
 | `kind` | text | no |  |  |  |
 | `engine_version` | text | no |  |  |  |
-| `input` | jsonb | no |  |  |  |
-| `input_hash` | text | no |  |  |  |
-| `summary` | jsonb | no |  |  |  |
+| `input` | jsonb | no |  |  | Exact engine input and scenario adjustments used. Sufficient to reproduce the outputs. |
+| `input_hash` | text | no |  |  | SHA-256 of the canonical validated engine input. |
+| `summary` | jsonb | no |  |  | Initial investment, funding, summary metrics, model notes and source reconciliation. |
 | `monthly` | jsonb | yes |  |  |  |
 | `annual` | jsonb | yes |  |  |  |
 | `warnings` | jsonb | no | `'[]'::jsonb` |  |  |
 | `parameter_count` | integer | no | `0` |  |  |
-| `assumption_count` | integer | no | `0` |  |  |
+| `assumption_count` | integer | no | `0` |  | How many model inputs behind this scenario are assumptions. |
 | `grade_profile` | jsonb | no | `'{}'::jsonb` |  | Count of model inputs by evidence grade plus explicit assumptions, so a scenario's arithmetic is never mistaken for the quality of its inputs. |
 | `weakest_grade` | character(1) | yes |  |  |  |
 | `is_current` | boolean | no | `true` |  |  |
@@ -1112,35 +1112,35 @@ _RLS: enabled (6 policies) · audited: yes_
 | Column | Type | Null | Default | Key | Description |
 |---|---|---|---|---|---|
 | `id` | uuid | no | `gen_random_uuid()` | PK |  |
-| `location_id` | uuid | no |  | FK → intel.locations |  |
+| `location_id` | uuid | no |  | FK → intel.locations | Geography node the figure applies to, when it is location-specific. |
 | `metric_key` | text | no |  | FK → intel.metric_definitions |  |
 | `segment` | text | yes |  |  | Optional sub-segment of the metric (e.g. "high street ground floor", "MIDC industrial shed", "unskilled"). |
 | `value` | numeric | no |  |  |  |
-| `value_low` | numeric | yes |  |  |  |
-| `value_high` | numeric | yes |  |  |  |
+| `value_low` | numeric | yes |  |  | Lower bound when the source gives a range. |
+| `value_high` | numeric | yes |  |  | Upper bound when the source gives a range. |
 | `currency` | character(3) | yes |  |  |  |
-| `unit_code` | text | yes |  | FK → intel.units |  |
-| `period` | text | yes |  |  |  |
-| `observed_on` | date | no |  |  |  |
-| `observed_on_precision` | text | no | `'day'::text` |  |  |
-| `geographic_scope` | text | no | `'unspecified'::text` |  |  |
-| `source_id` | uuid | no |  | FK → intel.sources |  |
-| `source_document_id` | uuid | yes |  | FK → intel.source_documents |  |
-| `page_ref` | text | yes |  |  |  |
-| `section_ref` | text | yes |  |  |  |
-| `tax_treatment` | text | no | `'unknown'::text` |  |  |
-| `evidence_type` | text | no |  |  |  |
-| `verification_status` | text | no | `'unverified'::text` |  |  |
-| `verified_by` | uuid | yes |  | FK → auth.users |  |
+| `unit_code` | text | yes |  | FK → intel.units | Unit the value refers to (intel.units). Money is always 'inr' in absolute rupees. |
+| `period` | text | yes |  |  | Time basis of the value: one_time, per_month, per_year, per_unit… |
+| `observed_on` | date | no |  |  | Date the figure refers to: quotation date, document date or observation date — not the date we recorded it. |
+| `observed_on_precision` | text | no | `'day'::text` |  | How precisely observed_on is known. 'year' = only the year is known; 'unknown' = the source is undated and the retrieval date was recorded instead. |
+| `geographic_scope` | text | no | `'unspecified'::text` |  | Level at which the source says the figure applies (city, district, state, national). |
+| `source_id` | uuid | no |  | FK → intel.sources | Registry source the figure came from. |
+| `source_document_id` | uuid | yes |  | FK → intel.source_documents | Original document holding the figure, when there is one. |
+| `page_ref` | text | yes |  |  | Page of the source document that states the figure. |
+| `section_ref` | text | yes |  |  | Section or table of the source document. |
+| `tax_treatment` | text | no | `'unknown'::text` |  | Whether the figure includes GST. 'unknown' is a research gap, not 'exclusive'. |
+| `evidence_type` | text | no |  |  | What kind of evidence this is. Determines the best grade the observation can reach. |
+| `verification_status` | text | no | `'unverified'::text` |  | unverified → verified / disputed / rejected. Only reviewers and admins can verify; rejected observations are kept but never used. |
+| `verified_by` | uuid | yes |  | FK → auth.users | Reviewer who verified the observation. |
 | `verified_at` | timestamp with time zone | yes |  |  |  |
-| `evidence_grade` | character(1) | no | `'D'::bpchar` |  |  |
-| `grade_basis` | text | yes |  |  |  |
-| `analyst_notes` | text | yes |  |  |  |
-| `valid_until` | date | yes |  |  |  |
-| `revalidate_by` | date | yes |  |  |  |
-| `supersedes_id` | uuid | yes |  | FK → intel.location_metrics |  |
-| `research_run_id` | uuid | yes |  |  |  |
-| `data_origin` | ops.data_origin | yes |  |  |  |
+| `evidence_grade` | character(1) | no | `'D'::bpchar` |  | A verified primary/regulatory evidence · B corroborated by independent current sources · C single source, older benchmark or self-reported · D estimate or assumption. |
+| `grade_basis` | text | yes |  |  | Why the observation holds its grade (e.g. "corroborated by 2 independent sources"). |
+| `analyst_notes` | text | yes |  |  | Free-text notes by analysts. Private: never included in snapshots or publications. |
+| `valid_until` | date | yes |  |  | Date after which the figure itself expires (e.g. quotation validity). |
+| `revalidate_by` | date | yes |  |  | Date by which the figure must be re-confirmed. Past this date it counts as stale and blocks publication. |
+| `supersedes_id` | uuid | yes |  | FK → intel.location_metrics | The earlier observation this one replaces. The earlier row is retained as history. |
+| `research_run_id` | uuid | yes |  |  | Pipeline run that created the row, when created automatically. |
+| `data_origin` | ops.data_origin | yes |  |  | research = genuine research; demo / test rows can never be verified or published. |
 | `created_by` | uuid | yes |  | FK → auth.users |  |
 | `created_at` | timestamp with time zone | no | `now()` |  |  |
 | `updated_at` | timestamp with time zone | no | `now()` |  |  |
@@ -1206,36 +1206,36 @@ _RLS: enabled (6 policies) · audited: yes_
 |---|---|---|---|---|---|
 | `id` | uuid | no | `gen_random_uuid()` | PK |  |
 | `business_model_id` | uuid | yes |  | FK → intel.business_models |  |
-| `location_id` | uuid | yes |  | FK → intel.locations |  |
+| `location_id` | uuid | yes |  | FK → intel.locations | Geography node the figure applies to, when it is location-specific. |
 | `metric_key` | text | no |  | FK → intel.metric_definitions |  |
 | `subject` | text | yes |  |  |  |
 | `value` | numeric | yes |  |  |  |
-| `value_low` | numeric | yes |  |  |  |
-| `value_high` | numeric | yes |  |  |  |
+| `value_low` | numeric | yes |  |  | Lower bound when the source gives a range. |
+| `value_high` | numeric | yes |  |  | Upper bound when the source gives a range. |
 | `value_text` | text | yes |  |  |  |
 | `currency` | character(3) | yes |  |  |  |
-| `unit_code` | text | yes |  | FK → intel.units |  |
-| `period` | text | yes |  |  |  |
-| `observed_on` | date | no |  |  |  |
-| `observed_on_precision` | text | no | `'day'::text` |  |  |
-| `geographic_scope` | text | no | `'unspecified'::text` |  |  |
-| `source_id` | uuid | no |  | FK → intel.sources |  |
-| `source_document_id` | uuid | yes |  | FK → intel.source_documents |  |
-| `page_ref` | text | yes |  |  |  |
-| `section_ref` | text | yes |  |  |  |
-| `tax_treatment` | text | no | `'unknown'::text` |  |  |
-| `evidence_type` | text | no |  |  |  |
-| `verification_status` | text | no | `'unverified'::text` |  |  |
-| `verified_by` | uuid | yes |  | FK → auth.users |  |
+| `unit_code` | text | yes |  | FK → intel.units | Unit the value refers to (intel.units). Money is always 'inr' in absolute rupees. |
+| `period` | text | yes |  |  | Time basis of the value: one_time, per_month, per_year, per_unit… |
+| `observed_on` | date | no |  |  | Date the figure refers to: quotation date, document date or observation date — not the date we recorded it. |
+| `observed_on_precision` | text | no | `'day'::text` |  | How precisely observed_on is known. 'year' = only the year is known; 'unknown' = the source is undated and the retrieval date was recorded instead. |
+| `geographic_scope` | text | no | `'unspecified'::text` |  | Level at which the source says the figure applies (city, district, state, national). |
+| `source_id` | uuid | no |  | FK → intel.sources | Registry source the figure came from. |
+| `source_document_id` | uuid | yes |  | FK → intel.source_documents | Original document holding the figure, when there is one. |
+| `page_ref` | text | yes |  |  | Page of the source document that states the figure. |
+| `section_ref` | text | yes |  |  | Section or table of the source document. |
+| `tax_treatment` | text | no | `'unknown'::text` |  | Whether the figure includes GST. 'unknown' is a research gap, not 'exclusive'. |
+| `evidence_type` | text | no |  |  | What kind of evidence this is. Determines the best grade the observation can reach. |
+| `verification_status` | text | no | `'unverified'::text` |  | unverified → verified / disputed / rejected. Only reviewers and admins can verify; rejected observations are kept but never used. |
+| `verified_by` | uuid | yes |  | FK → auth.users | Reviewer who verified the observation. |
 | `verified_at` | timestamp with time zone | yes |  |  |  |
-| `evidence_grade` | character(1) | no | `'D'::bpchar` |  |  |
-| `grade_basis` | text | yes |  |  |  |
-| `analyst_notes` | text | yes |  |  |  |
-| `valid_until` | date | yes |  |  |  |
-| `revalidate_by` | date | yes |  |  |  |
-| `supersedes_id` | uuid | yes |  | FK → intel.market_observations |  |
-| `research_run_id` | uuid | yes |  |  |  |
-| `data_origin` | ops.data_origin | yes |  |  |  |
+| `evidence_grade` | character(1) | no | `'D'::bpchar` |  | A verified primary/regulatory evidence · B corroborated by independent current sources · C single source, older benchmark or self-reported · D estimate or assumption. |
+| `grade_basis` | text | yes |  |  | Why the observation holds its grade (e.g. "corroborated by 2 independent sources"). |
+| `analyst_notes` | text | yes |  |  | Free-text notes by analysts. Private: never included in snapshots or publications. |
+| `valid_until` | date | yes |  |  | Date after which the figure itself expires (e.g. quotation validity). |
+| `revalidate_by` | date | yes |  |  | Date by which the figure must be re-confirmed. Past this date it counts as stale and blocks publication. |
+| `supersedes_id` | uuid | yes |  | FK → intel.market_observations | The earlier observation this one replaces. The earlier row is retained as history. |
+| `research_run_id` | uuid | yes |  |  | Pipeline run that created the row, when created automatically. |
+| `data_origin` | ops.data_origin | yes |  |  | research = genuine research; demo / test rows can never be verified or published. |
 | `created_by` | uuid | yes |  | FK → auth.users |  |
 | `created_at` | timestamp with time zone | no | `now()` |  |  |
 | `updated_at` | timestamp with time zone | no | `now()` |  |  |
@@ -1365,34 +1365,34 @@ _RLS: enabled (6 policies) · audited: yes_
 | `parameter_key` | text | no |  | FK → intel.financial_parameter_definitions | Key in intel.financial_parameter_definitions (FK added in migration 0006). |
 | `revenue_stream_id` | uuid | yes |  | FK → intel.revenue_streams |  |
 | `value` | numeric | no |  |  |  |
-| `value_low` | numeric | yes |  |  |  |
-| `value_high` | numeric | yes |  |  |  |
+| `value_low` | numeric | yes |  |  | Lower bound when the source gives a range. |
+| `value_high` | numeric | yes |  |  | Upper bound when the source gives a range. |
 | `currency` | character(3) | yes |  |  |  |
-| `unit_code` | text | yes |  | FK → intel.units |  |
-| `period` | text | yes |  |  |  |
-| `observed_on` | date | no |  |  |  |
-| `observed_on_precision` | text | no | `'day'::text` |  |  |
-| `location_id` | uuid | yes |  | FK → intel.locations |  |
-| `geographic_scope` | text | no | `'unspecified'::text` |  |  |
+| `unit_code` | text | yes |  | FK → intel.units | Unit the value refers to (intel.units). Money is always 'inr' in absolute rupees. |
+| `period` | text | yes |  |  | Time basis of the value: one_time, per_month, per_year, per_unit… |
+| `observed_on` | date | no |  |  | Date the figure refers to: quotation date, document date or observation date — not the date we recorded it. |
+| `observed_on_precision` | text | no | `'day'::text` |  | How precisely observed_on is known. 'year' = only the year is known; 'unknown' = the source is undated and the retrieval date was recorded instead. |
+| `location_id` | uuid | yes |  | FK → intel.locations | Geography node the figure applies to, when it is location-specific. |
+| `geographic_scope` | text | no | `'unspecified'::text` |  | Level at which the source says the figure applies (city, district, state, national). |
 | `scale_note` | text | yes |  |  |  |
 | `projection_year` | integer | yes |  |  | When the source gives a multi-year projection, the projection year this value belongs to (1 = first operating year). |
-| `source_id` | uuid | no |  | FK → intel.sources |  |
-| `source_document_id` | uuid | yes |  | FK → intel.source_documents |  |
-| `page_ref` | text | yes |  |  |  |
-| `section_ref` | text | yes |  |  |  |
-| `tax_treatment` | text | no | `'unknown'::text` |  |  |
-| `evidence_type` | text | no |  |  |  |
-| `verification_status` | text | no | `'unverified'::text` |  |  |
-| `verified_by` | uuid | yes |  | FK → auth.users |  |
+| `source_id` | uuid | no |  | FK → intel.sources | Registry source the figure came from. |
+| `source_document_id` | uuid | yes |  | FK → intel.source_documents | Original document holding the figure, when there is one. |
+| `page_ref` | text | yes |  |  | Page of the source document that states the figure. |
+| `section_ref` | text | yes |  |  | Section or table of the source document. |
+| `tax_treatment` | text | no | `'unknown'::text` |  | Whether the figure includes GST. 'unknown' is a research gap, not 'exclusive'. |
+| `evidence_type` | text | no |  |  | What kind of evidence this is. Determines the best grade the observation can reach. |
+| `verification_status` | text | no | `'unverified'::text` |  | unverified → verified / disputed / rejected. Only reviewers and admins can verify; rejected observations are kept but never used. |
+| `verified_by` | uuid | yes |  | FK → auth.users | Reviewer who verified the observation. |
 | `verified_at` | timestamp with time zone | yes |  |  |  |
-| `evidence_grade` | character(1) | no | `'D'::bpchar` |  |  |
-| `grade_basis` | text | yes |  |  |  |
-| `analyst_notes` | text | yes |  |  |  |
-| `valid_until` | date | yes |  |  |  |
-| `revalidate_by` | date | yes |  |  |  |
-| `supersedes_id` | uuid | yes |  | FK → intel.parameter_observations |  |
-| `research_run_id` | uuid | yes |  |  |  |
-| `data_origin` | ops.data_origin | yes |  |  |  |
+| `evidence_grade` | character(1) | no | `'D'::bpchar` |  | A verified primary/regulatory evidence · B corroborated by independent current sources · C single source, older benchmark or self-reported · D estimate or assumption. |
+| `grade_basis` | text | yes |  |  | Why the observation holds its grade (e.g. "corroborated by 2 independent sources"). |
+| `analyst_notes` | text | yes |  |  | Free-text notes by analysts. Private: never included in snapshots or publications. |
+| `valid_until` | date | yes |  |  | Date after which the figure itself expires (e.g. quotation validity). |
+| `revalidate_by` | date | yes |  |  | Date by which the figure must be re-confirmed. Past this date it counts as stale and blocks publication. |
+| `supersedes_id` | uuid | yes |  | FK → intel.parameter_observations | The earlier observation this one replaces. The earlier row is retained as history. |
+| `research_run_id` | uuid | yes |  |  | Pipeline run that created the row, when created automatically. |
+| `data_origin` | ops.data_origin | yes |  |  | research = genuine research; demo / test rows can never be verified or published. |
 | `created_by` | uuid | yes |  | FK → auth.users |  |
 | `created_at` | timestamp with time zone | no | `now()` |  |  |
 | `updated_at` | timestamp with time zone | no | `now()` |  |  |
@@ -1542,11 +1542,11 @@ _RLS: enabled (7 policies) · audited: yes_
 | `target_id` | uuid | yes |  |  |  |
 | `target_key` | text | yes |  |  |  |
 | `priority` | integer | no | `3` |  |  |
-| `requires_human` | boolean | no | `true` |  |  |
+| `requires_human` | boolean | no | `true` |  | True when the task cannot be completed by the pipeline (quotations, interviews, legal verification…). |
 | `status` | text | no | `'open'::text` |  |  |
 | `assignee` | uuid | yes |  | FK → auth.users |  |
 | `due_on` | date | yes |  |  |  |
-| `generated_by` | text | no | `'manual'::text` |  |  |
+| `generated_by` | text | no | `'manual'::text` |  | Rule or completeness check that raised the task, or 'manual'. |
 | `dedupe_key` | text | yes |  |  | Stable key of the gap that produced the task; at most one live task per key, so re-running gap analysis never duplicates work. |
 | `research_run_id` | uuid | yes |  |  |  |
 | `resolution_note` | text | yes |  |  |  |
@@ -1655,16 +1655,16 @@ _RLS: enabled (6 policies) · audited: yes_
 | `http_last_modified` | text | yes |  |  |  |
 | `mime_type` | text | no |  |  |  |
 | `byte_size` | bigint | no |  |  |  |
-| `sha256` | text | no |  |  |  |
+| `sha256` | text | no |  |  | SHA-256 of the original file. Identity of the document; also its storage path. |
 | `storage_bucket` | text | no | `'evidence'::text` |  |  |
-| `storage_path` | text | no |  |  |  |
+| `storage_path` | text | no |  |  | Path inside the private evidence bucket. |
 | `page_count` | integer | yes |  |  |  |
 | `language` | text | no | `'en'::text` |  |  |
 | `document_date` | date | yes |  |  |  |
-| `document_date_precision` | text | no | `'unknown'::text` |  |  |
+| `document_date_precision` | text | no | `'unknown'::text` |  | How precisely the document date is known; 'year' often means it was taken from PDF metadata because the document prints no date. |
 | `price_basis_year` | integer | yes |  |  | Year the document's prices refer to, when determinable. Old benchmarks are downgraded by the evidence-grade rules. |
-| `text_status` | text | no | `'pending'::text` |  |  |
-| `licence_snapshot` | text | yes |  |  |  |
+| `text_status` | text | no | `'pending'::text` |  | pending → extracted; needs_ocr when the PDF has no text layer. |
+| `licence_snapshot` | text | yes |  |  | The source's licence and reuse status as recorded when the document was ingested. |
 | `superseded_by` | uuid | yes |  | FK → intel.source_documents |  |
 | `uploaded_by` | uuid | yes |  | FK → auth.users |  |
 | `notes` | text | yes |  |  |  |
@@ -1717,20 +1717,20 @@ _RLS: enabled (7 policies) · audited: yes_
 | `robots_txt_summary` | text | yes |  |  |  |
 | `licence_name` | text | yes |  |  |  |
 | `licence_url` | text | yes |  |  |  |
-| `licence_quoted_terms` | text | yes |  |  |  |
+| `licence_quoted_terms` | text | yes |  |  | Verbatim excerpt of the operative reuse terms, as read on terms_checked_on. |
 | `reuse_status` | text | no | `'unclear'::text` |  | Legal reuse position as read from the source's own terms. permission_required/unclear/prohibited sources cannot have automated ingestion enabled (see constraint). |
 | `reuse_notes` | text | yes |  |  |  |
 | `permission_contact` | text | yes |  |  |  |
-| `permission_granted_on` | date | yes |  |  |  |
-| `permission_evidence` | text | yes |  |  |  |
+| `permission_granted_on` | date | yes |  |  | Date written permission to reuse was received, for permission_required sources. |
+| `permission_evidence` | text | yes |  |  | Where the written permission is filed (email reference, document). |
 | `terms_checked_on` | date | yes |  |  |  |
 | `registry_confidence` | text | no | `'unverified'::text` |  | verified = licence/terms page was actually read on terms_checked_on. unverified = recorded from prior knowledge; must be checked before reliance. |
 | `update_frequency` | text | yes |  |  |  |
 | `quality_limitations` | text[] | no | `'{}'::text[]` |  |  |
 | `default_revalidation_days` | integer | no | `365` |  |  |
 | `adapter_key` | text | yes |  |  |  |
-| `recommended_ingestion` | text | no | `'manual_only'::text` |  |  |
-| `ingestion_enabled` | boolean | no | `false` |  |  |
+| `recommended_ingestion` | text | no | `'manual_only'::text` |  | Research recommendation: automated, manual_only or do_not_ingest. |
+| `ingestion_enabled` | boolean | no | `false` |  | Whether adapters may fetch from this source. An explicit admin decision, constrained by reuse rights. |
 | `rate_limit_per_minute` | integer | no | `12` |  |  |
 | `last_checked_at` | timestamp with time zone | yes |  |  |  |
 | `last_ingested_at` | timestamp with time zone | yes |  |  |  |
@@ -2117,7 +2117,7 @@ _RLS: enabled (4 policies) · audited: yes_
 | `unit_code` | text | yes |  | FK → intel.units |  |
 | `period` | text | yes |  |  |  |
 | `reference_year` | integer | yes |  |  |  |
-| `evidence_level` | text | no |  |  |  |
+| `evidence_level` | text | no |  |  | documented = a supporting document was seen and referenced · self_reported = the owner's word only (never better than grade C). |
 | `supporting_document_path` | text | yes |  |  |  |
 | `verification_status` | text | no | `'unverified'::text` |  |  |
 | `verified_by` | uuid | yes |  | FK → auth.users |  |
@@ -2232,9 +2232,9 @@ _RLS: enabled (4 policies) · audited: yes_
 | `consent_id` | uuid | yes |  | FK → gt.consents |  |
 | `business_model_id` | uuid | no |  | FK → intel.business_models |  |
 | `business_variant_id` | uuid | yes |  | FK → intel.business_variants |  |
-| `location_id` | uuid | yes |  | FK → intel.locations |  |
+| `location_id` | uuid | yes |  | FK → intel.locations | District-level or coarser location, to keep the interview de-identified. |
 | `questionnaire_id` | uuid | yes |  | FK → gt.questionnaires |  |
-| `business_status` | text | no |  |  |  |
+| `business_status` | text | no |  |  | operating, closed, sold or paused. Closed and sold businesses are sought deliberately. |
 | `started_year` | integer | yes |  |  |  |
 | `ended_year` | integer | yes |  |  |  |
 | `years_operated` | numeric | yes |  |  |  |
@@ -2246,7 +2246,7 @@ _RLS: enabled (4 policies) · audited: yes_
 | `closure_or_success_reasons` | text | yes |  |  |  |
 | `advice_for_entrants` | text | yes |  |  |  |
 | `status` | text | no | `'planned'::text` |  |  |
-| `anonymisation_status` | text | no | `'pending'::text` |  |  |
+| `anonymisation_status` | text | no | `'pending'::text` |  | An interview cannot be marked reviewed until identifying detail has been removed from its free text. |
 | `reviewed_by` | uuid | yes |  | FK → auth.users |  |
 | `reviewed_at` | timestamp with time zone | yes |  |  |  |
 | `data_origin` | ops.data_origin | yes |  |  |  |
@@ -2612,10 +2612,10 @@ _RLS: enabled (1 policies) · audited: no_
 | `row_id` | text | yes |  |  |  |
 | `action` | text | no |  |  |  |
 | `actor_user_id` | uuid | yes |  |  |  |
-| `actor_db_role` | text | no | `CURRENT_USER` |  |  |
+| `actor_db_role` | text | no | `CURRENT_USER` |  | Database role in effect: authenticated (a staff user), planb_worker, or the owning role for migrations. |
 | `research_run_id` | uuid | yes |  |  |  |
-| `changed_fields` | text[] | yes |  |  |  |
-| `old_row` | jsonb | yes |  |  |  |
+| `changed_fields` | text[] | yes |  |  | Columns whose value changed (updates only). |
+| `old_row` | jsonb | yes |  |  | Row before the change. NULL for tables holding personal data (values are never copied into the audit log). |
 | `new_row` | jsonb | yes |  |  |  |
 
 <details><summary>Check constraints (1)</summary>
@@ -2776,15 +2776,15 @@ _RLS: enabled (6 policies) · audited: yes_
 | `idempotency_key` | text | yes |  |  | Enqueueing the same logical job twice returns the existing run instead of duplicating work. |
 | `status` | text | no | `'queued'::text` |  |  |
 | `current_stage` | text | yes |  |  |  |
-| `attempt` | integer | no | `0` |  |  |
+| `attempt` | integer | no | `0` |  | Number of times the run has been claimed. |
 | `max_attempts` | integer | no | `3` |  |  |
-| `next_attempt_at` | timestamp with time zone | no | `now()` |  |  |
+| `next_attempt_at` | timestamp with time zone | no | `now()` |  | Earliest time the run may be claimed (exponential backoff after a failure). |
 | `locked_by` | text | yes |  |  |  |
-| `locked_until` | timestamp with time zone | yes |  |  |  |
+| `locked_until` | timestamp with time zone | yes |  |  | Lease expiry. A running run whose lease has expired is reclaimed by the next worker. |
 | `heartbeat_at` | timestamp with time zone | yes |  |  |  |
 | `budget_usd` | numeric | yes |  |  | Execution budget. When LLM spend reaches it the run stops with status budget_exhausted instead of continuing to spend. |
 | `budget_tokens` | bigint | yes |  |  |  |
-| `spent_usd` | numeric | no | `0` |  |  |
+| `spent_usd` | numeric | no | `0` |  | LLM spend recorded against the run so far. |
 | `spent_tokens` | bigint | no | `0` |  |  |
 | `result` | jsonb | yes |  |  |  |
 | `error` | text | yes |  |  |  |
