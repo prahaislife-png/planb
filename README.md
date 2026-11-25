@@ -25,7 +25,7 @@ the customer product that will sit on top of it.
   its observations, the model with its assumptions counted, evidence review, gaps, versions and publication.
 - **Research catalogue** (`research/catalog/`) — 71 sources with their reuse terms, a 137-model research backlog with
   NIC-2008 codes, 27 verified pilot documents.
-- **Tests** —  Python tests against a real PostgreSQL database (mapped to the milestone acceptance criteria, RLS
+- **Tests** — 115 Python tests against a real PostgreSQL database (mapped to the milestone acceptance criteria, RLS
   and privacy), 865 finance-engine tests.
 
 What does **not** exist yet, what is unverified, and what blocks the first publication: [`docs/STATUS.md`](docs/STATUS.md).

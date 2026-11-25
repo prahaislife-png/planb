@@ -112,7 +112,7 @@ never exercised against a live project.
 ### Test suites
 | Suite | Count | Where it runs |
 |---|---|---|
-| Python unit + PostgreSQL integration (`research/tests`) |  | Locally and in CI (`.github/workflows/ci.yml`) |
+| Python unit + PostgreSQL integration (`research/tests`) | 115 | Locally and in CI (`.github/workflows/ci.yml`) |
 | Finance engine (`packages/finance/test`) | 865 | Locally and in CI |
 | Dashboard end-to-end (`web/e2e/run.sh`) | 52 checks | Locally only — not yet wired into CI |
 | Dashboard typecheck and production build | — | Locally and in CI |
