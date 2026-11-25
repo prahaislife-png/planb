@@ -31,6 +31,10 @@ jobs:
           pnpm --filter @planb/finance typecheck
           pnpm --filter @planb/finance build
           pnpm --filter @planb/finance test
+      - name: Matching engine — typecheck and tests
+        run: |
+          pnpm --filter @planb/matching typecheck
+          pnpm --filter @planb/matching test
       - name: Dashboard — typecheck and production build
         run: |
           pnpm --filter @planb/web typecheck

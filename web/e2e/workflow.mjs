@@ -46,7 +46,7 @@ try {
 // ── 1. Every core screen renders for a researcher ───────────────────────────
 const researcher = await as('researcher');
 for (const path of ['/', '/catalogue', '/tasks', '/runs', '/sources', '/evidence', '/review', '/publication', '/quality', '/costs', '/audit',
-                    '/suppliers', '/interviews', '/geography', '/regulatory']) {
+                    '/suppliers', '/interviews', '/geography', '/regulatory', '/matching']) {
   const res = await researcher.goto(BASE + path, { waitUntil: 'domcontentloaded' });
   check(`renders ${path}`, res?.status() === 200, `HTTP ${res?.status()}`);
 }

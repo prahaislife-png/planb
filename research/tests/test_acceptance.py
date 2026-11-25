@@ -136,6 +136,15 @@ class TestEndToEnd:
         assert version["status"] == "submitted" and version["version_no"] == 1 and version["submitted_by_run"] == r["run"]["id"]
         assert one(conn, "select lifecycle_status from intel.business_models where id = %s", model_id)["lifecycle_status"] == "in_review"
 
+    def test_snapshot_carries_asset_requirements(self, conn, factory):
+        r = factory.run_document()
+        before = one(conn, "select intel.build_business_snapshot(%s) as s", r["model"]["id"])["s"]
+        assert before["variants"][0]["assets"] == [] and "cost_items" in before["variants"][0] and "quality" in before
+        conn.execute("insert into intel.business_assets (business_variant_id, asset_type_slug, requirement_level, notes) values (%s, 'industrial-shed', 'required', 'synthetic')", (r["variant"]["id"],))
+        conn.commit()
+        after = one(conn, "select intel.build_business_snapshot(%s) as s", r["model"]["id"])["s"]
+        assert [(a["asset_type_slug"], a["requirement_level"], a["name"]) for a in after["variants"][0]["assets"]] == [("industrial-shed", "required", "Industrial shed or gala")]
+
     def test_normalisation_converts_units_and_periods(self, conn, factory):
         r = factory.run_document()
         misc = one(conn, """select o.value from intel.cost_observations o join intel.cost_items ci on ci.id = o.cost_item_id

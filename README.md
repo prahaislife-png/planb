@@ -14,7 +14,7 @@ the customer product that will sit on top of it.
 
 ## What works today
 
-- **Database** — 19 PostgreSQL migrations: 77 tables in five schemas, row-level security on every table, an
+- **Database** — 20 PostgreSQL migrations: 77 tables in five schemas, row-level security on every table, an
   append-only audit trail, evidence-grade rules, four-eyes review and a publication gate, all enforced in the database.
 - **Research pipeline** (`research/`, Python) — a durable, resumable eight-stage pipeline: ingest a document → extract
   claims → verify each quote against the page → normalise → structure into a business record → cross-verify →
@@ -25,8 +25,8 @@ the customer product that will sit on top of it.
   its observations, the model with its assumptions counted, evidence review, gaps, versions and publication.
 - **Research catalogue** (`research/catalog/`) — 71 sources with their reuse terms, a 137-model research backlog with
   NIC-2008 codes, 27 verified pilot documents.
-- **Tests** — 115 Python tests against a real PostgreSQL database (mapped to the milestone acceptance criteria, RLS
-  and privacy), 865 finance-engine tests.
+- **Tests** — 116 Python tests against a real PostgreSQL database (mapped to the milestone acceptance criteria, RLS
+  and privacy), 865 finance-engine tests, 163 matching-engine tests.
 
 What does **not** exist yet, what is unverified, and what blocks the first publication: [`docs/STATUS.md`](docs/STATUS.md).
 Read it before relying on anything here.
@@ -44,6 +44,8 @@ Read it before relying on anything here.
 | [`docs/RUNBOOK.md`](docs/RUNBOOK.md) | Local setup, deployment, migrations, backup and recovery, operations |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Ten phases, next 30/90/180 days, risks |
 | [`packages/finance/docs/FINANCE_ENGINE.md`](packages/finance/docs/FINANCE_ENGINE.md) | Exact definition of every financial metric |
+| [`packages/matching/docs/MATCHING_ENGINE.md`](packages/matching/docs/MATCHING_ENGINE.md) | Every feasibility check, fit dimension and threshold of the matching engine |
+| [`docs/TONIGHT.md`](docs/TONIGHT.md) | What only the founder can do: accounts, permission requests, decisions |
 | [`research/templates/`](research/templates) | Supplier enquiry, owner interview, rent enquiry, regulatory checklist |
 
 ## Quick start

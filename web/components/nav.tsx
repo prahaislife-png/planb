@@ -28,6 +28,7 @@ const GROUPS: { title: string; items: { href: string; label: string; count?: key
     { href: '/quality', label: 'Data quality', count: 'stale' },
     { href: '/costs', label: 'Research costs' },
     { href: '/audit', label: 'Audit history' },
+    { href: '/matching', label: 'Matching lab' },
   ] },
 ];
 

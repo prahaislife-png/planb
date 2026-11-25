@@ -25,12 +25,12 @@ run" is three NIFTEM project reports processed end to end as the restricted `pla
 | Approved records maintain version history | ✅ | `TestPublication`: three versions, two publications, supersession, immutability, diff in the dashboard |
 | Research jobs can resume after failure | ✅ | `TestDurability`: failed stage retried with backoff, completed stages not re-run, dead worker's lease reclaimed, bounded attempts, budget stop. Also observed for real during development |
 | Demonstration data cannot be mistaken for verified research | ✅ | `TestDemoData`: demo rows forced to grade D and unverified; estimates always D; demo/test records unpublishable; loud badges in the UI |
-| The entire workflow functions end to end | ✅ | `TestEndToEnd`; the real run; the browser-driven workflow test (`web/e2e/run.sh`, 53 checks: production build, real browser, real worker, isolated database) |
+| The entire workflow functions end to end | ✅ | `TestEndToEnd`; the real run; the browser-driven workflow test (`web/e2e/run.sh`, 54 checks: production build, real browser, real worker, isolated database) |
 
 ## 2. Component status
 
 ### Database — ✅
-19 migrations; RLS on every table; audit trail; evidence-grade, review, versioning and publication rules in
+20 migrations; RLS on every table; audit trail; evidence-grade, review, versioning and publication rules in
 triggers and constraints; generated data dictionary and ERD. Applied and tested on PostgreSQL 16 with a local shim
 for Supabase's roles and `auth` schema. 🟡 **Never applied to an actual Supabase project.**
 
@@ -71,8 +71,19 @@ sensitivity, closure. 865 tests. Limits: flat tax only; no GST cash-flow timing;
 | Pune / Nanded local data | ⬜ none |
 | Verified regulations | ⬜ none (leads only, in the backlog) |
 
+### Matching engine — ✅ first slice, internal only
+`packages/matching`: deterministic and explainable. For one profile and one business record it returns four mandatory
+feasibility checks (capital, runway, qualifications, assets), seven fit dimensions, trade-offs and missing
+prerequisites — each with a reason citing the numbers used — and, separately, research confidence. There is no
+score, percentage or probability anywhere (a test enforces it), and anything the record has not researched is
+reported as unknown. 163 tests. The **Matching lab** screen runs it in the browser against the latest research
+versions, as an internal preview.
+Limits: its cut-offs for risk, income and research confidence are first judgements, not researched values; interests
+are a plain word match; on today's records most dimensions are "unknown — not researched" because the qualitative
+sections are empty; nothing is stored and no customer can reach it.
+
 ### Not built
-❌ Customer profile intake and capability extraction · ❌ matching engine · ❌ customer-facing product ·
+❌ Customer profile intake (CV / LinkedIn-export parsing, capability extraction) · ❌ storing recommendations · ❌ customer-facing product ·
 ❌ payments · ❌ production infrastructure, monitoring, backups · ❌ scheduled maintenance.
 The `customer` schema and pricing table exist so these can be built without schema surgery.
 
@@ -101,6 +112,7 @@ show honest empty states — no demonstration rows are seeded.
 | Data quality dashboard | ✅ |
 | Research cost monitoring | ✅ (no LLM spend recorded yet) |
 | Audit history | ✅ |
+| Matching lab (internal preview of the matching engine) | ✅ |
 | Suppliers & quotation collection | ✅ workspace · ⬜ data |
 | Ground Truth interview workspace | ✅ workspace · ⬜ data |
 | Geographic data management and fallback resolver | ✅ workspace · ⬜ data |
@@ -112,9 +124,10 @@ never exercised against a live project.
 ### Test suites
 | Suite | Count | Where it runs |
 |---|---|---|
-| Python unit + PostgreSQL integration (`research/tests`) | 115 | Locally and in CI (`.github/workflows/ci.yml`) |
+| Python unit + PostgreSQL integration (`research/tests`) | 116 | Locally and in CI (`.github/workflows/ci.yml`) |
 | Finance engine (`packages/finance/test`) | 865 | Locally and in CI |
-| Dashboard end-to-end (`web/e2e/run.sh`) | 53 checks | Locally; a CI job is defined but has never run |
+| Matching engine (`packages/matching/test`) | 163 | Locally and in CI |
+| Dashboard end-to-end (`web/e2e/run.sh`) | 54 checks | Locally; a CI job is defined but has never run |
 | Dashboard typecheck and production build | — | Locally and in CI |
 
 The CI workflow itself has not run yet (no pull request has been opened); treat it as unverified until its first run.

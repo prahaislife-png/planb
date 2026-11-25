@@ -2860,7 +2860,8 @@ _RLS: enabled (2 policies) · audited: yes_
 | `customer.erase_user_data(p_user uuid)` | definer |  |
 | `gt.erase_subject(p_subject uuid)` | definer |  |
 | `intel._retire_claim_outputs(p_claim uuid, p_reason text)` | invoker |  |
-| `intel.build_business_snapshot(p_model uuid)` | invoker | JSON rendering of one business record with per-number source attribution and quality metrics. Excludes private research notes, supplier contacts and all interview identities. |
+| `intel.build_business_snapshot(p_model uuid)` | invoker | JSON rendering of one business record with per-number source attribution, quality metrics and asset requirements. Excludes private research notes, supplier contacts and all interview identities. |
+| `intel.build_business_snapshot_base(p_model uuid)` | invoker | JSON rendering of one business record with per-number source attribution and quality metrics. Excludes private research notes, supplier contacts and all interview identities. |
 | `intel.correct_claim(p_claim uuid, p_value numeric, p_unit_raw text, p_quote text, p_page integer, p_note text, p_quantity numeric)` | invoker | Replace a wrong extraction with an analyst-entered claim. The corrected value becomes usable only if its quote is found on the cited page; it is structured into the record on the next business_refresh run. |
 | `intel.count_non_research_rows(p_model uuid)` | invoker |  |
 | `intel.count_restricted_source_rows(p_model uuid)` | invoker |  |

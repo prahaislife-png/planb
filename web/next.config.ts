@@ -3,7 +3,7 @@ import type { NextConfig } from 'next';
 const config: NextConfig = {
   // The finance engine is consumed as TypeScript source so the scenario calculator runs the exact
   // same code in the browser as the research worker runs through the CLI.
-  transpilePackages: ['@planb/finance'],
+  transpilePackages: ['@planb/finance', '@planb/matching'],
   serverExternalPackages: ['postgres'],
   experimental: { serverActions: { bodySizeLimit: '45mb' } },
   poweredByHeader: false,

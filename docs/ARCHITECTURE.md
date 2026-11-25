@@ -133,13 +133,14 @@ YAML and the source registry; stage 10 (publication) is a human action behind th
 ## 5. Repository layout
 
 ```
-supabase/migrations/     19 SQL migrations — the schema, RLS, triggers, workflow functions, reference vocabularies
+supabase/migrations/     20 SQL migrations — the schema, RLS, triggers, workflow functions, reference vocabularies
 supabase/dev/            local-only Supabase shim
 research/planb_research/ Python worker: adapters/, extract/, pipeline/, ingest, storage, catalog, cli
 research/catalog/        version-controlled source registry, 137-model backlog, pilot document list (YAML)
 research/templates/      supplier enquiry, owner interview, rent enquiry, regulatory checklist
 research/tests/          pytest suite (unit + PostgreSQL integration, mapped to the acceptance criteria)
 packages/finance/        deterministic financial engine + CLI + tests
+packages/matching/       deterministic, explainable profile-to-business matching (no score) + tests
 web/                     PlanB Intelligence dashboard (Next.js)
 scripts/                 dev-reset.sh, gen_db_docs.py
 docs/                    this documentation
@@ -157,6 +158,8 @@ docs/                    this documentation
   tied to a location metric (rent = local rate × area). A pilot city gets its own base scenario only when it has
   local evidence; its stress tests still come from the national case. Required inputs must be resolved nationally —
   an input observed only locally does not yet unblock a national scenario.
-- **Customer product, matching engine, payments** are schema-only (Phases 8–10).
+- **Matching engine** (`packages/matching`) exists as a first slice with an internal lab screen only: it stores
+  nothing, no customer can reach it, and its cut-offs are first judgements rather than researched values.
+- **Customer product, profile intake, payments** are schema-only (Phases 8–10).
 - Worker deployment, scheduled maintenance runs, error monitoring and backups are documented in
   [`RUNBOOK.md`](RUNBOOK.md) but not provisioned — there is no production environment yet.
