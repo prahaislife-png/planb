@@ -475,12 +475,18 @@ _RLS: enabled (7 policies) · audited: yes_
 | `created_by` | uuid | yes |  | FK → auth.users |  |
 | `created_at` | timestamp with time zone | no | `now()` |  |  |
 | `updated_at` | timestamp with time zone | no | `now()` |  |  |
+| `location_metric_key` | text | yes |  | FK → intel.metric_definitions | Location metric this cost is derived from locally (e.g. commercial_rent_per_sqft_month). NULL = no local derivation; the national value is used everywhere. |
+| `location_metric_segment` | text | yes |  |  | Segment of the metric to use (micro-market, role…). NULL = any segment. |
+| `location_metric_multiplier` | numeric | yes |  |  | What the metric is multiplied by to give the monthly cost of one unit of the item (floor area for a per-sq-ft rent; 1 for a wage). |
+| `location_metric_basis` | text | yes |  |  | Where the multiplier comes from (e.g. "2,500 sq ft — upper bound of the built-up area stated by the source, p. 10"). |
 
 Unique: `(business_variant_id, key)`
 
-<details><summary>Check constraints (5)</summary>
+<details><summary>Check constraints (7)</summary>
 
 - `cost_items_key_check`: `CHECK ((key ~ '^[a-z0-9_]+$'::text))`
+- `cost_items_location_mapping_complete`: `CHECK ((((location_metric_key IS NULL) AND (location_metric_multiplier IS NULL) AND (location_metric_segment IS NULL)) OR ((location_metric_key IS NOT NULL) AND (location_metric_multiplier IS NOT NULL) AND (location_metric_basis IS NOT NULL) AND (length(btrim(location_metric_basis)) > 0))))`
+- `cost_items_location_metric_multiplier_check`: `CHECK ((location_metric_multiplier > (0)::numeric))`
 - `cost_items_pricing_basis_check`: `CHECK ((pricing_basis = ANY (ARRAY['per_unit'::text, 'stated_total'::text])))`
 - `cost_items_quantity_check`: `CHECK ((quantity > (0)::numeric))`
 - `cost_items_recurrence_check`: `CHECK ((recurrence = ANY (ARRAY['one_time'::text, 'monthly'::text, 'annual'::text, 'per_unit_output'::text, 'pct_of_revenue'::text])))`
@@ -2807,7 +2813,7 @@ Unique: `(idempotency_key)`
 - `research_runs_budget_tokens_check`: `CHECK ((budget_tokens >= 0))`
 - `research_runs_budget_usd_check`: `CHECK ((budget_usd >= (0)::numeric))`
 - `research_runs_max_attempts_check`: `CHECK (((max_attempts >= 1) AND (max_attempts <= 20)))`
-- `research_runs_pipeline_check`: `CHECK ((pipeline = ANY (ARRAY['document_research'::text, 'business_refresh'::text, 'freshness_scan'::text, 'catalog_sync'::text])))`
+- `research_runs_pipeline_check`: `CHECK ((pipeline = ANY (ARRAY['document_research'::text, 'business_refresh'::text, 'freshness_scan'::text, 'catalog_sync'::text, 'extractor_evaluation'::text])))`
 - `research_runs_status_check`: `CHECK ((status = ANY (ARRAY['queued'::text, 'running'::text, 'waiting_retry'::text, 'succeeded'::text, 'failed'::text, 'cancelled'::text, 'budget_exhausted'::text])))`
 
 </details>

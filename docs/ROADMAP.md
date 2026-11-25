@@ -5,7 +5,7 @@ foundation that is not real. Status as of 2026-11-24 — details in [`STATUS.md`
 
 | Phase | Scope | Status |
 |---|---|---|
-| 1 | Architecture, ontology, database schema, evidence framework | **Done** — 18 migrations, 77 tables, RLS, audit, evidence grades, publication gate, generated dictionary + ERD |
+| 1 | Architecture, ontology, database schema, evidence framework | **Done** — 19 migrations, 77 tables, RLS, audit, evidence grades, publication gate, generated dictionary + ERD |
 | 2 | Internal dashboard and source registry | **Core done** — business record, catalogue, overview; 71-source registry with reuse terms. Remaining screens in progress |
 | 3 | Document ingestion and structured research pipeline | **Done for the first slice** — durable 8-stage pipeline; rule-based extractor; LLM extractor written, untested live |
 | 4 | Financial modelling engine | **Done** — 7 archetypes, scenarios, stress tests, sensitivity, closure; 865 tests |
@@ -38,8 +38,8 @@ reviewed owner interviews, verified regulation for Pune and Nanded, and no assum
 ## 30–90 days — complete the pilot and build the consumer of the data
 
 6. Remaining seven pilot models to the same standard. Coffee kiosk and retail bakery built from primary research.
-7. **Location overlays in the pipeline**: resolve parameters per location through the fallback hierarchy; show the
-   level of every figure; city-level scenario variants.
+7. ~~Location overlays in the pipeline~~ — **done** (per-city base scenarios through the fallback hierarchy). Remaining:
+   city-level stress tests, and local selling-price evidence feeding revenue drivers.
 8. Second and third rule-based extractors (NIFTEM-T, NSTFDC templates) where volume justifies them.
 9. Embeddings for semantic evidence retrieval (choose provider; backfill `document_chunks`).
 10. OCR path for scanned documents.

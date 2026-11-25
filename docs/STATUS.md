@@ -25,12 +25,12 @@ run" is three NIFTEM project reports processed end to end as the restricted `pla
 | Approved records maintain version history | ✅ | `TestPublication`: three versions, two publications, supersession, immutability, diff in the dashboard |
 | Research jobs can resume after failure | ✅ | `TestDurability`: failed stage retried with backoff, completed stages not re-run, dead worker's lease reclaimed, bounded attempts, budget stop. Also observed for real during development |
 | Demonstration data cannot be mistaken for verified research | ✅ | `TestDemoData`: demo rows forced to grade D and unverified; estimates always D; demo/test records unpublishable; loud badges in the UI |
-| The entire workflow functions end to end | ✅ | `TestEndToEnd`; the real run; the browser-driven workflow test (`web/e2e/run.sh`, 48 checks: production build, real browser, real worker, isolated database) |
+| The entire workflow functions end to end | ✅ | `TestEndToEnd`; the real run; the browser-driven workflow test (`web/e2e/run.sh`, 52 checks: production build, real browser, real worker, isolated database) |
 
 ## 2. Component status
 
 ### Database — ✅
-18 migrations; RLS on every table; audit trail; evidence-grade, review, versioning and publication rules in
+19 migrations; RLS on every table; audit trail; evidence-grade, review, versioning and publication rules in
 triggers and constraints; generated data dictionary and ERD. Applied and tested on PostgreSQL 16 with a local shim
 for Supabase's roles and `auth` schema. 🟡 **Never applied to an actual Supabase project.**
 
@@ -49,7 +49,8 @@ for Supabase's roles and `auth` schema. 🟡 **Never applied to an actual Supaba
 | Supabase Storage backend | 🟡 written, unverified. Local-disk backend ✅ |
 | Embeddings / semantic retrieval | ❌ column and index exist; no provider. Full-text search ✅ |
 | Automated opportunity and evidence discovery (stages 1–2) | ❌ human-driven via the catalogue YAML |
-| Location overlays in parameter resolution | ❌ schema and resolver exist; pipeline resolves national values only |
+| Location overlays in parameter resolution | ✅ per-city scenarios from local observations and from cost items tied to a location metric, through the fallback hierarchy, with the level of every local figure recorded. ⬜ no local data yet, so no real record has one |
+| Extractor evaluation harness (`planb research eval-extractor`) | ✅ compares the LLM extractor with the rule-based one on the same document (recall, mapping agreement, quote verification, extras); unit-tested. 🟡 never run with a real model |
 
 ### Finance engine — ✅
 Seven archetypes; capex, pre-operative costs, deposits, contingency, working capital, staff, owner compensation,
@@ -85,9 +86,9 @@ show honest empty states — no demonstration rows are seeded.
 | Research overview | ✅ |
 | Business model catalogue | ✅ |
 | Business record: identity editor, completeness vs evidence quality, variants, documents, upload | ✅ |
-| — Costs & observations (every observation with its passport; add observation; conflicts) | ✅ |
+| — Costs & observations (every observation with its passport; add observation; conflicts; derive a cost locally) | ✅ |
 | — Revenue & parameters (model inputs with basis and grade; explicit assumptions) | ✅ |
-| — Financial model (scenarios, stress tests, source reconciliation, in-browser scenario calculator) | ✅ |
+| — Financial model (scenarios, stress tests, source reconciliation, location scenarios, in-browser scenario calculator) | ✅ |
 | — Evidence & review (accept / reject / correct claims) | ✅ |
 | — Gaps & tasks | ✅ |
 | — Versions (submit, four-eyes decision, diff, publication blockers) | ✅ |
@@ -111,9 +112,9 @@ never exercised against a live project.
 ### Test suites
 | Suite | Count | Where it runs |
 |---|---|---|
-| Python unit + PostgreSQL integration (`research/tests`) | 111 | Locally and in CI (`.github/workflows/ci.yml`) |
+| Python unit + PostgreSQL integration (`research/tests`) |  | Locally and in CI (`.github/workflows/ci.yml`) |
 | Finance engine (`packages/finance/test`) | 865 | Locally and in CI |
-| Dashboard end-to-end (`web/e2e/run.sh`) | 48 checks | Locally only — not yet wired into CI |
+| Dashboard end-to-end (`web/e2e/run.sh`) | 52 checks | Locally only — not yet wired into CI |
 | Dashboard typecheck and production build | — | Locally and in CI |
 
 The CI workflow itself has not run yet (no pull request has been opened); treat it as unverified until its first run.

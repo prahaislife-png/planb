@@ -53,6 +53,12 @@ def main() -> int:
         conn.execute(
             """insert into intel.sources (slug, name, source_type, authority_level, access_method, reuse_status, data_origin)
                values ('e2e-second-source', 'E2E second source (synthetic)', 'manufacturer_catalogue', 'commercial', 'manual_download', 'unclear', 'test')""")
+        # one synthetic local rent figure, so the test can derive a cost locally through the dashboard
+        conn.execute(
+            """insert into intel.location_metrics (location_id, metric_key, value, unit_code, period, observed_on, geographic_scope, source_id,
+                                                   evidence_type, evidence_grade, data_origin)
+               select l.id, 'commercial_rent_per_sqft_month', 80, 'inr', 'per_month', current_date, 'city', s.id, 'listing_observation', 'C', 'test'
+               from intel.locations l, intel.sources s where l.slug = 'pune-city' and s.slug = 'e2e-second-source'""")
         conn.commit()
         print(result["model"]["slug"])
     return 0

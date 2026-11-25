@@ -73,6 +73,24 @@ export async function addCostObservation(form: FormData) {
   });
 }
 
+export async function setLocationMapping(form: FormData) {
+  return act(form, z.object({
+    cost_item_id: uuid, metric_key: z.union([z.literal(''), z.string().regex(/^[a-z0-9_]+$/)]), segment: optionalText(120),
+    multiplier: z.union([z.literal(''), z.coerce.number().positive()]).optional(), basis: optionalText(400),
+  }).refine((i) => i.metric_key === '' || (i.multiplier !== '' && i.multiplier !== undefined && (i.basis ?? '').length >= 10), {
+    message: 'a mapping needs a multiplier and a basis of at least 10 characters saying where the multiplier comes from',
+  }), (r) => (r ? 'Local derivation recorded. Run a refresh to compute location scenarios.' : 'Local derivation removed.'),
+  async (sql, i) => {
+    const on = i.metric_key !== '';
+    await mustAffect(sql`
+      update intel.cost_items
+         set location_metric_key = ${on ? i.metric_key : null}, location_metric_segment = ${on ? i.segment : null},
+             location_metric_multiplier = ${on ? (i.multiplier as number) : null}, location_metric_basis = ${on ? i.basis : null}
+       where id = ${i.cost_item_id}`, 'this cost item');
+    return on;
+  });
+}
+
 export async function resolveConflict(form: FormData) {
   return act(form, z.object({ conflict_id: uuid, status: z.enum(['resolved', 'accepted_as_range']), note: text().min(5) }),
     'Conflict closed.', (sql, i) => sql`select intel.resolve_conflict(${i.conflict_id}, ${i.status}, ${i.note})`);

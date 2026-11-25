@@ -122,6 +122,25 @@ await row.locator('button', { hasText: 'Record as assumption' }).click();
 await researcher.waitForURL(/ok=|error=/);
 check('researcher records an explicit assumption', (await flash(researcher)).includes('Assumption recorded'), await flash(researcher));
 
+// tie the rent line to the local rent rate × floor area (an explicit, recorded analyst decision)
+await researcher.goto(record('costs'));
+const rentMapping = researcher.locator('tr:has(b:text-is("Rent")) + tr');  // the mapping row directly under the Rent line
+await rentMapping.locator('summary').click();
+await rentMapping.locator('select[name=metric_key]').selectOption('commercial_rent_per_sqft_month');
+await rentMapping.locator('input[name=multiplier]').fill('1200');
+await rentMapping.locator('button', { hasText: 'Save' }).click();
+await researcher.waitForURL(/ok=|error=/);
+check('a local derivation without a stated basis is refused', (await researcher.locator('.notice.bad').count()) === 1, await flash(researcher));
+await researcher.goto(record('costs'));
+const rentMapping2 = researcher.locator('tr:has(b:text-is("Rent")) + tr');  // the mapping row directly under the Rent line
+await rentMapping2.locator('summary').click();
+await rentMapping2.locator('select[name=metric_key]').selectOption('commercial_rent_per_sqft_month');
+await rentMapping2.locator('input[name=multiplier]').fill('1200');
+await rentMapping2.locator('input[name=basis]').fill('E2E synthetic: 1,200 sq ft assumed for the fixture');
+await rentMapping2.locator('button', { hasText: 'Save' }).click();
+await researcher.waitForURL(/ok=|error=/);
+check('researcher ties a cost to a local rate with its basis', (await flash(researcher)).includes('Local derivation recorded'), await flash(researcher));
+
 await researcher.goto(record('overview'));
 await researcher.locator('button', { hasText: 'Queue refresh run' }).click();
 await researcher.waitForURL(/ok=|error=/);
@@ -135,7 +154,7 @@ const conflicts = researcher.locator('section.panel', { hasText: 'Conflicting ob
 check('conflict between the two observations is flagged', (await conflicts.locator('tr', { hasText: 'Synthetic grinder' }).count()) === 1);
 const body = await researcher.locator('body').textContent();
 check('both observation values remain on record', body.includes('₹2,00,000') && body.includes('₹3,20,000'));
-check('corrected rent flows into the model (₹10,000 / month)', (await rowWith(researcher, 'Rent').textContent()).includes('₹10,000'));
+check('corrected rent flows into the model (₹10,000 / month)', (await researcher.locator('tr:has(b:text-is("Rent"))').first().textContent()).includes('₹10,000'));
 check('rejected claim retired its observation', (await researcher.locator('tr.sub', { hasText: 'Synthetic packer' }).locator('.badge', { hasText: /rejected/i }).count()) >= 1);
 await conflicts.locator('input[name=note]').fill('E2E: different capacity classes; accept the range');
 await conflicts.locator('select[name=status]').selectOption('accepted_as_range');
@@ -144,6 +163,11 @@ await researcher.waitForURL(/ok=|error=/);
 check('conflict closed with a recorded reason', (await flash(researcher)).includes('Conflict closed'), await flash(researcher));
 
 await researcher.goto(record('model'));
+const locPanel = researcher.locator('section.panel', { hasText: 'Location scenarios' });
+const puneRow = await locPanel.locator('tr', { hasText: 'Pune (city)' }).textContent();
+check('Pune gets its own scenario from the city-specific rent', /city.specific/i.test(puneRow) && puneRow.includes('₹96,000'), puneRow.slice(0, 160));
+const nandedRow = await locPanel.locator('tr', { hasText: 'Nanded' }).textContent();
+check('Nanded, with no local evidence, gets no scenario', /no local evidence/i.test(nandedRow));
 check('assumption reached the engine input', (await researcher.locator('pre.pagetext').textContent()).includes('"monthlyCompensation": 40000'));
 
 // ── 7. Versions: four-eyes, approval, and the publication gate ──────────────

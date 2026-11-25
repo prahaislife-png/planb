@@ -188,28 +188,32 @@ def cross_verify(ctx: RunContext) -> dict[str, Any]:
 # ── Stage 7: financial modelling ─────────────────────────────────────────────
 def _set_parameter(ctx: RunContext, variant_id, *, parameter_key=None, cost_item_id=None, stream_id=None, value: float,
                    unit: str | None, basis: str, method: str, rationale: str | None, grade: str,
-                   sources: list[tuple[str, Any]] | None = None, location_level: str | None = "national") -> bool:
-    """Create or supersede the current base parameter. Analyst-set values are never overwritten by the pipeline."""
+                   sources: list[tuple[str, Any]] | None = None, location_level: str | None = "national",
+                   location_id=None) -> bool:
+    """Create or supersede the current base parameter (national, or the overlay for one location).
+    Analyst-set values are never overwritten by the pipeline."""
     conn = ctx.conn
     cur = conn.execute(
         """select * from intel.financial_parameters
-           where business_variant_id = %s and is_current and scenario = 'base' and location_id is null
+           where business_variant_id = %s and is_current and scenario = 'base' and location_id is not distinct from %s
              and parameter_key is not distinct from %s and cost_item_id is not distinct from %s
              and revenue_stream_id is not distinct from %s""",
-        (variant_id, parameter_key, cost_item_id, stream_id),
+        (variant_id, location_id, parameter_key, cost_item_id, stream_id),
     ).fetchone()
     if cur:
         if cur["method"] in ("manual", "analyst_selected") and cur["set_by"] is not None:
             return False
         if (abs(float(cur["value"]) - value) <= 1e-9 * max(1.0, abs(value)) and cur["basis"] == basis and cur["method"] == method
-                and cur["evidence_grade"] == grade and (cur["rationale"] or "") == (rationale or "")):
+                and cur["evidence_grade"] == grade and (cur["rationale"] or "") == (rationale or "")
+                and cur["location_level"] == (location_level if basis != "assumption" else "assumed")):
             return False
         conn.execute("update intel.financial_parameters set is_current = false, superseded_at = now() where id = %s", (cur["id"],))
     row = conn.execute(
-        """insert into intel.financial_parameters (business_variant_id, scenario, parameter_key, cost_item_id, revenue_stream_id, value,
-                                                   unit_code, basis, method, rationale, evidence_grade, location_level, research_run_id, data_origin)
-           values (%s, 'base', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) returning id""",
-        (variant_id, parameter_key, cost_item_id, stream_id, value, unit, basis, method, rationale, grade,
+        """insert into intel.financial_parameters (business_variant_id, location_id, scenario, parameter_key, cost_item_id, revenue_stream_id,
+                                                   value, unit_code, basis, method, rationale, evidence_grade, location_level, research_run_id,
+                                                   data_origin)
+           values (%s, %s, 'base', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) returning id""",
+        (variant_id, location_id, parameter_key, cost_item_id, stream_id, value, unit, basis, method, rationale, grade,
          location_level if basis != "assumption" else "assumed", ctx.run_id, ctx.data_origin),
     ).fetchone()
     for kind, obs_id in sources or []:
@@ -371,8 +375,102 @@ def resolve_parameters(ctx: RunContext, variant: dict) -> dict[str, Any]:
     return {"parameters_changed": changed, "parameters_retired": retired}
 
 
-def build_engine_input(ctx: RunContext, variant: dict) -> tuple[dict | None, dict[str, Any]]:
-    """Assemble the finance-engine input from CURRENT parameters only. Returns (input | None, report)."""
+def pilot_locations(ctx: RunContext) -> list[dict]:
+    return ctx.conn.execute(
+        "select id, name, slug, location_type from intel.locations where is_pilot and location_type = 'city' order by name"
+    ).fetchall()
+
+
+def resolve_location_overlays(ctx: RunContext, variant: dict, location: dict) -> dict[str, Any]:
+    """Resolve the model inputs that have LOCAL evidence for one location, as overlay parameters.
+
+    Two kinds of local evidence, nearest geography first (city → district → state → country):
+      1. cost or parameter observations recorded for a place (a quotation delivered to Pune, a local selling price);
+      2. a cost item an analyst has tied to a location metric (rent = local rate × floor area), resolved through
+         intel.resolve_location_metric so the level the figure came from is always known.
+    Inputs with no local evidence get no overlay: the location scenario inherits the national value and says so.
+    """
+    conn = ctx.conn
+    touched: set[tuple] = set()
+    overlays: list[dict[str, Any]] = []
+    ancestry = {a["location_id"]: a for a in conn.execute(
+        "select location_id, depth, location_type, name from intel.location_ancestry(%s)", (location["id"],)).fetchall()}
+
+    def setp(*, label: str, level: str, parameter_key=None, cost_item_id=None, stream_id=None, **kw) -> None:
+        touched.add((parameter_key, cost_item_id, stream_id))
+        _set_parameter(ctx, variant["id"], parameter_key=parameter_key, cost_item_id=cost_item_id, stream_id=stream_id,
+                       location_id=location["id"], location_level=level, **kw)
+        overlays.append({"input": label, "level": level})
+
+    def nearest(observations: list[dict]) -> list[dict]:
+        depth = min(ancestry[o["location_id"]]["depth"] for o in observations)
+        return [o for o in observations if ancestry[o["location_id"]]["depth"] == depth]
+
+    # 1a. location-specific cost observations
+    by_item: dict[Any, list[dict]] = {}
+    for o in _usable_cost_obs(ctx, variant["id"]):
+        if o["location_id"] in ancestry:
+            by_item.setdefault(o["cost_item_id"], []).append(o)
+    for item_id, obs in by_item.items():
+        local = nearest(obs)
+        values = [(cv[0], o) for o in local if (cv := _comparable_value(o)) and not cv[1].startswith("annual_total")]
+        if not values:
+            continue
+        value, method, why, grade = _resolve(values, has_open_conflict=False)
+        place = ancestry[local[0]["location_id"]]
+        setp(label=local[0]["item_name"], level=place["location_type"], cost_item_id=item_id, value=round(value, 4),
+             unit="percent" if local[0]["unit_code"] == "percent" else "inr", basis="observation", method=method,
+             rationale=" ".join(filter(None, [why, f"Observed for {place['name']}."])), grade=grade,
+             sources=[("cost_observation", o["id"]) for _, o in values])
+
+    # 1b. location-specific parameter observations
+    by_param: dict[tuple, list[dict]] = {}
+    for o in _usable_param_obs(ctx, variant["id"]):
+        if o["location_id"] in ancestry:
+            by_param.setdefault((o["parameter_key"], o["revenue_stream_id"]), []).append(o)
+    for (key, stream_id), obs in by_param.items():
+        local = nearest(obs)
+        value, method, why, grade = _resolve([(float(o["value"]), o) for o in local], has_open_conflict=False)
+        place = ancestry[local[0]["location_id"]]
+        setp(label=key, level=place["location_type"], parameter_key=key, stream_id=stream_id, value=value, unit=local[0]["unit_code"],
+             basis="observation", method=method, rationale=" ".join(filter(None, [why, f"Observed for {place['name']}."])),
+             grade=grade, sources=[("parameter_observation", o["id"]) for o in local])
+
+    # 2. cost items tied to a location metric
+    for item in conn.execute(
+        """select ci.id, ci.name, ci.location_metric_key, ci.location_metric_segment, ci.location_metric_multiplier,
+                  ci.location_metric_basis, md.name as metric_name
+           from intel.cost_items ci join intel.metric_definitions md on md.key = ci.location_metric_key
+           where ci.business_variant_id = %s""", (variant["id"],)).fetchall():
+        if (None, item["id"], None) in touched:
+            continue  # a figure observed directly for this place beats one derived from a general local rate
+        m = conn.execute("select * from intel.resolve_location_metric(%s, %s, %s)",
+                         (location["id"], item["location_metric_key"], item["location_metric_segment"])).fetchone()
+        if m is None or m["period"] not in ("per_month", "per_year"):
+            continue  # nothing known at any level (or not a recurring rate): no overlay, the national value stands
+        monthly_rate = float(m["value"]) / (12.0 if m["period"] == "per_year" else 1.0)
+        value = monthly_rate * float(item["location_metric_multiplier"])
+        place = ancestry[m["resolved_location_id"]]
+        inherited = f" (no {location['name']} figure; inherited from {place['name']})" if m["is_fallback"] else ""
+        setp(label=item["name"], level=m["resolved_level"], cost_item_id=item["id"], value=round(value, 2), unit="inr",
+             basis="derived", method="formula", grade=m["evidence_grade"], sources=[("location_metric", m["location_metric_id"])],
+             rationale=(f"Derived: {item['metric_name']} ₹{monthly_rate:,.2f} for {place['name']}{inherited} × "
+                        f"{float(item['location_metric_multiplier']):g} ({item['location_metric_basis']})."))
+
+    retired = 0
+    for p in conn.execute(
+        """select id, parameter_key, cost_item_id, revenue_stream_id from intel.financial_parameters
+           where business_variant_id = %s and is_current and scenario = 'base' and location_id = %s and set_by is null""",
+        (variant["id"], location["id"])).fetchall():
+        if (p["parameter_key"], p["cost_item_id"], p["revenue_stream_id"]) not in touched:
+            conn.execute("update intel.financial_parameters set is_current = false, superseded_at = now() where id = %s", (p["id"],))
+            retired += 1
+    return {"location": location["name"], "overlaid": len(touched), "retired": retired, "overlays": overlays}
+
+
+def build_engine_input(ctx: RunContext, variant: dict, location_id=None) -> tuple[dict | None, dict[str, Any]]:
+    """Assemble the finance-engine input from CURRENT parameters only. Returns (input | None, report).
+    With a location, that location's overlay parameters replace the national ones for the same input."""
     conn = ctx.conn
     params = conn.execute(
         """select fp.*, ci.key as item_key, ci.name as item_name, ci.quantity, ci.recurrence, ci.useful_life_years,
@@ -381,9 +479,15 @@ def build_engine_input(ctx: RunContext, variant: dict) -> tuple[dict | None, dic
            from intel.financial_parameters fp
            left join intel.cost_items ci on ci.id = fp.cost_item_id
            left join intel.cost_categories cc on cc.id = ci.cost_category_id
-           where fp.business_variant_id = %s and fp.is_current and fp.scenario = 'base' and fp.location_id is null""",
-        (variant["id"],),
+           where fp.business_variant_id = %s and fp.is_current and fp.scenario = 'base'
+             and (fp.location_id is null or fp.location_id = %s)
+           order by (fp.location_id is not null)""",
+        (variant["id"], location_id),
     ).fetchall()
+    # one row per input: an overlay row (sorted last) replaces the national row for the same subject
+    by_subject = {(p["parameter_key"], p["cost_item_id"], p["revenue_stream_id"]): p for p in params}
+    national_count = len({(p["parameter_key"], p["cost_item_id"], p["revenue_stream_id"]) for p in params if p["location_id"] is None})
+    params = list(by_subject.values())
     missing = conn.execute(
         """select parameter_key, parameter_name, revenue_stream_name from intel.v_variant_parameter_status
            where business_variant_id = %s and is_required and not is_resolved""",
@@ -500,6 +604,16 @@ def build_engine_input(ctx: RunContext, variant: dict) -> tuple[dict | None, dic
         "observed": sum(1 for p in params if p["basis"] == "observation")}
     report["parameter_count"] = len(params)
     report["weakest_grade"] = _weakest(grades)
+    if location_id is not None:
+        local = [p for p in params if p["location_id"] is not None]
+        levels: dict[str, int] = {}
+        for p in local:
+            levels[p["location_level"] or "unspecified"] = levels.get(p["location_level"] or "unspecified", 0) + 1
+        report["location_coverage"] = {
+            "local_inputs": len(local), "inherited_national_inputs": len(params) - len(local), "national_inputs_total": national_count,
+            "by_level": levels,
+            "inputs": [{"input": p["item_name"] or p["parameter_key"], "level": p["location_level"], "value": float(p["value"]),
+                        "basis": p["basis"], "grade": p["evidence_grade"]} for p in local]}
     return model, report
 
 
@@ -561,8 +675,49 @@ def build_model(ctx: RunContext) -> dict[str, Any]:
                 entry["scenarios"] += 1
         entry["grade_profile"] = report["grade_profile"]
         entry["source_reconciliation"] = checks
+        entry["locations"] = _location_scenarios(ctx, variant)
         out["variants"].append(entry)
     return out
+
+
+def _location_scenarios(ctx: RunContext, variant: dict) -> list[dict[str, Any]]:
+    """One base scenario per pilot city that has ANY local evidence. A city with none gets no scenario of its own:
+    presenting the national case under a city's name would claim local knowledge that does not exist."""
+    conn = ctx.conn
+    results = []
+    for location in pilot_locations(ctx):
+        with conn.transaction():
+            ctx.tag_audit()
+            overlay = resolve_location_overlays(ctx, variant, location)
+        if overlay["overlaid"] == 0:
+            results.append({"location": location["name"], "scenario": False, "reason": "no local evidence"})
+            continue
+        model, report = build_engine_input(ctx, variant, location["id"])
+        if model is None:
+            results.append({"location": location["name"], "scenario": False, "reason": "required inputs missing"})
+            continue
+        res = run_engine(ctx, {"op": "run", "input": model})
+        coverage = report["location_coverage"]
+        summary = {"initialInvestment": res["initialInvestment"], "funding": res["funding"], "summary": res["summary"], "closure": None,
+                   "description": (f"Base case with {coverage['local_inputs']} of {report['parameter_count']} inputs taken from evidence for "
+                                   f"{location['name']} or its district/state; the remaining {coverage['inherited_national_inputs']} are national figures."),
+                   "notes": [], "modelNotes": report["model_notes"], "locationCoverage": coverage}
+        with conn.transaction():
+            ctx.tag_audit()
+            conn.execute(
+                """insert into intel.financial_scenarios
+                     (business_variant_id, location_id, scenario_key, label, kind, engine_version, input, input_hash, summary, monthly, annual,
+                      warnings, parameter_count, assumption_count, grade_profile, weakest_grade, research_run_id, data_origin)
+                   values (%s, %s, 'base', %s, 'base', %s, %s, %s, %s, null, %s, %s, %s, %s, %s, %s, %s, %s)
+                   on conflict (business_variant_id, coalesce(location_id, '00000000-0000-0000-0000-000000000000'::uuid), scenario_key, input_hash, engine_version)
+                   do update set is_current = true, summary = excluded.summary, computed_at = now(), research_run_id = excluded.research_run_id""",
+                (variant["id"], location["id"], f"Base case — {location['name']}", res["engineVersion"],
+                 Jsonb({"input": model, "scenario": {"key": "base", "kind": "base", "adjustments": []}}), res["inputHash"], Jsonb(summary),
+                 Jsonb(res["annual"]), Jsonb(res["warnings"]), report["parameter_count"], report["grade_profile"]["assumptions"],
+                 Jsonb(report["grade_profile"]), report["weakest_grade"], ctx.run_id, ctx.data_origin),
+            )
+        results.append({"location": location["name"], "scenario": True, **coverage})
+    return results
 
 
 def _source_reconciliation(ctx: RunContext, variant: dict, model: dict) -> dict[str, Any] | None:
@@ -689,6 +844,15 @@ def analyze_gaps(ctx: RunContext) -> dict[str, Any]:
                  description=f"{r['observation_count']} observations disagree by {float(r['spread_pct']):.0f}%.",
                  instructions="Check scale, date, tax and installation treatment of each; verify or reject, or accept the range.",
                  generated_by="rule:open_conflict")
+        for r in conn.execute(
+            """select ci.id, ci.name from intel.cost_items ci join intel.cost_categories cc on cc.id = ci.cost_category_id
+               where ci.business_variant_id = %s and cc.slug = 'opex.rent' and ci.location_metric_key is null""", (v["id"],)).fetchall():
+            want(f"local-rent:{r['id']}", task_type="confirm_local_rent", title=f"Tie '{r['name']}' to a local rent rate and floor area", priority=3,
+                 business_variant_id=v["id"], target_table="cost_items", target_id=r["id"], template_key="rent_enquiry",
+                 description="The rent in the model is a single national figure from the source. Rent is the most location-dependent cost.",
+                 instructions="Costs → the rent line → 'Derive this cost locally': choose the rent metric, enter the floor area as the multiplier and "
+                              "say where the area comes from. Then record rent observations for Pune and Nanded under Geography.",
+                 generated_by="rule:rent_not_localised")
         if conn.execute("select 1 from intel.financial_parameters where business_variant_id = %s and is_current and parameter_key = 'stated_subsidy_amount'", (v["id"],)).fetchone():
             want(f"scheme:{v['id']}", task_type="verify_licence", title="Verify the subsidy scheme assumed by the source (status, eligibility, ceiling)", priority=2,
                  business_variant_id=v["id"], template_key="regulatory_checklist",

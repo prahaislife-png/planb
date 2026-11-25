@@ -3,7 +3,7 @@ import { can, type StaffUser } from '@/lib/auth';
 import { asUser, type Row } from '@/lib/db';
 import { date, humanize, inr, num, pct, valueWithUnit } from '@/lib/format';
 import { Badge, Empty, Grade, Panel } from '@/components/ui';
-import { addCostObservation, resolveConflict, setObservationStatus } from '@/app/actions/research';
+import { addCostObservation, resolveConflict, setLocationMapping, setObservationStatus } from '@/app/actions/research';
 
 const CLASS_ORDER = ['capex', 'pre_operative', 'deposit', 'working_capital', 'staff', 'fixed_opex', 'variable', 'financing'];
 
@@ -38,6 +38,7 @@ export async function CostsTab({ user, model, back }: { user: StaffUser; model: 
       where bv.business_model_id = ${model.id} order by (c.status = 'open') desc, c.detected_at desc`,
     sources: await sql`select id, name from intel.sources where reuse_status <> 'prohibited' order by (source_type = 'primary_research') desc, name`,
     locations: await sql`select id, name, location_type from intel.locations order by location_type, name`,
+    metrics: await sql`select key, name from intel.metric_definitions where applies_to = 'location' and period in ('per_month', 'per_year') order by name`,
   }));
   const obsByItem = new Map<string, Row[]>();
   for (const o of d.observations) obsByItem.set(o.cost_item_id, [...(obsByItem.get(o.cost_item_id) ?? []), o]);
@@ -95,6 +96,27 @@ export async function CostsTab({ user, model, back }: { user: StaffUser; model: 
                         <td><Grade grade={item.resolved_grade} /></td>
                         <td className="muted small">{obs.length} obs.</td>
                       </tr>,
+                      ...(['fixed_opex', 'staff'].includes(item.cost_class) ? [
+                        <tr key={`${item.id}-loc`} className="sub">
+                          <td colSpan={13} style={{ paddingLeft: 22 }}>
+                            <details open={Boolean(item.location_metric_key)}>
+                              <summary>{item.location_metric_key
+                                ? `Derived locally: ${item.location_metric_key}${item.location_metric_segment ? ` [${item.location_metric_segment}]` : ''} × ${num(item.location_metric_multiplier, 2)} — ${item.location_metric_basis}`
+                                : 'Derive this cost locally (rent = local rate × area; wage = local wage × 1)'}</summary>
+                              <form action={setLocationMapping} className="inline">
+                                <input type="hidden" name="cost_item_id" value={item.id} /><input type="hidden" name="back" value={back} />
+                                <select name="metric_key" defaultValue={item.location_metric_key ?? ''} style={{ width: 280 }}>
+                                  <option value="">— not derived locally (national value everywhere) —</option>
+                                  {d.metrics.map((m) => <option key={m.key} value={m.key}>{m.name}</option>)}
+                                </select>
+                                <input name="segment" placeholder="segment (optional)" defaultValue={item.location_metric_segment ?? ''} style={{ width: 170 }} />
+                                <input name="multiplier" type="number" step="any" min="0" placeholder="× multiplier" defaultValue={item.location_metric_multiplier ?? ''} style={{ width: 110 }} />
+                                <input name="basis" placeholder="Where the multiplier comes from (e.g. 2,500 sq ft — source p. 10)" defaultValue={item.location_metric_basis ?? ''} style={{ width: 380 }} />
+                                <button type="submit" disabled={!editor}>Save</button>
+                              </form>
+                            </details>
+                          </td>
+                        </tr>] : []),
                       ...obs.map((o) => (
                         <tr key={o.id} className="sub" style={o.verification_status === 'rejected' || o.is_superseded ? { opacity: 0.5 } : undefined}>
                           <td style={{ paddingLeft: 22 }}>{o.quote ? <div className="quote" title="Verbatim text from the source page">{o.quote}</div> : <span className="faint small">{o.analyst_notes ?? 'no quote (manual entry)'}</span>}</td>

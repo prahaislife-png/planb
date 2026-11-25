@@ -30,7 +30,14 @@ cp web/.env.example web/.env.local && pnpm dev          # http://localhost:3000,
 ```
 
 Worker commands (`research/.venv/bin/planb …`): `db migrate`, `catalog sync`, `research ingest`, `research refresh
---business <slug> --run`, `worker [--once|--until-empty]`, `maintenance freshness`, `status`.
+--business <slug> --run`, `research eval-extractor --document <id|sha prefix>`, `worker [--once|--until-empty]`,
+`maintenance freshness`, `status`.
+
+**First use of the LLM extractor.** Before running it on unseen documents, measure it on the three NIFTEM reports the
+rule-based extractor already handles: `ANTHROPIC_API_KEY=… planb research eval-extractor --document <sha prefix>
+--budget-usd 1`. It reports how many reference claims the model found, how often it mapped them to the same place in
+the record, how many of its quotes verify against the page, and what it added. Read the "extras" and
+"mapped_differently" lists before trusting it at volume.
 
 Tests: `pnpm --filter @planb/finance test` · `cd research && .venv/bin/python -m pytest` (creates and migrates
 `planb_test`; refuses a database whose name lacks "test").

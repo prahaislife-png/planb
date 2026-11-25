@@ -99,6 +99,51 @@ def cmd_research_refresh(args, settings: Settings) -> int:
     return 0
 
 
+def cmd_research_eval_extractor(args, settings: Settings) -> int:
+    """Run the LLM extractor on a document the rule-based extractor recognises and report how they compare."""
+    from .extract import evaluate, llm, niftem_rules
+    from .pipeline.runner import BudgetExceeded, RunContext
+
+    if not settings.anthropic_api_key:
+        print("ANTHROPIC_API_KEY is not set: the LLM extractor cannot be evaluated.", file=sys.stderr)
+        return 2
+    with connect(settings) as conn:
+        doc = conn.execute(
+            "select id, title from intel.source_documents where id::text = %s or sha256 like %s", (args.document, args.document + "%")
+        ).fetchall()
+        if len(doc) != 1:
+            print(f"document '{args.document}' matched {len(doc)} documents; give a full id or a longer sha256 prefix", file=sys.stderr)
+            return 2
+        doc = doc[0]
+        pages = [(r["page_no"], r["text"]) for r in conn.execute(
+            "select page_no, text from intel.document_pages where document_id = %s order by page_no", (doc["id"],)).fetchall()]
+        if not niftem_rules.applies(pages):
+            print("no rule-based extractor recognises this document, so there is no reference to compare against", file=sys.stderr)
+            return 2
+        reference = niftem_rules.extract(pages)
+        # a real run row, so the spend is budgeted and shows up in research cost monitoring
+        run = conn.execute(
+            """insert into ops.research_runs (pipeline, source_document_id, status, locked_by, locked_until, budget_usd, started_at, params)
+               values ('extractor_evaluation', %s, 'running', 'eval', now() + interval '2 hours', %s, now(), %s) returning *""",
+            (doc["id"], args.budget_usd, json.dumps({"model": settings.extraction_model})),
+        ).fetchone()
+        conn.commit()
+        ctx = RunContext(conn, settings, None, run, "eval", stage="extractor_evaluation")
+        try:
+            candidate = llm.extract(ctx, pages)
+            status, error = "succeeded", None
+        except BudgetExceeded as exc:
+            candidate, status, error = None, "budget_exhausted", str(exc)
+        report = evaluate.compare(reference, candidate, dict(pages)).as_dict() if candidate else {}
+        report |= {"document": doc["title"], "model": settings.extraction_model, "spent_usd": float(ctx.run.get("spent_usd") or 0),
+                   "extractor_notes": candidate.notes if candidate else [error]}
+        conn.execute("update ops.research_runs set status = %s, error = %s, result = %s, finished_at = now(), locked_by = null, locked_until = null where id = %s",
+                     (status, error, json.dumps(report, default=str), run["id"]))
+        conn.commit()
+    _print(report)
+    return 0 if status == "succeeded" else 1
+
+
 def cmd_worker(args, settings: Settings) -> int:
     from .pipeline import Worker
 
@@ -174,6 +219,10 @@ def main(argv: list[str] | None = None) -> int:
     ing.add_argument("--key", help="idempotency key (defaults to business + document)")
     ing.add_argument("--run", action="store_true", help="execute immediately in this process")
     ing.set_defaults(fn=cmd_research_ingest)
+    ev = research.add_parser("eval-extractor", help="compare the LLM extractor with the rule-based one on a document (needs ANTHROPIC_API_KEY)")
+    ev.add_argument("--document", required=True, help="document id or sha256 prefix")
+    ev.add_argument("--budget-usd", type=float, default=1.0)
+    ev.set_defaults(fn=cmd_research_eval_extractor)
     ref = research.add_parser("refresh", help="re-derive a business record after review")
     ref.add_argument("--business", required=True)
     ref.add_argument("--run", action="store_true")

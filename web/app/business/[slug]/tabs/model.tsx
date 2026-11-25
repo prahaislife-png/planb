@@ -14,8 +14,14 @@ export async function ModelTab({ user, model }: { user: StaffUser; model: Row })
       select fs.id, fs.scenario_key, fs.label, fs.kind, fs.engine_version, fs.input_hash, fs.summary, fs.warnings, fs.grade_profile,
              fs.assumption_count, fs.parameter_count, fs.weakest_grade, fs.computed_at, fs.input, fs.annual, bv.name as variant_name, bv.id as variant_id
       from intel.financial_scenarios fs join intel.business_variants bv on bv.id = fs.business_variant_id
-      where bv.business_model_id = ${model.id} and fs.is_current
+      where bv.business_model_id = ${model.id} and fs.is_current and fs.location_id is null
       order by bv.is_reference desc, array_position(array['base', 'conservative', 'optimistic', 'stress', 'failure', 'custom'], fs.kind), fs.scenario_key`,
+    local: await sql`
+      select fs.id, fs.label, fs.summary, fs.weakest_grade, l.name as location_name, l.slug as location_slug, bv.name as variant_name
+      from intel.financial_scenarios fs join intel.business_variants bv on bv.id = fs.business_variant_id
+      join intel.locations l on l.id = fs.location_id
+      where bv.business_model_id = ${model.id} and fs.is_current order by bv.is_reference desc, l.name`,
+    pilots: await sql`select name from intel.locations where is_pilot and location_type = 'city' order by name`,
     missing: await sql`
       select s.parameter_name, s.revenue_stream_name, bv.name as variant_name from intel.v_variant_parameter_status s
       join intel.business_variants bv on bv.id = s.business_variant_id
@@ -113,7 +119,7 @@ export async function ModelTab({ user, model }: { user: StaffUser; model: Row })
               const x = sc.summary; const m = x.summary;
               return (
                 <tr key={sc.id}>
-                  <td><b>{sc.label}</b>{x.description ? <div className="faint small" style={{ maxWidth: 360 }}>{x.description}</div> : null}</td>
+                  <td style={{ minWidth: 340 }}><b>{sc.label}</b>{x.description ? <div className="faint small">{x.description}</div> : null}</td>
                   <td><Badge value={sc.kind} tone={sc.kind === 'base' ? 'info' : sc.kind === 'failure' || sc.kind === 'stress' ? 'warn' : undefined} /></td>
                   <td className="num">{inr(x.initialInvestment.total)}</td><td className="num">{inr(m.steadyState.revenue)}</td>
                   <td className="num" style={{ color: m.steadyState.ebitda < 0 ? 'var(--bad)' : undefined }}>{inr(m.steadyState.ebitda)}</td>
@@ -131,6 +137,42 @@ export async function ModelTab({ user, model }: { user: StaffUser; model: Row })
           Engine {base.engine_version} · input hash <span className="mono">{String(base.input_hash).slice(0, 16)}…</span> · computed {dateTime(base.computed_at)} · {base.variant_name}.
           Re-running this engine version on the stored input reproduces these figures exactly.
         </div>
+      </Panel>
+
+      <Panel title="Location scenarios — national record with local overlays" flush>
+        <table>
+          <thead><tr><th>Location</th><th>Inputs with local evidence</th><th>Level of that evidence</th><th className="num">Initial investment</th>
+            <th className="num">Operating profit / mo</th><th className="num">Break-even / mo</th><th>Capital recovery</th><th className="num">Owner income yr 3 / mo</th><th>Local inputs</th></tr></thead>
+          <tbody>
+            <tr className="sub">
+              <td>National (no overlay)</td><td colSpan={2} className="muted small">the base case above</td>
+              <td className="num">{inr(s.initialInvestment.total)}</td><td className="num">{inr(sum.steadyState.ebitda)}</td>
+              <td className="num">{inr(sum.breakEven.monthlyRevenueRequired)}</td><td className="small">{monthOrNever(sum.capitalRecovery.paybackOperatingMonth)}</td>
+              <td className="num">{inr(sum.ownerIncome.year3AvgMonthly)}</td><td />
+            </tr>
+            {d.local.map((sc) => {
+              const x = sc.summary; const m = x.summary; const cov = x.locationCoverage as Row;
+              return (
+                <tr key={sc.id}>
+                  <td><b>{sc.location_name}</b><div className="faint small">{sc.variant_name}</div></td>
+                  <td><b>{cov.local_inputs}</b> of {cov.local_inputs + cov.inherited_national_inputs}<div className="faint small">{cov.inherited_national_inputs} inherit the national figure</div></td>
+                  <td>{Object.entries(cov.by_level as Record<string, number>).map(([level, n]) => (
+                    <span key={level} className="row" style={{ display: 'inline-flex', marginRight: 8 }}>
+                      <Badge value={level === 'city' ? 'city-specific' : `inherited: ${level}`} tone={level === 'city' ? 'good' : 'warn'} /><span className="mono">{n}</span></span>))}</td>
+                  <td className="num">{inr(x.initialInvestment.total)}</td>
+                  <td className="num" style={{ color: m.steadyState.ebitda < 0 ? 'var(--bad)' : undefined }}>{inr(m.steadyState.ebitda)}</td>
+                  <td className="num">{inr(m.breakEven.monthlyRevenueRequired)}</td>
+                  <td className="small">{monthOrNever(m.capitalRecovery.paybackOperatingMonth)}</td>
+                  <td className="num">{inr(m.ownerIncome.year3AvgMonthly)}</td>
+                  <td className="small">{(cov.inputs as Row[]).map((i) => `${i.input}: ${inr(i.value)} (${i.level})`).join(' · ')}</td>
+                </tr>);
+            })}
+            {d.pilots.filter((p) => !d.local.some((sc) => sc.location_name === p.name)).map((p) => (
+              <tr key={p.name}><td>{p.name}</td><td colSpan={8}><Badge value="no local evidence" tone="bad" /> <span className="muted small">
+                No scenario is shown for this city: presenting the national case under its name would claim local knowledge that does not exist.
+                Record local rents, wages or quotations (Geography; Costs → derive locally), then refresh.</span></td></tr>))}
+          </tbody>
+        </table>
       </Panel>
 
       <Panel title="Scenario calculator — same engine, in your browser">

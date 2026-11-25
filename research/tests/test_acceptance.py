@@ -317,6 +317,94 @@ class TestDerivations:
         assert rec["statedRevenue"] == 5400000 and rec["modelledRevenue"] == 6000000  # the gap is the stock build-up, visible
 
 
+class TestLocationOverlays:
+    """National record + location-specific overlays, with the level of every local figure recorded."""
+
+    def _metric(self, conn, factory, slug, value, segment="synthetic high street"):
+        source = factory.source()
+        return conn.execute(
+            """insert into intel.location_metrics (location_id, metric_key, segment, value, unit_code, period, observed_on, geographic_scope,
+                                                   source_id, evidence_type, evidence_grade, data_origin)
+               select l.id, 'commercial_rent_per_sqft_month', %s, %s, 'inr', 'per_month', current_date,
+                      case l.location_type when 'city' then 'city' else 'district' end, %s, 'listing_observation', 'C', 'test'
+               from intel.locations l where l.slug = %s returning id""", (segment, value, source["id"], slug)).fetchone()["id"]
+
+    def _rent(self, conn, variant_id, location_slug):
+        return one(conn, """select fp.value, fp.basis, fp.location_level, fp.rationale, fp.evidence_grade
+                            from intel.financial_parameters fp join intel.cost_items ci on ci.id = fp.cost_item_id
+                            join intel.locations l on l.id = fp.location_id
+                            where ci.business_variant_id = %s and ci.key = 'rent' and fp.is_current and l.slug = %s""", variant_id, location_slug)
+
+    def _scenario(self, conn, variant_id, location_slug):
+        return one(conn, """select fs.summary, fs.label, fs.input from intel.financial_scenarios fs join intel.locations l on l.id = fs.location_id
+                            where fs.business_variant_id = %s and fs.is_current and l.slug = %s""", variant_id, location_slug)
+
+    def test_city_figure_district_fallback_and_no_evidence(self, conn, factory):
+        r = factory.run_document()
+        vid = r["variant"]["id"]
+        segment = f"synthetic {uuid.uuid4().hex[:8]}"  # isolates this test's metrics from any other test's
+        # no mapping and no local evidence → no location scenario at all, and the run says why
+        locations = r["run"]["result"]["build_model"]["variants"][0]["locations"]
+        assert {x["location"]: x["scenario"] for x in locations} == {"Pune (city)": False, "Nanded-Waghala (city)": False}
+        assert one(conn, "select count(*) as n from intel.financial_scenarios where business_variant_id = %s and location_id is not null", vid)["n"] == 0
+
+        # the analyst ties the rent line to the local commercial rent × 1,200 sq ft, and records where 1,200 comes from
+        conn.execute("""update intel.cost_items set location_metric_key = 'commercial_rent_per_sqft_month', location_metric_segment = %s,
+                               location_metric_multiplier = 1200, location_metric_basis = 'synthetic: 1,200 sq ft assumed for the fixture'
+                        where business_variant_id = %s and key = 'rent'""", (segment, vid))
+        self._metric(conn, factory, "pune-city", 80, segment)         # a city-specific figure for Pune
+        self._metric(conn, factory, "nanded-district", 25, segment)   # only a district figure for Nanded
+        conn.commit()
+        final = factory.refresh(r["model"]["id"])
+        assert final["status"] == "succeeded", final["error"]
+
+        pune = self._rent(conn, vid, "pune-city")
+        assert float(pune["value"]) == 96000 and pune["location_level"] == "city" and pune["basis"] == "derived" and pune["evidence_grade"] == "C"
+        nanded = self._rent(conn, vid, "nanded-city")
+        assert float(nanded["value"]) == 30000 and nanded["location_level"] == "district"
+        assert "inherited from Nanded district" in nanded["rationale"]
+
+        # the national value is untouched, and each city scenario uses its own rent
+        national = one(conn, """select fp.value from intel.financial_parameters fp join intel.cost_items ci on ci.id = fp.cost_item_id
+                                where ci.business_variant_id = %s and ci.key = 'rent' and fp.is_current and fp.location_id is null""", vid)
+        assert float(national["value"]) == 20000
+        for slug, rent, level in (("pune-city", 96000, "city"), ("nanded-city", 30000, "district")):
+            sc = self._scenario(conn, vid, slug)
+            rent_line = next(f for f in sc["input"]["input"]["fixedCosts"] if f["key"] == "rent")
+            assert rent_line["monthlyAmount"] == rent
+            cov = sc["summary"]["locationCoverage"]
+            assert cov["local_inputs"] == 1 and cov["by_level"] == {level: 1} and cov["inherited_national_inputs"] == cov["national_inputs_total"] - 1
+            assert "remaining" in sc["summary"]["description"]
+        base = one(conn, "select input from intel.financial_scenarios where business_variant_id = %s and is_current and kind = 'base' and location_id is null", vid)
+        assert next(f for f in base["input"]["input"]["fixedCosts"] if f["key"] == "rent")["monthlyAmount"] == 20000
+        checks = {c["check_key"]: c["is_satisfied"] for c in conn.execute("select check_key, is_satisfied from intel.v_completeness_items where business_model_id = %s", (r["model"]["id"],))}
+        assert checks["geography.overlay"] is True
+
+        # when the local evidence is rejected the overlay is retired and the city scenario disappears
+        conn.execute("update intel.location_metrics set verification_status = 'rejected' where segment = %s", (segment,))
+        conn.commit()
+        factory.refresh(r["model"]["id"])
+        assert self._rent(conn, vid, "pune-city") is None and self._scenario(conn, vid, "pune-city") is None
+        assert one(conn, "select count(*) as n from intel.financial_parameters where business_variant_id = %s and location_id is not null and not is_current", vid)["n"] == 2
+
+    def test_observation_recorded_for_a_place_beats_a_derived_local_rate(self, conn, factory):
+        r = factory.run_document()
+        vid = r["variant"]["id"]
+        item = one(conn, "select id from intel.cost_items where business_variant_id = %s and key = 'synthetic_grinder'", vid)
+        pune = one(conn, "select id from intel.locations where slug = 'pune-city'")["id"]
+        conn.execute(
+            """insert into intel.cost_observations (cost_item_id, value, unit_code, period, observed_on, source_id, location_id, geographic_scope,
+                                                    evidence_type, evidence_grade, data_origin)
+               values (%s, 210000, 'inr', 'one_time', current_date, %s, %s, 'city', 'manufacturer_catalogue', 'C', 'test')""",
+            (item["id"], factory.source()["id"], pune))
+        conn.commit()
+        factory.refresh(r["model"]["id"])
+        local = one(conn, "select value, location_level, basis from intel.financial_parameters where cost_item_id = %s and is_current and location_id = %s", item["id"], pune)
+        assert float(local["value"]) == 210000 and local["location_level"] == "city" and local["basis"] == "observation"
+        sc = self._scenario(conn, vid, "pune-city")
+        assert next(c for c in sc["input"]["input"]["capex"] if c["key"] == "synthetic_grinder")["amount"] == 420000  # 2 × 210,000
+
+
 # ── AC: missing data is visible / research tasks can be generated ────────────
 class TestGaps:
     def test_missing_required_input_blocks_the_scenario_and_raises_a_task(self, conn, factory):

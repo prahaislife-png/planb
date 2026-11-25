@@ -162,3 +162,48 @@ class TestPdfText:
         chunks = chunk_text(text, size=700)
         assert len(chunks) > 3 and all(len(c) <= 700 for c in chunks)
         assert sum(c.count("paragraph") for c in chunks) == 12
+
+
+class TestExtractorEvaluation:
+    def _claim(self, **kw):
+        base = {"page_no": 5, "quote": "Synthetic grinder                                  2              200000      400000", "claim_type": "cost",
+                "subject": "Synthetic grinder", "value_numeric": 200000, "unit_raw": "Rs.", "quantity": 2, "target_kind": "cost_item",
+                "cost_category_slug": "capex.machinery"}
+        return ExtractedClaim(**(base | kw))
+
+    def test_candidate_is_scored_against_the_reference(self):
+        from planb_research.extract import evaluate
+        from planb_research.extract.schemas import ExtractionResult
+
+        reference = niftem_rules.extract(SYNTHETIC_DPR_PAGES)
+        material = [c for c in reference.claims if c.target_kind in evaluate.MATERIAL_TARGETS]
+        candidate = ExtractionResult(extractor="fake-llm", method="llm", claims=[
+            self._claim(),                                                              # found, same mapping
+            self._claim(subject="Synthetic packer", value_numeric=100000, quantity=1,   # found, but mapped to the wrong category
+                        quote="Synthetic packer 1 100000 100000", cost_category_slug="capex.furniture"),
+            self._claim(subject="Misc assets", value_numeric=100000, unit_raw="Rs.",   # same absolute value as 1.00 lakh on that page
+                        quote="Miscellaneous Assets 1.00", quantity=1, cost_category_slug="capex.other"),
+            self._claim(subject="Phantom machine", value_numeric=999999, quote="Phantom machine 1 999999 999999"),  # fabricated
+        ])
+        report = evaluate.compare(reference, candidate, dict(SYNTHETIC_DPR_PAGES))
+        assert report.reference_material == len(material)
+        assert report.candidate_total == 4 and report.candidate_quote_verified == 2  # the 100000-as-rupees quote and the phantom do not verify
+        assert report.found == 2 and report.found_same_target == 1
+        assert [m["subject"] for m in report.mapped_differently] == ["Synthetic packer"]
+        assert {"Phantom machine", "Misc assets"} <= {e["subject"] for e in report.extras}
+        assert all(not e["quote_verified"] for e in report.extras)
+        assert report.recall_pct == round(100 * 2 / len(material), 1) and report.target_agreement_pct == 50.0
+        assert len(report.missed) == len(material) - 2
+
+    def test_money_scale_is_compared_in_absolute_terms(self):
+        from planb_research.extract import evaluate
+        from planb_research.extract.schemas import ExtractionResult
+
+        reference = ExtractionResult(extractor="ref", method="rule_based", claims=[
+            self._claim(subject="Miscellaneous fixed assets", value_numeric=1.00, unit_raw="Rs. in lacs", quantity=1, quote="Miscellaneous Assets 1.00",
+                        cost_category_slug="capex.other")])
+        candidate = ExtractionResult(extractor="cand", method="llm", claims=[
+            self._claim(subject="Misc. assets", value_numeric=1.0, unit_raw="Rs. Lakh", quantity=1, quote="Miscellaneous Assets                                              1.00",
+                        cost_category_slug="capex.other")])
+        report = evaluate.compare(reference, candidate, dict(SYNTHETIC_DPR_PAGES))
+        assert report.found == 1 and report.found_same_target == 1 and report.recall_pct == 100.0

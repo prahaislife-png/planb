@@ -125,14 +125,15 @@ its line. The LLM extractor handles everything else through the same schema and 
 | 9 | `submit_for_review` | Freeze a version with its quality metrics; report publication blockers | one pending version per model |
 
 `business_refresh` re-runs normalise → structure → cross-verify → model → gaps after analysts review or correct
-evidence. `freshness_scan` (stage 11) expires quotations, flags published records with stale evidence and raises
+evidence. The model stage also resolves **location overlays** for each pilot city (nearest geography first: city →
+district → state → country) and computes a city scenario wherever local evidence exists. `freshness_scan` (stage 11) expires quotations, flags published records with stale evidence and raises
 revalidation tasks. Stages 1–2 (opportunity and evidence discovery) are currently human-driven through the catalogue
 YAML and the source registry; stage 10 (publication) is a human action behind the gate.
 
 ## 5. Repository layout
 
 ```
-supabase/migrations/     18 SQL migrations — the schema, RLS, triggers, workflow functions, reference vocabularies
+supabase/migrations/     19 SQL migrations — the schema, RLS, triggers, workflow functions, reference vocabularies
 supabase/dev/            local-only Supabase shim
 research/planb_research/ Python worker: adapters/, extract/, pipeline/, ingest, storage, catalog, cli
 research/catalog/        version-controlled source registry, 137-model backlog, pilot document list (YAML)
@@ -152,8 +153,10 @@ docs/                    this documentation
 - **PDF only.** Other formats are refused at ingestion.
 - **Tax** is a flat rate or none; Indian slab taxation and GST cash-flow timing are not modelled. Results are pre-tax
   unless a rate is supplied, and say so.
-- **Location overlays** are modelled in the schema (`financial_parameters.location_id`, the fallback resolver) but the
-  pipeline currently resolves national parameters only; no local evidence exists yet to overlay.
+- **Location overlays** work for cost items and parameters with local observations and for cost items an analyst has
+  tied to a location metric (rent = local rate × area). A pilot city gets its own base scenario only when it has
+  local evidence; its stress tests still come from the national case. Required inputs must be resolved nationally —
+  an input observed only locally does not yet unblock a national scenario.
 - **Customer product, matching engine, payments** are schema-only (Phases 8–10).
 - Worker deployment, scheduled maintenance runs, error monitoring and backups are documented in
   [`RUNBOOK.md`](RUNBOOK.md) but not provisioned — there is no production environment yet.

@@ -13,6 +13,10 @@ Nothing below has been done on your behalf; no email has been sent and no accoun
 | Create an Anthropic API key with a monthly spend limit | console.anthropic.com → API keys, then Limits | The key (starts `sk-ant-`) |
 | Import the GitHub repository into Vercel, root directory `web` | vercel.com → Add New → Project | The deployment URL. Turn on Deployment Protection |
 
+Once the Anthropic key exists, the first thing to run is the extractor evaluation described in
+[`RUNBOOK.md`](RUNBOOK.md#local-development) — it measures the model against 169 already-verified claims for about a
+dollar, before it touches a new document.
+
 Do **not** paste keys into chat or commit them. Put them in Vercel's environment variables and in the worker's
 environment; the variable names are listed in [`RUNBOOK.md`](RUNBOOK.md#environment-variables). When the project
 exists, the remaining set-up steps are in [`RUNBOOK.md`](RUNBOOK.md#first-production-deployment-not-provisioned).

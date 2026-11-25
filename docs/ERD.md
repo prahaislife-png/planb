@@ -203,6 +203,7 @@ erDiagram
     uuid revenue_stream_id FK
     text quantity_unit_code FK
     uuid created_by FK
+    text location_metric_key FK
   }
   intel_cost_observations {
     uuid id PK
@@ -350,6 +351,7 @@ erDiagram
     uuid revenue_stream_id FK
     text quantity_unit_code FK
     uuid created_by FK
+    text location_metric_key FK
   }
   intel_locations {
     uuid id PK
