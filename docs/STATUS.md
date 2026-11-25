@@ -25,7 +25,7 @@ run" is three NIFTEM project reports processed end to end as the restricted `pla
 | Approved records maintain version history | ✅ | `TestPublication`: three versions, two publications, supersession, immutability, diff in the dashboard |
 | Research jobs can resume after failure | ✅ | `TestDurability`: failed stage retried with backoff, completed stages not re-run, dead worker's lease reclaimed, bounded attempts, budget stop. Also observed for real during development |
 | Demonstration data cannot be mistaken for verified research | ✅ | `TestDemoData`: demo rows forced to grade D and unverified; estimates always D; demo/test records unpublishable; loud badges in the UI |
-| The entire workflow functions end to end | ✅ | `TestEndToEnd`; the real run; the browser-driven workflow test (`web/e2e/run.sh`, 52 checks: production build, real browser, real worker, isolated database) |
+| The entire workflow functions end to end | ✅ | `TestEndToEnd`; the real run; the browser-driven workflow test (`web/e2e/run.sh`, 53 checks: production build, real browser, real worker, isolated database) |
 
 ## 2. Component status
 
@@ -114,7 +114,7 @@ never exercised against a live project.
 |---|---|---|
 | Python unit + PostgreSQL integration (`research/tests`) | 115 | Locally and in CI (`.github/workflows/ci.yml`) |
 | Finance engine (`packages/finance/test`) | 865 | Locally and in CI |
-| Dashboard end-to-end (`web/e2e/run.sh`) | 52 checks | Locally only — not yet wired into CI |
+| Dashboard end-to-end (`web/e2e/run.sh`) | 53 checks | Locally; a CI job is defined but has never run |
 | Dashboard typecheck and production build | — | Locally and in CI |
 
 The CI workflow itself has not run yet (no pull request has been opened); treat it as unverified until its first run.

@@ -33,6 +33,7 @@ async function as(role) {
   const page = await context.newPage();
   page.setDefaultTimeout(TIMEOUT);
   page.on('pageerror', (e) => errors.push(`${role}: ${String(e).slice(0, 200)}`));
+  page.on('console', (m) => { if (m.type() === 'error' && /Content Security Policy|Refused to/i.test(m.text())) errors.push(`${role}: CSP ${m.text().slice(0, 200)}`); });
   page.on('response', (r) => { if (r.status() >= 500) errors.push(`${role}: HTTP ${r.status()} ${r.url()}`); });
   return page;
 }
@@ -208,7 +209,10 @@ check('audit history records the actions with their actors', (await admin.locato
 } catch (error) {
   check('workflow ran to completion', false, String(error).split('\n')[0]);
 }
-check('no server errors or page exceptions', errors.length === 0, errors.slice(0, 3).join(' | '));
+const probe = await as('researcher');
+const cspHeader = (await (await probe.goto(BASE + '/'))?.headerValue('content-security-policy')) ?? '';
+check('content security policy is served and nothing violated it', cspHeader.includes("frame-ancestors 'none'"), cspHeader.slice(0, 60));
+check('no server errors, page exceptions or policy violations', errors.length === 0, errors.slice(0, 3).join(' | '));
 await browser.close();
 console.log(results.join('\n'));
 console.log(`\n${results.length - failures}/${results.length} checks passed`);

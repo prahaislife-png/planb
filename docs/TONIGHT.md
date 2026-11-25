@@ -79,6 +79,10 @@ the sentence about reproduction and whether permission is required.
 - `mofpi.gov.in` — Ministry of Food Processing Industries
 - `data.gov.in` — confirm the GODL-India licence text on the site itself
 
+While there: the Local Government Directory (`lgdirectory.gov.in`) permits reuse but serves its lists only through
+interactive forms, so I did not automate it. Download the district list for Maharashtra once and send me the LGD codes
+for Pune and Nanded districts — they are deliberately empty in the database until verified.
+
 Also read the terms for the four pilot publishers whose policies were never read: `nstfdc.tribal.gov.in`,
 `msme1connect.up.gov.in`, `ncdc.in`, `horticulture.bihar.gov.in`. Send me what you find and I will update the registry.
 

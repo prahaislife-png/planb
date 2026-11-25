@@ -71,7 +71,8 @@ log records *that* a change happened and which fields, not the values.
 The few `SECURITY DEFINER` functions pin `search_path`.
 
 **HTTP headers.** `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`,
-`X-Robots-Tag: noindex` on the internal dashboard.
+`X-Robots-Tag: noindex`, and in production builds a Content-Security-Policy restricting scripts, styles, connections,
+form targets and framing to the dashboard's own origin (checked by the end-to-end test).
 
 ## Tested
 
@@ -88,7 +89,7 @@ schema, page and budget guards.
   development identity switcher is refused in production builds. Verify sign-in, session refresh and MFA for staff
   before deploying.
 - No rate limiting or bot protection on the dashboard (it should sit behind SSO/IP allow-listing at first).
-- No Content-Security-Policy header yet.
+- The Content-Security-Policy still allows inline scripts (the framework emits them); per-request nonces are the next step.
 - No error monitoring, alerting or log shipping.
 - No secret rotation procedure; no dependency or secret scanning in CI beyond what GitHub provides by default.
 - Backups and restore are documented in [`RUNBOOK.md`](RUNBOOK.md) but untested — there is no production database.

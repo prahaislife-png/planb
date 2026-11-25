@@ -2447,9 +2447,9 @@
   base_url: "https://lgdirectory.gov.in/"
   information_available: "Standard codes and hierarchy for states, districts, sub-districts/talukas, blocks, villages, urban local bodies and panchayats (used to key Pune/Nanded and their sub-units); change history of administrative units."
   geographic_coverage: national down to village / ULB level
-  access_method: http_download
+  access_method: manual_download
   accessible: "yes"
-  accessibility_notes: HTTP 200. /robots.txt HTTP 404.
+  accessibility_notes: "HTTP 200; /robots.txt HTTP 404. Checked again 2026-11-25: every report and download link carries a per-session CSRF token and is served through interactive forms, so there is no stable URL an adapter could fetch without driving a session. Download the district list by hand, or register for the NAPIX web service linked from the home page."
   api_available: unknown
   api_notes: "The site's tagline is 'Facilitating Data Standardization, Data Sharing & Interoperability Among eGov Applications'; web-service access for departments is believed to exist but no public API documentation was read today. Some report downloads may be captcha-gated (not tested) - never bypass; use data.gov.in LGD datasets if so."
   requires_auth: false
@@ -2468,8 +2468,8 @@
   quality_limitations:
     - Codes change with reorganisations - store LGD version/date
     - "Download mechanics (captcha, formats) not tested"
-  candidate_adapter: lgd_codes
-  recommended_ingestion: automated
+  candidate_adapter: ""
+  recommended_ingestion: manual_only
   evidence_urls:
     - "https://lgdirectory.gov.in/"
     - "https://lgdirectory.gov.in/copyRightPolicy.do"
